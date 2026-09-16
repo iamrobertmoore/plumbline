@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Plumbline app icon">
+  <title>Plumbline</title>
+  <rect width="512" height="512" rx="112" fill="#14161A"/>
+  <line x1="256" y1="64" x2="256" y2="286" stroke="#F7F5F1" stroke-width="20" stroke-linecap="round"/>
+  <circle cx="256" cy="64" r="24" fill="#F7F5F1"/>
+  <path d="M256 272 L328 376 L256 456 L184 376 Z" fill="#C8912F"/>
+  <path d="M256 272 L328 376 L256 376 Z" fill="#A8761F"/>
+  <line x1="120" y1="456" x2="392" y2="456" stroke="#F7F5F1" stroke-width="20" stroke-linecap="round" opacity="0.22"/>
+</svg>

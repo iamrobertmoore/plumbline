@@ -1,0 +1,21 @@
+{
+  "name": "plumbline",
+  "version": "0.1.0",
+  "description": "A pre-ship auditor. Checks whether a repository does what it says it does, and proves each of its own checks can fail.",
+  "type": "module",
+  "bin": { "plumbline": "./src/cli.mjs" },
+  "exports": { ".": "./src/index.mjs" },
+  "files": ["src", "docs/brand", "docs/architecture.svg", "README.md", "LICENSE"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "audit": "node src/cli.mjs",
+    "selfcheck": "node src/cli.mjs --selfcheck",
+    "test": "node --test test/*.test.mjs"
+  },
+  "repository": { "type": "git", "url": "git+https://github.com/iamrobertmoore/plumbline.git" },
+  "homepage": "https://iamrobertmoore.github.io/plumbline/",
+  "bugs": { "url": "https://github.com/iamrobertmoore/plumbline/issues" },
+  "keywords": ["audit", "release", "ci", "documentation", "verification"],
+  "license": "MIT",
+  "dependencies": {}
+}

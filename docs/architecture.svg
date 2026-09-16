@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 880" width="1200" height="880" role="img" aria-label="Plumbline architecture">
+  <title>Plumbline architecture</title>
+  <desc>Claims are read out of the documents, Bob plans the work and sends one subagent per claim, the checks run, every check is proved able to fail, and the result lists what a reader would hit first.</desc>
+
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8A8578"/>
+    </marker>
+    <style>
+      .t   { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+      .m   { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .eye { font-size: 12px; letter-spacing: .17em; text-transform: uppercase; fill: #8A8578; }
+      .h   { font-size: 17px; font-weight: 650; fill: #14161A; }
+      .s   { font-size: 13px; fill: #5C5A54; }
+      .sm  { font-size: 12px; fill: #5C5A54; }
+      .fm  { font-size: 12.5px; fill: #14161A; }
+      .pill{ font-size: 11.5px; fill: #14161A; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="880" fill="#F7F5F1"/>
+
+  <!-- header -->
+  <text class="t" x="60" y="56" font-size="26" font-weight="700" fill="#14161A">Plumbline</text>
+  <text class="t" x="60" y="80" font-size="14" fill="#5C5A54">It checks whether a repository does what it says it does, and proves that each of its own checks can fail.</text>
+  <line x1="60" y1="98" x2="1140" y2="98" stroke="#E4DFD6" stroke-width="1"/>
+
+  <!-- 1 claims -->
+  <text class="t eye" x="60" y="132">1 · claims</text>
+  <text class="t s" x="196" y="132">the things the project says about itself</text>
+
+  <g>
+    <rect x="60"  y="146" width="196" height="46" rx="9" fill="#FFFFFF" stroke="#E4DFD6"/>
+    <text class="m fm" x="76" y="166">README.md</text>
+    <text class="t sm" x="76" y="182">prose, links, commands</text>
+
+    <rect x="268" y="146" width="196" height="46" rx="9" fill="#FFFFFF" stroke="#E4DFD6"/>
+    <text class="m fm" x="284" y="166">package.json</text>
+    <text class="t sm" x="284" y="182">name, version, licence</text>
+
+    <rect x="476" y="146" width="196" height="46" rx="9" fill="#FFFFFF" stroke="#C8912F" stroke-width="1.6"/>
+    <text class="m fm" x="492" y="166">spec.docx</text>
+    <text class="t sm" x="492" y="182">requirements, written spec</text>
+
+    <rect x="684" y="146" width="196" height="46" rx="9" fill="#FFFFFF" stroke="#C8912F" stroke-width="1.6"/>
+    <text class="m fm" x="700" y="166">release-checklist.pdf</text>
+    <text class="t sm" x="700" y="182">what must be true to ship</text>
+
+    <rect x="892" y="146" width="248" height="46" rx="9" fill="#FFFFFF" stroke="#C8912F" stroke-width="1.6"/>
+    <text class="m fm" x="908" y="166">test-plan.xlsx</text>
+    <text class="t sm" x="908" y="182">cases that are supposed to exist</text>
+  </g>
+
+  <!-- arrows -->
+  <line x1="600" y1="192" x2="600" y2="228" stroke="#8A8578" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="548" y="200" width="104" height="18" rx="9" fill="#F7F5F1"/>
+  <text class="t pill" x="600" y="213" text-anchor="middle">read as they are</text>
+
+  <!-- 2 bob -->
+  <text class="t eye" x="60" y="256">2 · bob, in agent mode</text>
+  <text class="t s" x="270" y="256">plans the work and makes the calls</text>
+
+  <rect x="60" y="268" width="1080" height="62" rx="11" fill="#14161A"/>
+  <text class="t" x="84" y="296" font-size="15" font-weight="600" fill="#F7F5F1">Plan</text>
+  <text class="t" x="84" y="315" font-size="12" fill="#B9B4A8">turn the documents into claims</text>
+  <line x1="330" y1="284" x2="330" y2="314" stroke="#4A4A44" stroke-width="1"/>
+  <text class="t" x="358" y="296" font-size="15" font-weight="600" fill="#F7F5F1">Dispatch</text>
+  <text class="t" x="358" y="315" font-size="12" fill="#B9B4A8">one subagent per claim, each in a clean context</text>
+  <line x1="742" y1="284" x2="742" y2="314" stroke="#4A4A44" stroke-width="1"/>
+  <text class="t" x="770" y="296" font-size="15" font-weight="600" fill="#F7F5F1">Judge</text>
+  <text class="t" x="770" y="315" font-size="12" fill="#B9B4A8">read what came back and decide</text>
+
+  <line x1="600" y1="330" x2="600" y2="362" stroke="#8A8578" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="536" y="338" width="128" height="18" rx="9" fill="#F7F5F1"/>
+  <text class="t pill" x="600" y="351" text-anchor="middle">parallel tasks</text>
+
+  <!-- 3 subagents -->
+  <text class="t eye" x="60" y="392">3 · one subagent per claim</text>
+  <text class="t s" x="324" y="392">so nothing gets checked by accident while something else is being checked</text>
+
+  <g>
+    <rect x="60"  y="404" width="246" height="74" rx="10" fill="#FFFFFF" stroke="#E4DFD6"/>
+    <text class="t h" x="78" y="428">Does it install?</text>
+    <text class="t sm" x="78" y="448">run the README's command</text>
+    <text class="t sm" x="78" y="464">in a clean container</text>
+
+    <rect x="318" y="404" width="246" height="74" rx="10" fill="#FFFFFF" stroke="#E4DFD6"/>
+    <text class="t h" x="336" y="428">Is it published?</text>
+    <text class="t sm" x="336" y="448">manifest version against</text>
+    <text class="t sm" x="336" y="464">the registry, right now</text>
+
+    <rect x="576" y="404" width="246" height="74" rx="10" fill="#FFFFFF" stroke="#E4DFD6"/>
+    <text class="t h" x="594" y="428">Do the links hold?</text>
+    <text class="t sm" x="594" y="448">every path and URL the</text>
+    <text class="t sm" x="594" y="464">documents point at</text>
+
+    <rect x="834" y="404" width="306" height="74" rx="10" fill="#FFFFFF" stroke="#C8912F" stroke-width="1.6"/>
+    <text class="t h" x="852" y="428">Does the plan hold?</text>
+    <text class="t sm" x="852" y="448">every case in the .xlsx test plan</text>
+    <text class="t sm" x="852" y="464">traced to a test that exists</text>
+  </g>
+
+  <line x1="600" y1="478" x2="600" y2="510" stroke="#8A8578" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="512" y="486" width="176" height="18" rx="9" fill="#F7F5F1"/>
+  <text class="t pill" x="600" y="499" text-anchor="middle">each reports back</text>
+
+  <!-- 4 checks -->
+  <text class="t eye" x="60" y="540">4 · the checks</text>
+  <text class="t s" x="190" y="540">found out separately from the claim</text>
+
+  <rect x="60" y="552" width="522" height="112" rx="10" fill="#FFFFFF" stroke="#E4DFD6"/>
+  <text class="t h" x="80" y="578">Facts</text>
+  <text class="t sm" x="80" y="600">links resolve · the install command names a package that exists</text>
+  <text class="t sm" x="80" y="620">the manifest version is on the registry · the licence is detectable</text>
+  <text class="t sm" x="80" y="640">CI steps that assert something, rather than skip and pass</text>
+
+  <rect x="598" y="552" width="542" height="112" rx="10" fill="#FFFFFF" stroke="#C8912F" stroke-width="1.6"/>
+  <text class="t h" x="618" y="578">Reading</text>
+  <text class="t sm" x="618" y="600">does what the prose says match what the code does</text>
+  <text class="t sm" x="618" y="620">is the release checklist actually satisfied</text>
+  <text class="t sm" x="618" y="640">which clauses of the spec nothing implements</text>
+
+  <line x1="600" y1="664" x2="600" y2="694" stroke="#8A8578" stroke-width="1.5" marker-end="url(#ar)"/>
+
+  <!-- 5 proving a check can fail -->
+  <rect x="60" y="700" width="1080" height="60" rx="10" fill="#FFFFFF" stroke="#B3423A" stroke-width="1.6"/>
+  <text class="t h" x="80" y="726">5 · proving the check can fail</text>
+  <text class="t sm" x="80" y="746">Every check is run against an input that must fail it. A check that cannot fail is reported as unproven, never as a pass.</text>
+  <text class="t m" x="1120" y="734" font-size="12" fill="#B3423A" text-anchor="end">not a green tick</text>
+
+  <!-- 6 what you get -->
+  <rect x="60" y="784" width="1080" height="66" rx="10" fill="#14161A"/>
+  <text class="t" x="84" y="812" font-size="15" font-weight="600" fill="#F7F5F1">What you get</text>
+  <text class="t" x="84" y="833" font-size="12.5" fill="#B9B4A8">every place the project says something that is not true, ordered by what a reader would hit first, as one page you can hand over</text>
+  <circle cx="1104" cy="817" r="7" fill="#C8912F"/>
+</svg>

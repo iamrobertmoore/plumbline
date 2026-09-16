@@ -1,0 +1,110 @@
+name: plumbline
+
+# Two jobs, deliberately separate.
+#
+# `audit`     is the deterministic tier. It has no credentials and no external
+#             dependency, so it can always run and is the thing that gates.
+# `semantic`  is the tier that needs IBM Bob. It is allowed to be skipped when
+#             the CLI is absent, but it reports that fact loudly rather than
+#             passing quietly. A check that did not run is not a check that passed.
+#
+# Two rules are enforced here on purpose, because both have cost me time before:
+#   1. Never gate the whole suite on a credential that may not exist.
+#   2. Never file the alarm on `if: failure()`. Alarm on the specific step.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: plumbline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: deterministic audit
+    runs-on: ubuntu-latest
+    outputs:
+      verdict: ${{ steps.verdict.outputs.verdict }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # There are no dependencies, so there is nothing to install and no lockfile to
+      # install from. `npm ci` would fail here for want of a package-lock.json. This
+      # asserts the zero-dependency claim instead, which is the more useful step.
+      - name: Assert the dependency surface is empty
+        run: |
+          node -e "const p=require('./package.json');const n=Object.keys(p.dependencies||{}).length+Object.keys(p.devDependencies||{}).length;if(n){console.error('dependencies appeared: '+n);process.exit(1)}console.log('zero dependencies, nothing to install')"
+
+      - name: Negative controls (prove every check can fail)
+        run: node src/cli.mjs --selfcheck --format markdown --out out/selfcheck.md
+
+      - name: Audit
+        id: audit
+        run: node src/cli.mjs --repo . --format markdown --out out/report.md --format json --out out/report.json
+
+      - name: Read the verdict back
+        id: verdict
+        run: node -e "const r=require('./out/report.json');console.log('verdict='+r.verdict)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plumbline-report
+          path: out/
+          if-no-files-found: error
+
+      # The alarm is on THIS step's outcome, never on if: failure().
+      - name: Open or update an issue when the audit fails
+        if: steps.audit.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node src/ci/file-issue.mjs --report out/report.json
+
+  semantic:
+    name: semantic audit (needs IBM Bob)
+    runs-on: ubuntu-latest
+    needs: audit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Assert the dependency surface is empty
+        run: |
+          node -e "const p=require('./package.json');const n=Object.keys(p.dependencies||{}).length+Object.keys(p.devDependencies||{}).length;if(n){console.error('dependencies appeared: '+n);process.exit(1)}console.log('zero dependencies, nothing to install')"
+
+      - name: Is Bob Shell available?
+        id: bob
+        run: |
+          if command -v bob >/dev/null 2>&1; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Bob Shell not available::The semantic tier did not run. Claims that need reading and judgement are UNVERIFIED, not passing."
+          fi
+
+      - name: Semantic tier
+        if: steps.bob.outputs.available == 'true'
+        run: bob --non-interactive --mode agent --prompt-file prompts/verify-claims.md --out out/semantic.md
+
+      - name: Upload semantic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plumbline-semantic
+          path: out/
+          if-no-files-found: warn

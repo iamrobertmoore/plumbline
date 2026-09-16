@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Plumbline">
+  <title>Plumbline</title>
+  <!-- the cord -->
+  <line x1="32" y1="7" x2="32" y2="37" stroke="#14161A" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- the pivot -->
+  <circle cx="32" cy="7" r="3" fill="#14161A"/>
+  <!-- the bob: a pointed weight, brass, the part that finds true vertical -->
+  <path d="M32 35 L41 48 L32 58 L23 48 Z" fill="#C8912F"/>
+  <path d="M32 35 L41 48 L32 48 Z" fill="#A8761F"/>
+  <!-- the reference the cord is measured against -->
+  <line x1="14" y1="58" x2="50" y2="58" stroke="#14161A" stroke-width="2.5" stroke-linecap="round" opacity="0.25"/>
+</svg>

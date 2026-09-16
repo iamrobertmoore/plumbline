@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" data-page-node-id="NBjQilLMJWg4Zy301lEqkY">
+<head data-page-node-id="kJe2uVur5gGM6JGSfxPPHt">
+<meta charset="utf-8" data-page-node-id="F4k795hZeHed3zoNWjd9RB">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="dBb9TK6z9XwWqPvUC5flG7">
+<title>Plumbline: does your repo do what it says?</title>
+<meta name="description" content="A pre-ship auditor. 22 of the 100 most-starred installable repositories on GitHub fail at least one check against their own claims." data-page-node-id="O835COIToLIIwBzvL3q6KU">
+<link rel="icon" href="docs/brand/mark.svg" type="image/svg+xml" data-page-node-id="ePaJRlMiw3YNj3fwGQFng5">
+<link rel="stylesheet" href="site/style.css" data-page-node-id="k7HBazBk1sxNh7Lh3E9La7">
+</head>
+<body data-page-node-id="eisFNFt6gclJ9BdbXypZJd">
+
+<div class="wrap" data-page-node-id="ylXFMD0kqKYDHUE1BtP8Ec">
+
+  <header class="masthead" data-page-node-id="5O0Mat25YXaodDXbFhZqEN">
+    <div class="brand" data-page-node-id="fcUyjw6x31CeyyRzVMR6bs">
+      <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true" data-page-node-id="GDMnUUt8vEjCp1qSAZ6hrP">
+        <line x1="32" y1="7" x2="32" y2="37" stroke="#14161A" stroke-width="3" stroke-linecap="round" data-page-node-id="oghMfRsK6F3ubEBW5bt10S"/>
+        <circle cx="32" cy="7" r="3.4" fill="#14161A" data-page-node-id="svNoJglI05rwLF2s6iq8eF"/>
+        <path d="M32 35 L41 48 L32 58 L23 48 Z" fill="#C8912F" data-page-node-id="uRqMkeHKZxeQTc7EtM5vdV"/>
+        <line x1="14" y1="58" x2="50" y2="58" stroke="#14161A" stroke-width="3" stroke-linecap="round" opacity="0.25" data-page-node-id="sL5gOR0NiR4bihOLlnGaxt"/>
+      </svg>
+      <b data-page-node-id="LvbAYod9FEuZRn89MjbgUh">PLUMBLINE</b>
+    </div>
+    <nav class="navlinks" data-page-node-id="GZlTEigjhyKFx2HZWxvAHV">
+      <a href="#number" data-page-node-id="eECJD8iJ5tCMNJ2mPilO3D">The number</a>
+      <a href="#finding" data-page-node-id="4kHxEsJur62YwvmJhudvGz">A real finding</a>
+      <a href="#controls" data-page-node-id="tpHhqmFeJw9Ob5XulcAyEL">Controls</a>
+      <a href="#run" data-page-node-id="QsRG7DnY6ToZF6CEDamLgE">Run it</a>
+    </nav>
+  </header>
+
+  <div class="hero" data-page-node-id="xFBc7nX0HITO2ZTXnFHKhv">
+    <p class="eyebrow" data-page-node-id="xTWBDHK9tFlX3Ei3L0Yfb2">Built for the <b data-page-node-id="Di4TCGvTAJurISSKzmuCBR">IBM Bob 2.0</b> hackathon</p>
+    <h1 data-page-node-id="sUJD4DH6H05lrooWQssWMS">Your repo says it is done. Let us check.</h1>
+    <p class="lede" data-page-node-id="dx4ILJfiVaNMFJ8W45Gbpw">
+      Plumbline reads everything a project says about itself, then tests whether any of it is true.
+      It does not tell you whether your code works. It tells you every place your project says
+      something that is not true, ordered by what a reader would hit first.
+    </p>
+  </div>
+
+  <section id="number" data-page-node-id="zsCxoCLMdPlV6yMFXN3C5x">
+    <p class="eyebrow" data-page-node-id="sBx607ZIIWcSS4gY48Lg79">01 &middot; The problem, measured</p>
+    <p class="bignum" data-page-node-id="64aJhxaxKPiaa3nzZdHi0X">22<small data-page-node-id="VAMe5vqQlepxr6lbMyXSAZ">&nbsp;of 100</small></p>
+    <p class="bignum-caption" data-page-node-id="Zpmlk7Bws3v1Xp04qESDZf">
+      of the most-starred installable repositories on GitHub fail at least one check against their own claims.
+      <span data-page-node-id="bzzig3JB9DNq3GjGMmW6Bz">14,304,526 stars between them. Measured 15 September 2026. These are the best-maintained, most-read READMEs in public existence.</span>
+    </p>
+
+    <div class="tablewrap" style="margin-top:32px" data-page-node-id="ztNp8hWF0IVGERy3QkFcls">
+      <table data-page-node-id="iusQMFU7VzKhPaZPSEDKcI">
+        <thead data-page-node-id="jN2DgPYovrNWqYnoLawIwC">
+          <tr data-page-node-id="st2Io5YthQO4rdVdlZbj7E"><th data-page-node-id="6FApPObtCXl2BvUFBI9o48">What the repository claims</th><th data-page-node-id="REPuFBUXALA0rXxCNU4GSU">What is actually true</th><th data-page-node-id="M1HHgpWLCH68VoaUA4GShE">of 100</th></tr>
+        </thead>
+        <tbody data-page-node-id="AlKkIN2sfGbDXvjfRvY86X">
+          <tr data-page-node-id="qXonYj4zOYAKsCtADcrEIb"><td data-page-node-id="XzcKDX64NFBJAhWCeTYc54">the links in the README work</td><td data-page-node-id="2PYuWGgzB8nJ3aTnp0Cm5H">links that return 404 or 410</td><td class="n hot" data-page-node-id="nwf0nzw32iZO3lYEFQaUtM">13</td></tr>
+          <tr data-page-node-id="DwJTj1pwiK1nQlTRwPMEAY"><td data-page-node-id="y8Bg8vSzT0PJvSDJKSkDZu">the README points at files that exist</td><td data-page-node-id="twC1eHEEKDFIq3xUyX3CtQ">links to files not in the repository</td><td class="n hot" data-page-node-id="D61vmvjniRFCICwl6s7bEj">3</td></tr>
+          <tr data-page-node-id="zkZW8ast4pSA3sdwnBNAcG"><td data-page-node-id="mZxOSjSUfIvap7yb9VyGBX">the manifest version is published</td><td data-page-node-id="9pDPAkgwYSBBgGlM8hzwCB">disagrees with the registry</td><td class="n hot" data-page-node-id="WtQkdGh8JRHqGYL5ShFqAx">3</td></tr>
+          <tr data-page-node-id="w0d8JCHVLJEm44oRV6GPWD"><td data-page-node-id="Fo0nOepV8HVlNu1aztEMQ9">the licence shows in the About panel</td><td data-page-node-id="dRqjWasJjXvRmiyOABqVge">a licence file GitHub cannot detect</td><td class="n hot" data-page-node-id="9Rhh4AGqAHBLoq2B1cdS5i">1</td></tr>
+          <tr data-page-node-id="xBCMXU1gpp3233JcuT7hj8"><td data-page-node-id="yy4QzJESkN0BEV5P4ji6eY">the install command names a real package</td><td data-page-node-id="9wu14FosYEGkpmM3J8OswR">a package that does not exist</td><td class="n hot" data-page-node-id="XpNygEhwUSx19qhonh3pEw">1</td></tr>
+          <tr data-page-node-id="CaG7nqAA8ZU7LI1wWd7FVo"><td data-page-node-id="57EmqFzoXyim181PjkFdZk">a version named in the README exists</td><td data-page-node-id="kKZep5TWBGH7zEDkN65PL7">a version never published</td><td class="n hot" data-page-node-id="s1GMuQQuqt3WlFlAqx0IlC">1</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="muted" style="font-size:14.5px;margin-top:18px" data-page-node-id="iDkajNKAjwLp4pWAFb0qGu">
+      The first pass of this measurement said 89 of 100. That was wrong, and it was wrong in the
+      direction that flattered the tool, so I went back through the findings by hand until the number
+      survived scrutiny. Four defects in my own checks are written up in
+      <a href="https://github.com/iamrobertmoore/plumbline/blob/main/docs/MEASUREMENT.md" data-page-node-id="VXVKu5c3SZceb99oM3Sc7A">the method</a>. The figure moved 89 to 47 to 30 to 22.
+    </p>
+  </section>
+
+  <section id="finding" data-page-node-id="14YDe6ZX8HpP4rBVBVjZPR">
+    <p class="eyebrow" data-page-node-id="siG73ezV1PLFyunwfFQWPX">02 &middot; A real finding</p>
+    <h2 data-page-node-id="PNklHCwXGmus7EY1Gb3nUF">One README. One document. Two filenames.</h2>
+    <p class="muted" style="margin-bottom:22px" data-page-node-id="GrT0E95lq0tUBbPxWSoKrn">
+      From <b data-page-node-id="0msAxD3WtrstvyRFv3rtzc">ruvnet/RuView</b>, the hundred-and-first most-starred repository in the corpus. Its
+      README links the same architecture decision record twice, to two different files.
+    </p>
+
+    <div class="finding" data-page-node-id="J9308zXDEIF40jAcvKzD8w">
+<pre data-page-node-id="uDcDGkSxS1i1qEOMYKKgtL"><span class="cmt" data-page-node-id="fyqKHcZBCGFBxvF8yQt6Dr">[ADR-079]</span>(docs/adr/ADR-079-camera-ground-truth-training.md)      <span class="ok" data-page-node-id="yIsM3clKpnoTaptxSui3Yd">exists</span>
+<span class="cmt" data-page-node-id="EkC9FA3TPhXANcnezJEFgM">[ADR-079]</span>(docs/adr/ADR-079-camera-supervised-pose-finetune.md)   <span class="bad" data-page-node-id="qjSVV6a80YtlJ07eli4VLG">never existed</span></pre>
+    </div>
+
+    <p style="margin-top:22px" data-page-node-id="G5d5vBDSsZG0ao7zWK6e6N">
+      A reader clicks that and gets a 404. The author never saw it, because they never clicked their
+      own link after renaming the file. No test catches this. Nothing in CI reads the README.
+    </p>
+  </section>
+
+  <section id="controls" data-page-node-id="16HMPZ5zkMT9kcW9WD8za1">
+    <p class="eyebrow" data-page-node-id="oJ0bgFE6DU38UqGvVO7gZ9">03 &middot; Why this is not a bundle of linters</p>
+    <h2 data-page-node-id="0hz2pE51Qb0FYlIvreZv2w">Every check proves it can fail.</h2>
+    <p class="muted" style="margin-bottom:24px" data-page-node-id="atc921Lsn1BVQmBl98HLiX">
+      Link checkers exist. Version drift tools exist. What none of them do is prove their own checks
+      can fail. Before Plumbline is allowed to report a pass, it runs that check against an input
+      built to fail it. A check that does not fail is reported as <b data-page-node-id="0RPPG5ja4BEVBi146n9itD">unproven</b>, never as a pass.
+    </p>
+
+    <div class="card" data-page-node-id="COUownrEC3K7NPW0bZfwPh">
+      <div class="control" data-page-node-id="6aO1A1Go8awBuYgDT23pG4"><span class="tick" data-page-node-id="ql0vK9st4JQ4ihO7IHhhhr">proven</span><span data-page-node-id="qgsq9WBGIC7F7cOqNxzeA6"><code data-page-node-id="i0k6NyVjrjawV5r4C0uXRl">link.relative</code> &nbsp; relative links point at files that exist</span></div>
+      <div class="control" data-page-node-id="qeJtp8cYb550QcIrCTOfXZ"><span class="tick" data-page-node-id="B7VwmNCHfioGPwAV7MsrfQ">proven</span><span data-page-node-id="NyYKeorkZnAAeh3EEWLEiq"><code data-page-node-id="LyGO2UHXskgcmx2fWCkTmF">link.external</code> &nbsp; external links resolve</span></div>
+      <div class="control" data-page-node-id="IT8isksCS68reB7N4iTYGq"><span class="tick" data-page-node-id="nfSIPp7eM3Pwe9mvuemtFA">proven</span><span data-page-node-id="a4t37HO3ldgb7OaYUHfixb"><code data-page-node-id="E13dOq7HE66Rqk3G3J2rQ9">install</code> &nbsp; the install command names a package that exists</span></div>
+      <div class="control" data-page-node-id="MzbiV0taAGAlTXEIAF9xqD"><span class="tick" data-page-node-id="tnIkWsRfOn4FRK788ctq38">proven</span><span data-page-node-id="CseZH3Oy6muQCixQWCTsan"><code data-page-node-id="UT3nuBL6GXhquAdlY7jqbv">manifest.version</code> &nbsp; the manifest version is published</span></div>
+      <div class="control" data-page-node-id="sN5yzHHCWuTtfP77YaAB1N"><span class="tick" data-page-node-id="tcduAsJAbXB8DWkFtAqEwa">proven</span><span data-page-node-id="bGHPe2rnTim24fEVJszcM0"><code data-page-node-id="GRUHwNRAG0O2C1RZvAy1WB">license.claimed</code> &nbsp; the licence is detectable</span></div>
+      <div class="control" data-page-node-id="u2yJY0HfFkOUZQpi8MzGEB"><span class="tick" data-page-node-id="wF38d2D2WiESHzI6ABRteS">proven</span><span data-page-node-id="P4zgDlySoepEHIguodJ9OM"><code data-page-node-id="5hRy1sxXDQo1L4OkhIzFZL">ci.claimed</code> &nbsp; CI is claimed and a workflow exists</span></div>
+    </div>
+
+    <p class="muted" style="font-size:14.5px;margin-top:20px" data-page-node-id="FEBb8DT5JFNbgLUv98AOBa">
+      This exists because I shipped a green CI badge that was doing nothing at all: a conformance job
+      that ran nightly for days and skipped every test, because it gated on a credential that did not
+      exist. It passed, so nothing drew attention to it. I found it on submission day.
+    </p>
+  </section>
+
+  <section data-page-node-id="AkjEfwHH0IRSgUtAzb5VU2">
+    <p class="eyebrow" data-page-node-id="IHcXcVCuaqJZ9HKsnuc706">04 &middot; How it works</p>
+    <h2 data-page-node-id="ONN7LEb84uYJBM4CTkbo8R">Documents in, a list of what is wrong out.</h2>
+    <figure data-page-node-id="A2gGTAcJWFgn5WBrBY8qp1">
+      <img src="docs/architecture.svg" alt="Claims are read from the README, the manifest and real documents. Bob plans the work and sends one subagent per claim. The checks run. Every check is proved able to fail. The result lists what a reader would hit first." data-page-node-id="O3Gk9CZfPKKPzI1hh46xVK">
+      <figcaption data-page-node-id="utLYdOHFpVhM7T4aJMM6ri">The half that needs no judgement has no dependency on Bob and runs in CI on every push.</figcaption>
+    </figure>
+  </section>
+
+  <section data-page-node-id="WwALAFjkbI3L2dGa5SyGZ3">
+    <p class="eyebrow" data-page-node-id="RE24QKocQ6LC2Xl8hZo5Ff">05 &middot; How Bob is used</p>
+    <h2 data-page-node-id="IAW0mokvzJ497pbByvxHbw">Four of Bob's capabilities do real work here.</h2>
+    <div class="grid g2" style="margin-top:6px" data-page-node-id="I888AMODoVk0KuoJs9blz2">
+      <div class="card accent" data-page-node-id="JZ7JhtBxSWssCxFY18RTsn">
+        <h3 data-page-node-id="67yFq0GXuRTb2xxFZTj6n3">Document understanding</h3>
+        <p data-page-node-id="6rUCjvIdQM2ebU5jRU6nqc">Claims come out of real documents, not just markdown. Bob reads <code data-page-node-id="8arlwnDCF8MY5YGaLNpOiE">.docx</code>, <code data-page-node-id="KTBDvEQyOirFDS0QmD68t1">.pdf</code> and <code data-page-node-id="IQ8TCP3xfuinsL46MUA35Z">.xlsx</code> as they are, so a spec, a release checklist or a test plan can be the source of a claim.</p>
+      </div>
+      <div class="card" data-page-node-id="MVph1aAMYf3bSZmydORGzD">
+        <h3 data-page-node-id="IfGja0nknLeC1FXJACXZdW">Subagents</h3>
+        <p data-page-node-id="ybojGuA2ZO6agfdkeZUYeK">One subagent per claim, each with its own clean context, so nothing gets checked by accident while something else is being checked.</p>
+      </div>
+      <div class="card" data-page-node-id="NHCA9PEaAVqch4b2I7bVkg">
+        <h3 data-page-node-id="vXsARZrTANbv9OUdRrcGzW">Parallel tasks</h3>
+        <p data-page-node-id="OfqJZe4JB17B86YwY8Wj94">Claims that do not depend on each other are checked at the same time, so a hundred-repository corpus does not have to queue up.</p>
+      </div>
+      <div class="card" data-page-node-id="NHCA9PEaAVqch4b2I7bVkh">
+        <h3 data-page-node-id="vXsARZrTANbv9OUdRrcGzX">Agent mode</h3>
+        <p data-page-node-id="OfqJZe4JB17B86YwY8Wj95">Runs the whole thing, decides what is left to check, and writes the result. If Bob is unavailable, those claims are reported as unverified, never as passing.</p>
+      </div>
+    </div>
+
+    <p class="muted" style="font-size:14.5px;margin-top:22px" data-page-node-id="3wLamOTIPLzr2UqMQ575ge">
+      The flagship check is test-plan coverage: read an <code data-page-node-id="NGhnAtCM00nALnPiRykCHt">.xlsx</code> test plan as it is, trace
+      every case to a test that exists, and list the ones nobody wrote. No existing tool can do that,
+      because no existing tool reads the plan.
+    </p>
+  </section>
+
+  <section id="run" data-page-node-id="j5EPXXesrvIzHf76VEPiow">
+    <p class="eyebrow" data-page-node-id="VivfOtTfd5aFLo269iOnu9">06 &middot; Run it</p>
+    <h2 data-page-node-id="KNocw4NqCaYDsMtLlCcH6r">Two commands.</h2>
+    <div class="run" data-page-node-id="GfjfhH8M9CVuV4S5zroWjJ">
+<pre data-page-node-id="0IYJEihseGZ0G4aOKSxrLn"><span class="c" data-page-node-id="TSuJteM1tyKAB3oDjl0kQv"># audit the repository in the current directory</span>
+npx github:iamrobertmoore/plumbline --repo .
+
+<span class="c" data-page-node-id="JMNwIV4ue4HnQTb0ZYOJsR"># prove that every check can fail before trusting any of them</span>
+npx github:iamrobertmoore/plumbline --selfcheck</pre>
+    </div>
+    <p class="muted" style="font-size:14.5px;margin-top:16px" data-page-node-id="wjEaQrHrH7UJ3WCdDLM2B9">
+      Exits 0 on pass, 1 on a failed check, 2 when a check cannot be shown to fail. Zero runtime
+      dependencies. Reads the repository and writes nothing.
+    </p>
+  </section>
+
+  <section data-page-node-id="bmCDq383j4RsLlOPLoNN30">
+    <p class="eyebrow" data-page-node-id="JFRVMrJuMFKEpRDoRWG0E8">07 &middot; Honest limitations</p>
+    <h2 data-page-node-id="62lGrBqqdxfkHkXNxfIa0Q">A failing check is not broken software.</h2>
+    <p data-page-node-id="8Os0vEYGqTN1Ono6hAGUzS">
+      A dead link in a README does not stop anyone installing the package. That is exactly why these
+      defects survive: no test reads what the documentation claims.
+    </p>
+    <p data-page-node-id="eXVy6DQsZR3dnWDyUzKocw">
+      The number is a snapshot, and it carries its date for that reason. The corpus is deliberately the
+      strongest end of GitHub, so 22% is a floor rather than an average. Workflows that can pass
+      without asserting anything are reported as warnings and kept out of the headline, because
+      <code data-page-node-id="fPgGF2TaFjPrHNecu32G1Y">continue-on-error</code> on a docs job is a deliberate choice rather than a lie.
+    </p>
+    <p data-page-node-id="MmfOowjXfwCzA33pB0imFF">
+      A claim the tool cannot observe is reported as <b data-page-node-id="ZAeFqCTGtppfywY8qGd9n3">not observable</b>, never as a pass and never
+      as a failure. If the About panel cannot be seen, or a package name turns out to belong to a
+      different project, Plumbline says so and moves on. It does not guess, and it does not accuse.
+    </p>
+  </section>
+
+  <footer data-page-node-id="4KQ2U6sZiSFHgtYHAmVr8G">
+    <p style="margin:0 0 8px" data-page-node-id="sGTiLLQA6LdEWde7QA2GR0">
+      <b data-page-node-id="CbvSffOPEUlWaQlk0HGAgf">Plumbline</b> &middot; a pre-ship auditor for repositories that believe they are finished.
+    </p>
+    <p style="margin:0" data-page-node-id="xlBie84VwOsMGpQEuwOjJy">
+      <a href="https://github.com/iamrobertmoore/plumbline/blob/main/docs/MEASUREMENT.md" data-page-node-id="DZjB6Ot29jmIxNsKlkcMy5">Method and corrections</a> &middot;
+      <a href="docs/architecture.svg" data-page-node-id="H5zuLh0caBkbogHa6AcXhZ">Architecture</a> &middot;
+      <a href="deck/plumbline-deck.pdf" data-page-node-id="Dfql8Yv7im2fm2ilzOASGS">Slide deck</a> &middot;
+      <a href="https://github.com/iamrobertmoore/plumbline/blob/main/.github/workflows/plumbline.yml" data-page-node-id="wk4BcQC3oOLkKyVcW0FNvE">CI workflow</a> &middot;
+      MIT licensed
+    </p>
+  </footer>
+
+</div>
+
+<script>
+// Progressive enhancement only. Every figure on this page is in the markup as its
+// resting state, so the page is complete and correct with this script removed.
+document.documentElement.classList.add('js');
+(function () {
+  var els = document.querySelectorAll('section, .card, figure, .finding, .run');
+  if (!('IntersectionObserver' in window)) return;
+  for (var i = 0; i < els.length; i++) els[i].classList.add('reveal');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+  for (var j = 0; j < els.length; j++) io.observe(els[j]);
+})();
+</script>
+
+</body>
+</html>

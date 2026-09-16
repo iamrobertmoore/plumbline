@@ -1,0 +1,5 @@
+# Serve this repository as plain static files.
+#
+# GitHub Pages runs Jekyll by default, which would exclude dot-directories and
+# rewrite .md paths to .html. The site links into .github/ and to raw markdown, so
+# Jekyll would break both. This file turns it off.
