@@ -66,7 +66,7 @@ tool's ids, so there is one name for each check and no mapping to get wrong.
 ## The corrections
 
 **The first pass said 89 of 100.** That was wrong, and it was wrong in the direction that flattered
-the tool, which is the failure mode that matters. Seven corrections follow. Five came from re-checking
+the tool, which is the failure mode that matters. Eight corrections follow. Five came from re-checking
 a finding by hand, one from trying to reproduce the number from the shipped code rather than from the
 harness that produced it, and one from reading this document against the tool's own output:
 
@@ -143,11 +143,24 @@ every difference between the two runs is a name. The two rows that genuinely are
 (`readme.present`, a precondition, and `readme.versions`, a claim type the CLI does not expose) and the
 one the harness does not evaluate (`ci.claimed`) are now stated rather than left to be noticed.
 
+**8. The deck quoted figures from a run that does not exist, and this document published a variable as
+a constant.** Found on 17 September, by cross-checking the deck's measured panel against the harness
+JSON rather than against the prose. The deck said **542 s** and **1,850 links**. No run produces either.
+The counts are 1,667 external links, 251 badges and 1,644 relative links, and the wall clock has
+measured 273, 283, 293, 298 and 336 seconds across five runs. **The counts are stable and the timing is
+not**, so the panel now leads with the count and states the time as about five minutes.
+
+Checking that also caught a figure in this document. The **unreachable** count was published as 53, and
+53 is not a constant. It measured **53, 57 and 64** across three consecutive runs, because an
+unreachable link is almost always a timeout rather than a statement about the repository. It is now
+reported as a range, and the distinction between the figures that move and the figures that do not is
+stated rather than left implicit.
+
 **The headline moved 89 → 47 → 30 → 22 → 19 → 18.** Corrections 1 to 4 produced the 22. Correction 5,
 carrying three of those corrections into the shipped tool, produced the 19. Correction 6, the code-span
-false accusation, produced the 18. **Correction 7 moved no figure at all, and that is what made it
-worth writing down:** it was a defect in how the result was described, and a description defect cannot
-show up in a result. **Every move has been downward, and every move has been the removal
+false accusation, produced the 18. **Corrections 7 and 8 moved no figure at all, and that is what made them
+worth writing down:** both were defects in how the result was described, and a description defect
+cannot show up in a result. **Every move has been downward, and every move has been the removal
 of an accusation the evidence did not support.** That is the only direction this number should ever
 move, and it is worth being explicit about why: a tool that finds more problems when you fix it is
 finding problems that were not there.
@@ -169,11 +182,20 @@ finding problems that were not there.
 five rows above are the five that produced a failure, and they are listed in full rather than trimmed
 to the interesting ones, because a method that shows only its hits cannot be audited.
 
-Behind those five rows: **1,667 links fetched and tested**, of which **21 are gone** and **53 could
-not be reached at all**. A further **251 are badges**, which are skipped rather than asserted, because
-a shields.io badge is an image whose 404 is not a claim the README makes. **1,644 relative links** were
-checked against the repositories' own file trees. Two repositories report their tree truncated, so
-their relative links are reported as not observable rather than guessed at.
+Behind those five rows: **1,667 external links fetched and tested**, of which **21 are gone**. A
+further **251 are badges**, which are skipped rather than asserted, because a shields.io badge is an
+image whose 404 is not a claim the README makes. **1,644 relative links** were checked against the
+repositories' own file trees, making **3,311 links** in total. Two repositories report their tree
+truncated, so their relative links are reported as not observable rather than guessed at.
+
+**Some of these numbers move between runs and some do not, and the difference matters.** The counts are
+stable. Three consecutive full runs returned the same 1,667 external links, the same 251 badges, the
+same 1,644 relative links and the same 21 gone. Two figures are not stable, because they describe the
+network rather than the corpus: the **unreachable** count measured **53, 57 and 64** across those same
+three runs, since an unreachable link is almost always a timeout, and the wall clock moved **273 to 299
+seconds** for the same reason. Neither is used as a headline. An earlier version of this document
+quoted the unreachable count as a single figure, which was a sample of a variable wearing the costume
+of a fact.
 
 **All 21 gone links were re-confirmed by hand with a real `GET`**, following redirects. 20 are hard
 404s and one is a 410 from a delisted store listing. **All three relative-link findings were confirmed

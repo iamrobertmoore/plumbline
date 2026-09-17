@@ -170,7 +170,7 @@ a different project, Plumbline says so and moves on. It does not guess, and it d
   floor rather than an average.
 - **Every move in this number has been downward, and that is the point.** The first pass said 89 of
   100. Each correction removed an accusation the evidence did not support. A tool that finds more
-  problems when you fix it is finding problems that were not there. All seven corrections are in
+  problems when you fix it is finding problems that were not there. All eight corrections are in
   [`docs/MEASUREMENT.md`](docs/MEASUREMENT.md).
 - **CI that cannot fail is reported as a warning, not a failure.** Across 1,768 workflow files in the
   same 100 repositories, **6 have a step or job marked `if: false`**, which can never run, and **55
