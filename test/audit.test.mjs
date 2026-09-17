@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { audit, CHECKS, SEVERITY } from '../src/plumbline.mjs';
+import { audit, CHECKS, SEVERITY, climbsAboveRoot } from '../src/plumbline.mjs';
 import { renderJson, renderMarkdown } from '../src/report.mjs';
 
 function fixture(files) {
@@ -103,13 +103,32 @@ test('CI claimed with no workflow directory is a failure', async () => {
   } finally { cleanup(root); }
 });
 
-test('a genuine traversal out of the repository is caught', async () => {
-  const root = fixture({ 'README.md': '[x](../../../etc/passwd)\n' });
+test('a path that climbs above the repository root is not observable, not a fault', async () => {
+  // "../../releases" from a root README is the standard way to link to a GitHub
+  // repository's own releases page, and it resolves there correctly. The file tree
+  // cannot answer the question, so the claim is counted as not observable rather
+  // than accused. It used to be reported as "escapes the repository", which was an
+  // accusation the evidence could not support.
+  const root = fixture({ 'README.md': '[Releases](../../releases)\n[x](../../../etc/passwd)\n' });
   try {
     const a = await audit({ root });
-    assert.equal(a.failures, 1);
-    assert.match(a.results[0].detail, /escapes the repository/);
+    assert.equal(a.failures, 0, JSON.stringify(a.results, null, 2));
+    assert.equal(a.skipped, 2);
+    for (const s of a.skippedDetail) assert.match(s.detail, /climbs above the repository root/);
   } finally { cleanup(root); }
+});
+
+test('climbsAboveRoot fires only when a path actually leaves the root', () => {
+  // This rule is shared with the measurement harness on purpose. When it lived in
+  // two places, the two copies disagreed and the published figure drifted.
+  assert.equal(climbsAboveRoot('../../releases'), true);
+  assert.equal(climbsAboveRoot('../x'), true);
+  assert.equal(climbsAboveRoot('..'), true);
+  assert.equal(climbsAboveRoot('docs/../README.md'), false);
+  assert.equal(climbsAboveRoot('a/../../b'), true);
+  assert.equal(climbsAboveRoot('./docs/guide.md'), false);
+  assert.equal(climbsAboveRoot('docs/guide.md'), false);
+  assert.equal(climbsAboveRoot(''), false);
 });
 
 test('the same claim is not reported twice', async () => {

@@ -252,7 +252,7 @@ ul.tight li b { color: var(--ink); }
   <h1>Plumbline</h1>
   <p class="sub">It reads what your project says about itself, then goes and checks whether any of it is true.</p>
   <div class="strip">
-    <b>22 of the 100 most-starred installable projects on GitHub say something about themselves that is not true.</b>
+    <b>18 of the 100 most-starred installable repositories on GitHub fail at least one check.</b>
     That is 14,304,526 stars between them.
   </div>
   <div class="foot">
@@ -273,31 +273,32 @@ ul.tight li b { color: var(--ink); }
 <section class="slide">
   <div class="head">
     <p class="eyebrow"><b>02</b> / The problem, measured</p>
-    <h2>22 of 100. Every one of them wrong about something.</h2>
+    <h2>18 of 100. Every one of them wrong about something.</h2>
   </div>
   <div class="body">
     <div class="figs">
       <div class="fig">
-        <span class="n">13</span>
+        <span class="n">11</span>
         <span class="t">README links that go nowhere
           <small>every one re-checked with a real request, not a HEAD</small></span>
-      </div>
-      <div class="fig">
-        <span class="n">3</span>
-        <span class="t">links pointing at files that are not in the repository
-          <small>you click, and get nothing</small></span>
       </div>
       <div class="fig">
         <span class="n">3</span>
         <span class="t">manifests whose version is not the version on the registry
           <small>counted only where the registry points back at the repo, so a shared name is not a finding</small></span>
       </div>
+      <div class="fig">
+        <span class="n">2</span>
+        <span class="t">links pointing at files that are not in the repository
+          <small>you click, and get nothing</small></span>
+      </div>
     </div>
     <p class="note">
-      Measured 15 September 2026 against the strongest end of GitHub, not a random sample. My first
+      Measured 17 September 2026 against the strongest end of GitHub, not a random sample. My first
       pass said 89 of 100. That was wrong in the direction that flattered the tool, so I re-checked
-      every finding by hand. Four faults in my own checks are written up in the method. The number
-      came down 89, then 47, then 30, then 22.
+      every finding by hand. Five faults in my own checks, and one in my own process, are written up
+      in the method. The number came down 89, then 47, then 30, then 22, then 19, then 18. Every move
+      was downward, because every move removed an accusation the evidence did not support.
     </p>
   </div>
   <div class="foot"><span class="mk">PLUMBLINE</span><span class="pg">02 / 12</span></div>
@@ -407,8 +408,13 @@ ul.tight li b { color: var(--ink); }
       for days and skipped every test, because it waited on a credential that did not exist. It
       passed, so nothing drew attention to it. I found it on submission day.
     </p>
-    <div class="block light"><span class="c">$ npx github:iamrobertmoore/plumbline --selfcheck</span>
-6/6 checks proved able to fail. Result: <b>PROVEN</b>.</div>
+    <div class="block light" style="font-size:15.5px;line-height:1.85"><span class="c">$ npx github:iamrobertmoore/plumbline --selfcheck</span>
+6/6 checks proved able to fail. Result: <b>PROVEN</b>.
+<span class="c">check             good input  broken input  what the broken input said</span>
+link.relative     accepted    rejected      missing README.md
+link.external     accepted    rejected      ERR plumbline.invalid/__control__
+manifest.version  accepted    rejected      0.0.0-plumbline-control vs 1.3.0
+<span class="c">a check that cannot tell those two apart is reported UNPROVEN, never a pass</span></div>
   </div>
   <div class="foot"><span class="mk">PLUMBLINE</span><span class="pg">07 / 12</span></div>
 </section>
@@ -443,8 +449,9 @@ ul.tight li b { color: var(--ink); }
       </div>
     </div>
     <p class="note">
-      The half that needs no judgement has <b>no Bob dependency at all</b> and runs in CI on every
-      push. If Bob is unavailable, those claims are reported as <b>unverified</b>, never as passing.
+      <b>Bob access starts on 25 September, so this is the design.</b> The half that needs no
+      judgement is built, has <b>no Bob dependency at all</b>, and runs in CI on every push. It is
+      what produced the number on slide 2.
     </p>
   </div>
   <div class="foot"><span class="mk">PLUMBLINE</span><span class="pg">08 / 12</span></div>
@@ -520,7 +527,7 @@ ul.tight li b { color: var(--ink); }
     </p>
     <p>
       The number is a snapshot, which is why it carries its date. The sample is deliberately the
-      strongest end of GitHub, so 22 in 100 is a floor rather than an average. Workflows that can pass
+      strongest end of GitHub, so 18 in 100 is a floor rather than an average. Workflows that can pass
       without checking anything are reported as warnings and kept out of the headline, because
       switching a docs job to <code>continue-on-error</code> is a choice someone made, not a lie.
     </p>
@@ -544,9 +551,10 @@ ul.tight li b { color: var(--ink); }
       <div>Source: <a href="https://github.com/iamrobertmoore/plumbline">github.com/iamrobertmoore/plumbline</a></div>
       <div>Method: <a href="https://github.com/iamrobertmoore/plumbline/blob/main/docs/MEASUREMENT.md">docs/MEASUREMENT.md</a></div>
       <div class="cmd">npx github:iamrobertmoore/plumbline --repo .</div>
+      <div class="cmd">npx github:iamrobertmoore/plumbline --selfcheck</div>
     </div>
     <p class="note">
-      Two commands. Exits 0 on a pass, 1 on a failed check, 2 when a check cannot be shown to fail.
+      Exits 0 on a pass or a warning, 1 on a blocker, 2 when a check cannot be shown to fail.
       No dependencies. It reads your repository and writes nothing.
     </p>
   </div>

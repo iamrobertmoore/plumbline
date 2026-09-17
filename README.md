@@ -1,13 +1,15 @@
 <div align="center">
 
-<img src="docs/brand/readme-banner.svg" alt="Plumbline: 22 of the 100 most-starred installable repositories on GitHub fail at least one check." width="900">
+<img src="docs/brand/readme-banner.svg" alt="Plumbline: 18 of the 100 most-starred installable repositories on GitHub fail at least one check." width="900">
 
-**A pre-ship auditor. It checks whether your repository does what it says it does.**
+**A pre-ship auditor. It checks whether your repository does what it says it does, and it proves
+that each of its own checks can fail.**
 
 [Live report](https://iamrobertmoore.github.io/plumbline/) ·
 [Slide deck](deck/plumbline-deck.pdf) ·
 [Architecture](docs/architecture.svg) ·
 [How the number was measured](docs/MEASUREMENT.md) ·
+[Who wrote the code](docs/AUTHORSHIP.md) ·
 [Run it in CI](.github/workflows/plumbline.yml)
 
 </div>
@@ -17,24 +19,33 @@
 ## The problem, measured
 
 **I checked the 100 most-starred installable repositories on GitHub against their own claims.
-22 of them fail at least one check.**
+18 of them fail at least one check.**
+
+The clearest one is `ruvnet/RuView`, rank 90 of the 100. Its README links the same architecture
+decision record twice, under two different filenames. One exists. The other has never existed in the
+repository.
 
 That is 14,304,526 stars of software. These are the best-maintained, most-read READMEs in public
 existence, and one in five still describes itself inaccurately right now.
 
-Measured 15 Sep 2026. Method, corpus, and every correction I made to the checks are in
+**And more of it is machine-written every month.** In the same 100 repositories, **61 carry commits
+that name an AI agent as a co-author**, and **11% of their 9,936 most recent commits declare one**. I
+measured that too, because every published figure for it turns out to be a marketing number that
+cannot be checked. The method is in [`docs/AUTHORSHIP.md`](docs/AUTHORSHIP.md), and it is deliberately
+a lower bound: a commit that was agent-assisted without saying so is counted as human.
+
+Measured 17 Sep 2026. Method, corpus, and every correction I made to the checks are in
 [`docs/MEASUREMENT.md`](docs/MEASUREMENT.md). The first pass said 89 of 100. That was wrong, and it
 was wrong in the direction that flattered the product, so I went back through the findings by hand
 until the number survived scrutiny.
 
 | What the repository claims | What is actually true | How many, of 100 |
 |---|---|---|
-| the links in the README work | 13 have links that return 404 or 410 | **13** |
-| the README points at files that exist | 3 link to files that are not in the repository | **3** |
+| the links in the README work | 11 have links that return 404 or 410 | **11** |
 | the version in the manifest is published | 3 disagree with the registry | **3** |
+| the README points at files that exist | 2 link to files that are not in the repository | **2** |
 | the licence shows in the About panel | 1 has a licence file GitHub cannot detect | **1** |
-| the install command names a real package | 1 names a package that does not exist | **1** |
-| a version named in the README exists | 1 names a version that was never published | **1** |
+| it has a README | 1 has no README at all | **1** |
 
 ## The person this is for
 
@@ -63,8 +74,17 @@ that is not true, ordered by what a reader would hit first.
 
 ## Why it is not a bundle of linters
 
-Every check above has a tool that does something similar. Link checkers exist. Version drift tools
-exist. What none of them do is **prove their own checks can fail**, and that is the whole point.
+Every check here has a tool that does something similar. None of them does this.
+
+| What you already use | What it does | What it does not do |
+|---|---|---|
+| **SonarQube**, **Snyk** | read your code | read what your project claims about itself. Neither has an opinion on whether the README is true. |
+| **Dependabot**, **Renovate** | keep your dependencies current | check that your own published version exists. |
+| **lychee**, **markdown-link-check** | check that links resolve | anything else. That is one of the six checks here, and it is not the interesting one. |
+| **documentation drift tools** | compare a commit against the docs it should have touched | see anything the commit did not touch, so a README that was wrong when it was written stays invisible. |
+| **all of them** | report a result | show that the result means anything. |
+
+That last row is the point. What none of these tools do is **prove their own checks can fail**.
 
 A check that has never been observed to fail is not evidence. I have shipped a green CI badge that
 was doing nothing at all: a conformance job that ran nightly for days and skipped every test, because
@@ -82,7 +102,11 @@ $ npx github:iamrobertmoore/plumbline --selfcheck
 
 ## How IBM Bob is used
 
-Four of Bob's capabilities do real work here, and none of them is decoration.
+**Bob access starts on 25 September, so this section is a design, not a description of code that runs
+today.** The half of the tool that needs no judgement is built, runs in CI on every push, and is what
+produced the number above. The half below is what gets wired in on the 25th.
+
+Four of Bob's capabilities do real work in that design, and none of them is decoration.
 
 - **Document understanding.** The claims come out of real documents, not just markdown. Bob reads
   `.docx`, `.pdf` and `.xlsx` as they are, so a specification, a release checklist or a test plan can
@@ -95,8 +119,8 @@ Four of Bob's capabilities do real work here, and none of them is decoration.
   hundred-repository corpus does not have to queue up.
 - **Agent mode.** Runs the whole thing, decides what is left to check, and writes the result.
 
-The half of the tool that needs no judgement has **no Bob dependency at all** and runs in CI on every
-push. If Bob is not available, those claims are reported as **unverified**, never as passing.
+A claim the tool cannot observe is reported as **not observable**, never as a pass. That holds for the
+half that runs today, and it will hold for the half Bob handles.
 
 ## Architecture
 
@@ -110,12 +134,15 @@ npx github:iamrobertmoore/plumbline --selfcheck # prove every check can fail
 npx github:iamrobertmoore/plumbline --repo . --format json --out r.json
 ```
 
-Exits `0` on pass, `1` on a failed check, `2` when a check cannot be shown to fail.
+Exits `0` on a pass or a warning, `1` on a blocker, `2` when a check cannot be shown to fail. A
+warning is a note about the repository, not a reason to hold a release, so it does not break the build.
 
 Zero runtime dependencies. Node 20 or later. Reads the repository, writes nothing.
 
-The suite is `node --test test/*.test.mjs` (33 tests). Three of them reach the npm registry;
-those skip rather than fail when the network is down.
+The suite is `node --test test/*.test.mjs` (54 tests). Seven of them reach the npm registry and skip
+rather than fail when the network is down. The rest run offline, including five that prove the
+`HEAD`/`GET` behaviour against a **local HTTP server**, so that correction is tested without depending
+on a real host happening to misbehave on the day.
 
 A claim the tool cannot observe is reported as **not observable**, never as a pass and never as a
 failure. If the About panel cannot be seen, or a package name on the registry turns out to belong to
@@ -130,12 +157,20 @@ a different project, Plumbline says so and moves on. It does not guess, and it d
 - **A failing check is not broken software.** A dead link in a README does not stop anyone installing
   the package. That is precisely why these defects survive: no test looks at what the docs claim.
 - **The number is a snapshot.** Links rot and versions move. It carries its date for that reason.
-- **The corpus is not a random sample of GitHub.** It is deliberately the strongest end, so 22% is a
+- **The corpus is not a random sample of GitHub.** It is deliberately the strongest end, so 18% is a
   floor rather than an average.
-- **CI checks that can silently pass are reported as warnings, not failures.** 47 of the 100 have a
-  workflow containing `|| true`, `if: false`, or a step gated on a secret that may not exist. That is
-  worth knowing, but `continue-on-error` on a docs job is a deliberate choice, not a lie, so it is
-  not counted in the headline.
+- **Every move in this number has been downward, and that is the point.** The first pass said 89 of
+  100. Each correction removed an accusation the evidence did not support. A tool that finds more
+  problems when you fix it is finding problems that were not there. All six corrections are in
+  [`docs/MEASUREMENT.md`](docs/MEASUREMENT.md).
+- **CI that cannot fail is reported as a warning, not a failure.** Across 1,768 workflow files in the
+  same 100 repositories, **6 have a step or job marked `if: false`**, which can never run, and **55
+  have a step marked `continue-on-error`**, whose failure does not fail the job. Neither counts toward
+  the headline, because `continue-on-error` on a docs job is a deliberate choice rather than a lie.
+  Reproduce it with [`measure/ci-warnings.mjs`](measure/ci-warnings.mjs).
+  An earlier pass put this figure at 47 by counting any `|| true`. That was wrong. `|| true` is used
+  legitimately inside command substitution and at the end of best-effort cleanup, and the pattern even
+  matched a comment explaining why a workflow does **not** use it.
 
 ## Licence
 

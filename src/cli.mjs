@@ -32,7 +32,10 @@ if (o.help) {
 }
 
 const root = resolve(o.repo);
-const sc = o.selfcheck ? await selfcheck({ root, rootFiles: [], workflowFiles: [], githubLicense: null }) : null;
+// The controls build their own workspace. Handing them the audited repository's
+// context is what made two of them degenerate: they failed on an empty file list
+// before the mutation was ever applied.
+const sc = o.selfcheck ? await selfcheck() : null;
 const a = await audit({ root });
 
 const payloads = [];
@@ -53,8 +56,10 @@ if (!o.out.length) {
   }
 }
 
-// A verdict of FAIL must be a non-zero exit. A check that cannot fail the build
-// is decoration.
+// Exit codes: 0 when nothing failed or only warnings did, 1 on a blocker, 2 when a
+// check could not be shown to fail. A warning is a note about the repository, not a
+// reason to hold a release, so it does not break the build. A check that cannot fail
+// the build at all is decoration, which is what exit 2 is for.
 if (a.verdict === 'FAIL') process.exit(1);
 if (sc && sc.verdict === 'INCOMPLETE') process.exit(2);
 process.exit(0);

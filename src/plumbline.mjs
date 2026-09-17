@@ -21,12 +21,36 @@ export const SEVERITY = { BLOCKER: 3, WARNING: 2, NOTE: 1 };
 // claim extraction
 // ---------------------------------------------------------------------------
 
+// A link inside a code span or a fenced block is not a link, it is an example of one.
+// Graphify's README documents its own parser with `[text](./other.md)` inside backticks,
+// and treating that as a link accused the project of pointing at a file it had never
+// written. That is the failure mode this whole tool exists to argue against, so the link
+// passes run against a copy with code removed.
+//
+// The copy keeps every newline, so the bare-URL pass still sees line boundaries and the
+// length of the file is unchanged. Removing the lines instead would have been simpler and
+// would have made two unrelated URLs adjacent, which is its own way of inventing a link.
+export function proseOnly(md) {
+  const blank = (s) => s.replace(/[^\n]/g, ' ');
+  return String(md)
+    .replace(/^[ \t]*```[\s\S]*?^[ \t]*```/gm, blank)
+    .replace(/^[ \t]*~~~[\s\S]*?^[ \t]*~~~/gm, blank)
+    .replace(/`[^`\n]*`/g, blank);
+}
+
 export function claimsFromReadme(md) {
   const claims = [];
   const add = (id, kind, text, extra = {}) => claims.push({ id, kind, text, ...extra });
+  // Everything that is genuinely a link lives in here.
+  const prose = proseOnly(md);
 
-  for (const m of md.matchAll(/\[[^\]]*\]\(([^)\s]+)\)/g)) {
-    const href = m[1];
+  // A link destination may itself contain balanced parentheses, and Wikipedia URLs
+  // do this constantly: .../wiki/Script_(Unix). Stopping at the first ")" cut those
+  // URLs short and reported a live page as dead, which is the one thing this tool
+  // must never do: accuse a repository of something the evidence does not support.
+  // Angle brackets are the other legal way to write a destination containing spaces.
+  for (const m of prose.matchAll(/\[[^\]]*\]\(\s*(?:<([^>\n]+)>|((?:[^\s()]|\((?:[^\s()]|\([^\s()]*\))*\))+))\s*\)/g)) {
+    const href = m[1] || m[2];
     if (/^https?:/i.test(href)) { add('link.external', 'link', href, { url: href }); continue; }
     // Any other URI scheme (mailto:, tel:, irc:, ftp:, data:) is not a path in this
     // repository. Treating these as filesystem paths produced a whole class of false
@@ -36,18 +60,31 @@ export function claimsFromReadme(md) {
     if (/^(#|\/\/)/.test(href)) continue;
     // A leading slash is repository-root-relative on GitHub, not an absolute
     // filesystem path. Stripping it is what stops "/docs/x.md" being reported as
-    // escaping the repository.
-    const path = href.split('#')[0].replace(/^\/+/, '');
+    // escaping the repository. The query string is not part of the path: a link to
+    // "images/x.png?WT.mc_id=..." points at a file that exists, and leaving the
+    // query on the end made the tool accuse it of pointing at nothing. This is one
+    // of the corrections written up in the method, and it had never been carried
+    // into the shipped parser.
+    const path = href.split('#')[0].split('?')[0].replace(/^\/+/, '');
     if (!path) continue;
     // A pipe inside a link destination is almost always a markdown table separator
     // that got captured. The intent is ambiguous, so report nothing rather than guess.
     if (path.includes('|')) continue;
     add('link.relative', 'path', path, { path });
   }
-  for (const m of md.matchAll(/(?:^|[\s(])(https?:\/\/[^\s)\]<>"']+)/g)) {
+  // Bare URLs in prose get the same treatment: a balanced pair of parentheses is
+  // part of the URL, an unmatched one is punctuation that ends the sentence. Without
+  // this the bare pass re-truncated every Wikipedia link the markdown pass had just
+  // parsed correctly, and the truncated one is the one that gets checked. This pass
+  // also runs against the code-stripped copy, for the same reason as the one above.
+  for (const m of prose.matchAll(/(?:^|[\s(])(https?:\/\/(?:[^\s()\]<>"']|\((?:[^\s()]|\([^\s()]*\))*\))+)/g)) {
     add('link.bare', 'link', m[1].replace(/[.,;:]+$/, ''), { url: m[1].replace(/[.,;:]+$/, '') });
   }
-  for (const m of md.matchAll(/\b(?:npm\s+(?:i|install)|yarn\s+add|pnpm\s+(?:i|add|install))\s+(?:--?[\w-]+\s+)*(@?[\w][\w./-]*)/g)) {
+  // An install command cannot span a line break, and an npm package name cannot
+  // start with a capital letter. Without both of these the parser reached across a
+  // newline in nvm's README, took the first word of the next sentence, and accused
+  // the project of installing a package called "There" that does not exist.
+  for (const m of md.matchAll(/\b(?:npm\s+(?:i|install)|yarn\s+add|pnpm\s+(?:i|add|install))[ \t]+(?:--?[\w-]+[ \t]+)*(@?[a-z][\w./-]*)/g)) {
     add('install', 'install', m[0], { pkg: m[1] });
   }
   for (const m of md.matchAll(/\bv?(\d+\.\d+\.\d+)\b/g)) add('version', 'version', m[1], { version: m[1] });
@@ -81,21 +118,39 @@ export function claimsFromManifest(pkgPath) {
 // ---------------------------------------------------------------------------
 
 async function httpOk(url, timeout = 12000) {
-  for (const method of ['HEAD', 'GET']) {
+  // HEAD first, but only as a cheap positive. Plenty of servers answer HEAD with a
+  // 404 or a 405 and then serve the same URL perfectly on GET, so a non-2xx HEAD is
+  // inconclusive and has to be confirmed with a real request before anything is
+  // called dead. Trusting the HEAD result reported four live pages as dead the first
+  // time this corpus was measured, which is the one finding this tool must never
+  // produce: an accusation the evidence does not support.
+  const attempt = async (method) => {
     const c = new AbortController();
     const t = setTimeout(() => c.abort(), timeout);
     try {
-      const r = await fetch(url, { method, signal: c.signal, redirect: 'follow', headers: { 'User-Agent': 'plumbline/0.1' } });
-      if (method === 'HEAD' && [403, 405, 429, 501, 503].includes(r.status)) continue;
+      const r = await fetch(url, {
+        method,
+        signal: c.signal,
+        redirect: 'follow',
+        headers: method === 'GET'
+          ? { 'User-Agent': 'plumbline/0.1', Range: 'bytes=0-2048' }
+          : { 'User-Agent': 'plumbline/0.1' },
+      });
       return { ok: r.ok, status: r.status };
     } catch (e) {
-      if (method === 'GET') return { ok: false, status: 0, error: String(e.name || e) };
+      return { ok: false, status: 0, error: String(e.name || e) };
     } finally { clearTimeout(t); }
-  }
-  return { ok: false, status: 0 };
+  };
+
+  const head = await attempt('HEAD');
+  if (head.ok) return head;
+  const get = await attempt('GET');
+  // If the GET could not be made at all, the link is unverifiable rather than dead.
+  // Only a real HTTP answer is allowed to decide, and status 0 is not an answer.
+  return get.status === 0 ? { ok: false, status: 0, error: get.error || head.error } : get;
 }
 
-async function npmLatest(pkg) {
+export async function npmLatest(pkg) {
   if (!pkg || typeof pkg !== 'string') return { missing: true, status: 0 };
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), 12000);
@@ -114,7 +169,11 @@ async function npmLatest(pkg) {
 // Reduce the many spellings of a repository URL to a comparable owner/repo slug.
 // Returns null for anything that is not a GitHub repository, because a package
 // the tool cannot tie back to this repository must not be used to accuse it.
-function repoSlug(s) {
+//
+// Exported because the measurement harness asks the same question, and the guard
+// has to be the same guard in both places or the published figure stops describing
+// the published tool.
+export function repoSlug(s) {
   if (!s) return null;
   const raw = typeof s === 'string' ? s : s.url;
   if (!raw) return null;
@@ -125,13 +184,40 @@ function repoSlug(s) {
   return m ? `${m[1]}/${m[2]}`.toLowerCase() : null;
 }
 
+// A relative link that climbs above the repository root is not a claim about a file
+// in this repository. On GitHub, "../../releases" from a root README resolves to the
+// repository's own releases page, which is correct and extremely common. The file
+// tree cannot answer a question about GitHub's URL space, so the claim is reported
+// as not observable rather than accused.
+//
+// Exported on purpose. The measurement harness asks the same question against
+// GitHub's tree instead of the local filesystem, and when this rule lived in two
+// places the two copies disagreed: the harness kept reporting "../../releases" as a
+// fault after the tool had stopped.
+export function climbsAboveRoot(path) {
+  let depth = 0;
+  for (const seg of String(path).split('/')) {
+    if (!seg || seg === '.') continue;
+    if (seg === '..') { depth -= 1; if (depth < 0) return true; }
+    else depth += 1;
+  }
+  return false;
+}
+
 export const CHECKS = {
   'link.relative': {
     title: 'Relative links in the README point at files that exist',
     severity: SEVERITY.WARNING,
     async run(ctx, claim) {
+      if (climbsAboveRoot(claim.path)) {
+        return { ok: true, skipped: true, detail: `climbs above the repository root, so the file tree cannot answer it: ${claim.path}` };
+      }
       const p = resolve(ctx.root, claim.path);
-      if (!p.startsWith(ctx.root)) return { ok: false, detail: `escapes the repository: ${claim.path}` };
+      // The string rule above covers the ordinary case. This is the backstop for a
+      // path that resolves outside the root for some other reason.
+      if (!p.startsWith(ctx.root)) {
+        return { ok: true, skipped: true, detail: `resolves outside the repository, so the file tree cannot answer it: ${claim.path}` };
+      }
       return existsSync(p)
         ? { ok: true, detail: claim.path }
         : { ok: false, detail: `${claim.path} is linked but does not exist` };

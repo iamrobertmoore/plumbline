@@ -35,21 +35,36 @@ export function renderMarkdown(a, sc) {
     L.push('Nothing in this repository currently contradicts itself.');
     L.push('');
     L.push('> A pass only means something if the check could have failed. See the negative controls below.');
-    return L.join('\n');
+    L.push('');
   }
 
-  L.push('## What a reviewer would see first');
+  // The ledger. Every claim, what it asserts, and the evidence, in one grid, with the
+  // failures at the top. A reader should be able to run their eye down the first column
+  // and know the state of the repository without reading a sentence of prose.
+  //
+  // This is deliberately one table and not two. An earlier version split the failures
+  // into a ranked summary and left the passes as a bullet list, which meant the two
+  // halves were ranked by different rules and a reader could not see the whole set at
+  // once. The whole set is the point.
+  L.push('## Every claim, and what happened to it');
   L.push('');
-  L.push('| severity | what it claims | what is true |');
-  L.push('|---|---|---|');
-  for (const r of a.results.filter((x) => !x.ok)) {
-    L.push(`| ${LABEL[r.severity]} | ${String(r.claim).replace(/\|/g, '\\|')} | ${String(r.detail).replace(/\|/g, '\\|')} |`);
+  L.push('| verdict | claim | what it asserts | evidence |');
+  L.push('|---|---|---|---|');
+  const esc = (v) => String(v == null ? '' : v).replace(/\|/g, '\\|');
+  const ordered = [
+    ...a.results.filter((r) => !r.ok).sort((x, y) => (y.severity || 0) - (x.severity || 0)),
+    ...a.results.filter((r) => r.ok),
+    ...(a.skippedDetail || []).map((s) => ({ ...s, ok: null, skipped: true })),
+  ];
+  for (const r of ordered) {
+    const v = r.skipped ? 'not observable' : r.ok ? 'holds' : LABEL[r.severity] || 'fails';
+    L.push(`| ${v} | \`${r.check}\` | ${esc(r.claim)} | ${esc(r.detail)} |`);
   }
   L.push('');
-  L.push('## Everything checked');
-  L.push('');
-  for (const r of a.results) {
-    L.push(`- ${r.ok ? 'ok' : '**fails**'} \`${r.check}\` — ${r.detail}`);
+  if (a.failures) {
+    L.push(`${a.failures} of these do not hold. The rows above are ordered by what a reader`);
+    L.push('would hit first, not by the order the checks happened to run.');
+    L.push('');
   }
   return L.join('\n');
 }

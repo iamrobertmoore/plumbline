@@ -2,9 +2,9 @@
 
 The claim on the front page is:
 
-> **22 of the 100 most-starred installable repositories on GitHub fail at least one check.**
+> **18 of the 100 most-starred installable repositories on GitHub fail at least one check.**
 
-Measured 15 Sep 2026. This document is the method, including every correction I made to the checks
+Measured 17 Sep 2026. This document is the method, including every correction I made to the checks
 along the way, because a measurement that only reports its final answer is not reproducible.
 
 ---
@@ -70,8 +70,54 @@ finding. **This check went from 16% to 3%.**
 Re-testing a sample of twelve flagged links with a real `GET` found three that returned 200. Fixed by
 using `HEAD` only as a cheap positive and confirming any non-2xx with a `GET`.
 
-**The headline moved 89 → 47 → 30 → 22 as these were fixed.** Every move was toward a smaller, more
-defensible number.
+**5. Three of the four corrections had never been carried into the tool.** Found on 17 September,
+while reproducing this measurement from the shipped code rather than from the harness that produced
+it. Correction 2 (query strings), correction 3 (the registry `repository` guard) and correction 4
+(`HEAD`/`GET`) were all applied here and then not applied in `src/`. **The published number was right
+and the published tool was not**, which is not a distinction anyone outside would have noticed.
+
+It also means the shipped tool was making three classes of false accusation, and a false accusation is
+the one thing this tool must never produce:
+
+- a relative link carrying a query string, e.g. `images/x.png?WT.mc_id=abc`, was reported as pointing
+  at nothing. Marketing parameters on relative links are everywhere.
+- a link that climbs out of the repository, e.g. `../../releases`, was reported as an escape. On
+  GitHub that resolves to the repository's own releases page, and it is correct. The file tree cannot
+  answer a question about GitHub's URL space, so it is now reported as not observable.
+- **any URL whose server answers `HEAD` with a 404 and serves `GET` with a 200 was reported dead.**
+  Four in this corpus alone, and all four were confirmed returning 200 with the tool's own user agent:
+
+  ```
+  HEAD=404  GET=200   https://support.google.com/chrome/answer/95346
+  HEAD=404  GET=200   https://bsky.app/profile/angular.dev
+  HEAD=404  GET=200   https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright
+  HEAD=404  GET=200   https://get.neon.com/VqfnMo4
+  ```
+
+All three are fixed in `src/`, each with a regression test. The `HEAD`/`GET` tests run against a local
+HTTP server, so they prove the behaviour offline rather than depending on a real host happening to
+misbehave on the day. The harness now imports the shipped checks and the shipped path rule instead of
+re-implementing them, because while those rules lived in two places they disagreed and the figure
+moved.
+
+**6. A link inside a code span is not a link.** Found on 17 September, by checking one of the three
+relative-link findings by hand and discovering that the path was not in the README at all. Graphify's
+README documents its own parser with `` `[text](./other.md)` `` inside backticks. That is an example of
+markdown syntax, written to explain what the tool parses. Plumbline read it as a link, found no
+`other.md` in the repository, and reported the project for pointing at a file it had never written.
+
+This is the worst class of defect this tool can have. It is a false accusation, stated with
+confidence, against a repository that had done nothing wrong, and it is precisely the failure the tool
+exists to argue against. Fixed by running both link passes against a copy of the README with fenced
+blocks and inline code spans blanked out. The copy keeps every newline and its length, so two URLs that
+were never adjacent cannot become adjacent and invent a link between them.
+
+**The headline moved 89 → 47 → 30 → 22 → 19 → 18.** Corrections 1 to 4 produced the 22. Correction 5,
+carrying three of those corrections into the shipped tool, produced the 19. Correction 6, the code-span
+false accusation, produced the 18. **Every move has been downward, and every move has been the removal
+of an accusation the evidence did not support.** That is the only direction this number should ever
+move, and it is worth being explicit about why: a tool that finds more problems when you fix it is
+finding problems that were not there.
 
 ---
 
@@ -79,22 +125,42 @@ defensible number.
 
 | check | repositories failing, of 100 |
 |---|---|
-| `readme_external_links_resolve` | 13 |
-| `readme_relative_links_resolve` | 3 |
+| `readme_external_links_resolve` | 11 |
 | `manifest_version_published` | 3 |
+| `readme_relative_links_resolve` | 2 |
 | `license_detectable` | 1 |
-| `install_command_resolves` | 1 |
-| `readme_versions_exist` | 1 |
 | `readme_present` | 1 |
-| **at least one of the above** | **22** |
+| **at least one of the above** | **18** |
 
-All 13 external-link failures were re-confirmed with a real `GET`. 12 are hard 404s, one is a 410
-from a delisted store listing.
+Behind those five rows: **1,667 links fetched and tested**, of which **21 are gone** and **53 could
+not be reached at all**. A further **251 are badges**, which are skipped rather than asserted, because
+a shields.io badge is an image whose 404 is not a claim the README makes. **1,644 relative links** were
+checked against the repositories' own file trees. Two repositories report their tree truncated, so
+their relative links are reported as not observable rather than guessed at.
 
-**Reported separately, not in the headline:** 47 of the 100 have a workflow containing `|| true`,
-`if: false`, or a step gated on a secret that may not exist. A looser pattern matches 60. These are
-worth knowing but `continue-on-error` on a docs job is a deliberate engineering choice, not a lie, so
-they are a warning tier rather than a failure.
+**All 21 gone links were re-confirmed by hand with a real `GET`**, following redirects. 20 are hard
+404s and one is a 410 from a delisted store listing. **All three relative-link findings were confirmed
+against the GitHub contents API**, and one of them is the correction 6 story below: the first version
+of this pass reported three, and the third was not real.
+
+**Two independent runs of the shipped code produce the same answer.** Both audited all 100
+repositories, both reported no errors, and both returned the same 18, the same per-check counts, the
+same 21 gone links and the same failing set, repository for repository. That is the property this
+number was missing. Until it was measured, a reader had no way to tell a move caused by the corpus
+from a move caused by the tool, and the two happened together four times.
+
+**Reported separately, not in the headline.** Across the **1,768 workflow files** in these 100
+repositories, **6 have a step or job marked `if: false`**, which can never run, and **55 have a step
+marked `continue-on-error`**, whose failure does not fail the job. Three repositories have no GitHub
+Actions workflows at all, because they use another CI system. This is a warning tier rather than a
+failure: `continue-on-error` on a docs job is a deliberate engineering choice, not a lie.
+
+Reproduce it with `measure/ci-warnings.mjs`. **An earlier version of this figure said 47, and it was
+wrong.** It counted any `|| true`, which appears legitimately inside command substitution
+(`candidate="$(find ... || true)"`), at the end of best-effort cleanup (`gh pr merge ... || true`), and
+inside a comment explaining why a workflow does **not** use it. The pattern was measuring "CI that
+mentions `|| true`" and reporting it as "CI that cannot fail". It was narrowed to the two cases that
+are unambiguous from the file alone.
 
 ---
 
@@ -123,11 +189,26 @@ One document, one README, two filenames, one invented. Confirmed against the Git
 
 ## Reproducing
 
+The harness ships with the tool, and it runs the same checks the tool runs:
+
 ```bash
-export GH_TOKEN=$(gh auth token)
-node working/measure/corpus.mjs                        # builds the corpus
-CORPUS=corpus-B.json node working/measure/audit2.mjs   # ~10 minutes, writes runs/
+GH_TOKEN=$(gh auth token) node measure/audit.mjs            # the whole corpus, about ten minutes
+GH_TOKEN=$(gh auth token) node measure/audit.mjs --only 8   # a pilot, first eight repositories
+GH_TOKEN=$(gh auth token) node measure/audit.mjs --out r.json
 ```
 
-The measurement harness lives outside the published package. The checks it exercises are the same
-ones in `src/`.
+`measure/corpus.json` is the 100 repositories and their metadata. `measure/audit.mjs` imports the
+checks from `src/` rather than re-implementing them, so the link parsing and the registry rules are
+the shipped ones and cannot drift away from them. The one exception is the relative-path check, which
+the shipped version answers against the local filesystem and the harness answers against GitHub's file
+tree, because the repository is remote.
+
+It needs network access: GitHub for the file trees and the READMEs, npm for the version lookups. It
+reads only, and writes nothing unless you pass `--out`.
+
+What it prints is a **candidate** set. Every candidate was then confirmed by hand, and the corrections
+above name exactly what that pass changed. A harness that reports its own answer without being checked
+is the thing this whole project is about.
+
+The numbers move as links rot and versions are published, which is why the figure carries its date. A
+re-run today will not return exactly this set.

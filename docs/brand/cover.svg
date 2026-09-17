@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="Plumbline. 18 of the 100 most-starred installable repositories on GitHub fail at least one check.">
+  <title>Plumbline — cover image</title>
+  <desc>A pre-ship auditor. 18 of the 100 most-starred installable repositories on GitHub do not do what they say they do.</desc>
+
+  <defs>
+    <style>
+      .n { font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+      .m { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="630" fill="#F7F5F1"/>
+  <rect x="0" y="0" width="1200" height="8" fill="#C8912F"/>
+
+  <!-- mark -->
+  <g transform="translate(80,64) scale(2.3)">
+    <line x1="32" y1="7" x2="32" y2="37" stroke="#14161A" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="32" y="7" r="3" fill="#14161A"/>
+    <path d="M32 35 L41 48 L32 58 L23 48 Z" fill="#C8912F"/>
+    <path d="M32 35 L41 48 L32 48 Z" fill="#A8761F"/>
+    <line x1="14" y1="58" x2="50" y2="58" stroke="#14161A" stroke-width="2.5" stroke-linecap="round" opacity="0.25"/>
+  </g>
+
+  <!-- wordmark -->
+  <text class="n" x="252" y="122" font-size="58" font-weight="700" letter-spacing="5" fill="#14161A">PLUMBLINE</text>
+  <text class="n" x="254" y="158" font-size="19" fill="#5C5A54">A pre-ship auditor. It checks whether your repository does what it says it does.</text>
+
+  <line x1="80" y1="216" x2="1120" y2="216" stroke="#E4DFD6"/>
+
+  <!-- the number, which is the point -->
+  <text class="n" x="80" y="356" font-size="112" font-weight="700" fill="#C8912F">18 of 100</text>
+  <text class="n" x="82" y="428" font-size="31" fill="#14161A">of the most-starred installable repositories on GitHub</text>
+  <text class="n" x="82" y="470" font-size="31" fill="#14161A">fail at least one check.</text>
+
+  <text class="n" x="82" y="530" font-size="22" fill="#5C5A54">14,304,526 stars between them. Measured, not cited.</text>
+
+  <line x1="80" y1="566" x2="1120" y2="566" stroke="#E4DFD6"/>
+
+  <text class="n" x="80" y="600" font-size="20" fill="#8A8578">IBM Bob 2.0 Hackathon &#183; Robert Moore, solo builder</text>
+  <text class="m" x="1120" y="600" font-size="18" fill="#8A8578" text-anchor="end">github.com/iamrobertmoore/plumbline</text>
+</svg>
