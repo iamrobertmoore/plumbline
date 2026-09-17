@@ -26,7 +26,7 @@ decision record twice, under two different filenames. One exists. The other has 
 repository.
 
 That is 14,304,526 stars of software. These are the best-maintained, most-read READMEs in public
-existence, and one in five still describes itself inaccurately right now.
+existence, and 18 in every 100 still describe themselves inaccurately right now.
 
 **And more of it is machine-written every month.** In the same 100 repositories, **61 carry commits
 that name an AI agent as a co-author**, and **11% of their 9,936 most recent commits declare one**. I
@@ -84,7 +84,16 @@ Every check here has a tool that does something similar. None of them does this.
 | **documentation drift tools** | compare a commit against the docs it should have touched | see anything the commit did not touch, so a README that was wrong when it was written stays invisible. |
 | **all of them** | report a result | show that the result means anything. |
 
-That last row is the point. What none of these tools do is **prove their own checks can fail**.
+**This is not a documentation drift detector**, and it is worth saying so plainly, because that is
+the category it gets filed under. A drift detector compares what a commit changed against the
+documentation it should have updated. That question cannot see a README that was wrong the day it
+was written, and that is most of what I found: the RuView link above was never correct, so there is
+no commit to diff against. Two teams independently shipped a project called DriftGuard in the last
+IBM Bob hackathon. I am not the third. Drift is the first thing this model gets pointed at, not the
+model.
+
+That last row is the point, and it is the one thing all four of the tools above have in common. What
+none of them do is **prove their own checks can fail**.
 
 A check that has never been observed to fail is not evidence. I have shipped a green CI badge that
 was doing nothing at all: a conformance job that ran nightly for days and skipped every test, because
@@ -161,7 +170,7 @@ a different project, Plumbline says so and moves on. It does not guess, and it d
   floor rather than an average.
 - **Every move in this number has been downward, and that is the point.** The first pass said 89 of
   100. Each correction removed an accusation the evidence did not support. A tool that finds more
-  problems when you fix it is finding problems that were not there. All six corrections are in
+  problems when you fix it is finding problems that were not there. All seven corrections are in
   [`docs/MEASUREMENT.md`](docs/MEASUREMENT.md).
 - **CI that cannot fail is reported as a warning, not a failure.** Across 1,768 workflow files in the
   same 100 repositories, **6 have a step or job marked `if: false`**, which can never run, and **55

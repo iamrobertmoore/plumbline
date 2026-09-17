@@ -36,21 +36,39 @@ sample cannot be accused of being chosen to look bad.
 
 | check | the claim being tested | how it is tested |
 |---|---|---|
-| `readme_relative_links_resolve` | every path the README links to exists | against the repository's own file tree, fetched in full |
-| `readme_external_links_resolve` | every URL the README links to resolves | HTTP, and **only a 404 or 410 counts as gone** |
-| `manifest_version_published` | the version in the manifest is the published version | against the npm registry, today |
-| `readme_versions_exist` | a version named in the README exists | against the published version list |
-| `install_command_resolves` | the install command names a real package | against the registry |
-| `license_detectable` | the licence is one GitHub can show in the About panel | the API's own `license` field |
-| `readme_present` | there is a README | the file tree |
+| `link.relative` | every path the README links to exists | against the repository's own file tree, fetched in full |
+| `link.external` | every URL the README links to resolves | HTTP, and **only a 404 or 410 counts as gone** |
+| `manifest.version` | the version in the manifest is the published version | against the npm registry, today |
+| `install` | the install command names a real package | against the registry |
+| `license.claimed` | the licence is one GitHub can show in the About panel | the API's own `license` field |
+| `readme.versions` | a version named in the README is published | against the published version list |
+| `readme.present` | there is a README at all | the file tree |
+
+Those names are the ones the tool itself uses. Run `plumbline --selfcheck` and it prints six of them,
+each with the input it accepts and the input it must reject. The other two are harness-side:
+
+- **`readme.present` is a precondition**, not a claim. Nothing else can be evaluated on a repository
+  with no README, so it is reported first and separately.
+- **`readme.versions` is measured here and not exposed by the CLI.** It is the check that a version
+  named in a README is actually published, and it found nothing in this corpus: the repositories that
+  name versions are the ones whose registry entry is guarded as belonging to a different project, so
+  it skips rather than asserts. It is kept because it is the one check whose absence would flatter the
+  number, and a check that is skipped everywhere should be visible as skipped.
+
+**And the harness does not evaluate `ci.claimed`**, the sixth shipped check. CI that cannot fail is a
+warning tier rather than a failure, so it is measured separately by `measure/ci-warnings.mjs` and
+reported outside the headline. The harness used to label its rows with its own names, which meant the
+published method described seven checks that appeared nowhere in the published tool. It now uses the
+tool's ids, so there is one name for each check and no mapping to get wrong.
 
 ---
 
 ## The corrections
 
 **The first pass said 89 of 100.** That was wrong, and it was wrong in the direction that flattered
-the tool, which is the failure mode that matters. Four defects were found by re-checking findings by
-hand:
+the tool, which is the failure mode that matters. Seven corrections follow. Five came from re-checking
+a finding by hand, one from trying to reproduce the number from the shipped code rather than from the
+harness that produced it, and one from reading this document against the tool's own output:
 
 **1. The file tree was capped at 6,000 entries.** 34 of the 100 repositories exceed that. A path past
 the cap looked identical to a path that does not exist. Fixed by fetching the tree per repository with
@@ -112,9 +130,24 @@ exists to argue against. Fixed by running both link passes against a copy of the
 blocks and inline code spans blanked out. The copy keeps every newline and its length, so two URLs that
 were never adjacent cannot become adjacent and invent a link between them.
 
+**7. The harness named the checks something the tool has never called them.** Found on 17 September,
+by reading this document against the tool's own output rather than by checking any finding.
+`measure/audit.mjs` called the shipped checks but labelled its rows `readme_external_links_resolve`,
+`manifest_version_published`, `license_detectable` and four more, and the tables above published those
+names. Run `--selfcheck` and the tool prints `link.external`, `manifest.version`, `license.claimed` and
+three more. **Seven published check names appeared nowhere in the published tool**, and this document
+claimed the harness "runs the same checks the tool runs". The harness now reports under the tool's ids.
+Proved label-only rather than asserted: re-running the whole corpus returns the same 18, the same
+14,304,526 stars, the same per-check counts and the same failing set repository for repository, and
+every difference between the two runs is a name. The two rows that genuinely are harness-side
+(`readme.present`, a precondition, and `readme.versions`, a claim type the CLI does not expose) and the
+one the harness does not evaluate (`ci.claimed`) are now stated rather than left to be noticed.
+
 **The headline moved 89 → 47 → 30 → 22 → 19 → 18.** Corrections 1 to 4 produced the 22. Correction 5,
 carrying three of those corrections into the shipped tool, produced the 19. Correction 6, the code-span
-false accusation, produced the 18. **Every move has been downward, and every move has been the removal
+false accusation, produced the 18. **Correction 7 moved no figure at all, and that is what made it
+worth writing down:** it was a defect in how the result was described, and a description defect cannot
+show up in a result. **Every move has been downward, and every move has been the removal
 of an accusation the evidence did not support.** That is the only direction this number should ever
 move, and it is worth being explicit about why: a tool that finds more problems when you fix it is
 finding problems that were not there.
@@ -125,12 +158,16 @@ finding problems that were not there.
 
 | check | repositories failing, of 100 |
 |---|---|
-| `readme_external_links_resolve` | 11 |
-| `manifest_version_published` | 3 |
-| `readme_relative_links_resolve` | 2 |
-| `license_detectable` | 1 |
-| `readme_present` | 1 |
+| `link.external` | 11 |
+| `manifest.version` | 3 |
+| `link.relative` | 2 |
+| `license.claimed` | 1 |
+| `readme.present` | 1 |
 | **at least one of the above** | **18** |
+
+`install` and `readme.versions` found nothing in this corpus. `ci.claimed` is not evaluated here. The
+five rows above are the five that produced a failure, and they are listed in full rather than trimmed
+to the interesting ones, because a method that shows only its hits cannot be audited.
 
 Behind those five rows: **1,667 links fetched and tested**, of which **21 are gone** and **53 could
 not be reached at all**. A further **251 are badges**, which are skipped rather than asserted, because
@@ -189,7 +226,8 @@ One document, one README, two filenames, one invented. Confirmed against the Git
 
 ## Reproducing
 
-The harness ships with the tool, and it runs the same checks the tool runs:
+The harness ships with the tool and reports under the same check ids, so a row here and a row from
+`--selfcheck` name the same thing:
 
 ```bash
 GH_TOKEN=$(gh auth token) node measure/audit.mjs            # the whole corpus, about ten minutes
@@ -199,7 +237,9 @@ GH_TOKEN=$(gh auth token) node measure/audit.mjs --out r.json
 
 `measure/corpus.json` is the 100 repositories and their metadata. `measure/audit.mjs` imports the
 checks from `src/` rather than re-implementing them, so the link parsing and the registry rules are
-the shipped ones and cannot drift away from them. The one exception is the relative-path check, which
+the shipped ones and cannot drift away from them. What it does not do is evaluate all six: `ci.claimed`
+is measured by `measure/ci-warnings.mjs` instead, and `readme.versions` is a claim type the CLI does
+not expose. Both are stated above rather than left for a reader to notice. The one exception is the relative-path check, which
 the shipped version answers against the local filesystem and the harness answers against GitHub's file
 tree, because the repository is remote.
 

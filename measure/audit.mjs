@@ -117,8 +117,8 @@ async function auditRepo(repo) {
 
   // 1. the README claims a licence and GitHub shows one
   const rd = await fetchReadme(full, repo.default_branch);
-  if (rd === null) { add('readme_present', false, 'no README found'); return R; }
-  add('readme_present', true, 'README found');
+  if (rd === null) { add('readme.present', false, 'no README found'); return R; }
+  add('readme.present', true, 'README found');
 
   const md = rd;
   const claims = claimsFromReadme(md);
@@ -138,9 +138,9 @@ async function auditRepo(repo) {
       return !paths.has(clean) && !paths.has(decoded) && !dirs.has(clean) && !dirs.has(decoded);
     });
     R.rel = { checked: rel.length, missing: missing.slice(0, 8).map((c) => c.path) };
-    if (rel.length) add('readme_relative_links_resolve', missing.length === 0, `${missing.length} of ${rel.length} point at nothing`);
+    if (rel.length) add('link.relative', missing.length === 0, `${missing.length} of ${rel.length} point at nothing`);
   } else {
-    skip('readme_relative_links_resolve', 'GitHub reports the tree truncated, so a missing path cannot be told from an unlisted one');
+    skip('link.relative', 'GitHub reports the tree truncated, so a missing path cannot be told from an unlisted one');
   }
 
   // 3. external links resolve. The shipped check does the HTTP work, so the
@@ -152,14 +152,14 @@ async function auditRepo(repo) {
   const unreachable = asserted.filter((p) => p.ok !== true && !/^(404|410)\b/.test(p.detail));
   R.linkStats = { checked: asserted.length, gone: gone.length, unreachable: unreachable.length, badges: probe.length - asserted.length };
   R.deadLinks = gone.slice(0, 6).map((p) => p.detail);
-  if (asserted.length) add('readme_external_links_resolve', gone.length === 0, `${gone.length} gone, ${unreachable.length} unverifiable of ${asserted.length}`);
+  if (asserted.length) add('link.external', gone.length === 0, `${gone.length} gone, ${unreachable.length} unverifiable of ${asserted.length}`);
 
   // 4. the install command names a real package
   const installs = uniqBy(claims.filter((c) => c.id === 'install'), (c) => c.pkg).slice(0, 5);
   const badInstall = [];
   for (const c of installs) { const r = await CHECKS.install.run({}, c); if (r.ok !== true) badInstall.push(c.pkg); }
   R.installs = installs.map((c) => c.pkg);
-  if (installs.length) add('install_command_resolves', badInstall.length === 0, badInstall.length ? `no such package: ${badInstall.join(', ')}` : `${installs.length} ok`);
+  if (installs.length) add('install', badInstall.length === 0, badInstall.length ? `no such package: ${badInstall.join(', ')}` : `${installs.length} ok`);
 
   // 5/6. the manifest version is published, and versions named in the README exist.
   //      The registry-repository guard lives in the shipped check, so a name
@@ -171,8 +171,8 @@ async function auditRepo(repo) {
         id: 'manifest.version', name: pj.name, version: pj.version, repository: pj.repository,
       });
       R.manifest = { name: pj.name, local: pj.version, detail: r.detail };
-      if (r.skipped) skip('manifest_version_published', r.detail);
-      else add('manifest_version_published', r.ok, r.detail);
+      if (r.skipped) skip('manifest.version', r.detail);
+      else add('manifest.version', r.ok, r.detail);
 
       const info = await npmLatest(pj.name);
       // The same guard the manifest check uses, for the same reason. If the name on
@@ -186,10 +186,10 @@ async function auditRepo(repo) {
         if (named.length) {
           const phantom = named.filter((v) => !info.versions.includes(v));
           R.namedVersions = named;
-          add('readme_versions_exist', phantom.length === 0, phantom.length ? `README names unpublished ${phantom.join(', ')}` : `README names ${named.join(', ')}`);
+          add('readme.versions', phantom.length === 0, phantom.length ? `README names unpublished ${phantom.join(', ')}` : `README names ${named.join(', ')}`);
         }
       } else if (info && info.versions) {
-        skip('readme_versions_exist', `${pj.name} on npm points at ${info.repository || 'nothing'}, not at ${full}`);
+        skip('readme.versions', `${pj.name} on npm points at ${info.repository || 'nothing'}, not at ${full}`);
       }
     }
   }
@@ -199,8 +199,8 @@ async function auditRepo(repo) {
     { root: '/', rootFiles, githubLicense: repo.license },
     { id: 'license.claimed', kind: 'license', text: 'README refers to a licence' },
   );
-  if (lic.skipped) skip('license_detectable', lic.detail);
-  else add('license_detectable', lic.ok, lic.detail);
+  if (lic.skipped) skip('license.claimed', lic.detail);
+  else add('license.claimed', lic.ok, lic.detail);
 
   return R;
 }
