@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plumbline: check a repository</title>
+<meta name="description" content="Paste a public GitHub repository and see every place its README says something that is not true.">
+<link rel="icon" href="../docs/brand/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../site/style.css">
+<style>
+  .tool { padding: 40px 0 28px; border-top: 3px solid var(--brass); }
+  .tool h1 { font-family: var(--display); font-weight: 400; font-size: clamp(34px, 5.4vw, 54px); line-height: 1.08; margin: 0 0 12px; letter-spacing: -.01em; }
+  .tool .lede { color: var(--muted); max-width: 640px; margin: 0 0 26px; }
+  form.ask { display: flex; gap: 10px; flex-wrap: wrap; }
+  form.ask input { flex: 1 1 320px; min-width: 0; font: 16px var(--mono); padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); }
+  form.ask input:focus { outline: 2px solid var(--brass); outline-offset: 1px; border-color: transparent; }
+  form.ask button { font: 600 16px var(--sans); padding: 14px 22px; border-radius: 10px; border: 0; background: var(--ink); color: #fff; cursor: pointer; }
+  form.ask button:disabled { opacity: .55; cursor: progress; }
+  .tries { margin: 14px 0 0; font-size: 14px; color: var(--faint); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .tries button { font: 13.5px var(--mono); padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink); cursor: pointer; }
+  .tries button:hover { border-color: var(--brass); }
+  .working { display: none; align-items: center; gap: 18px; margin: 34px 0 10px; color: var(--muted); }
+  .working.on { display: flex; }
+  .bob { width: 34px; height: 64px; transform-origin: 17px 2px; animation: swing 1.6s ease-in-out infinite alternate; }
+  @keyframes swing { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
+  @media (prefers-reduced-motion: reduce) { .bob { animation: none; } }
+  .out { margin: 30px 0 10px; }
+  .verdict { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; padding: 18px 22px; border-radius: var(--r); background: var(--card); box-shadow: 0 18px 40px -30px rgba(20,22,26,.45); border-left: 6px solid var(--faint); }
+  .verdict.fails { border-left-color: var(--fail); }
+  .verdict.holds { border-left-color: var(--pass); }
+  .verdict.partial { border-left-color: var(--brass); }
+  .verdict b { font: 700 13px var(--mono); letter-spacing: .08em; }
+  .verdict.fails b { color: var(--fail); } .verdict.holds b { color: var(--pass); } .verdict.partial b { color: var(--brass-dark); }
+  .verdict .repo { font: 600 20px var(--sans); }
+  .verdict .meta { color: var(--faint); font-size: 14px; margin-left: auto; }
+  table.ledger { width: 100%; border-collapse: collapse; margin: 18px 0 8px; font-size: 15px; }
+  table.ledger th { text-align: left; font: 600 12px var(--mono); letter-spacing: .06em; color: var(--faint); padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  table.ledger td { padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .tag { font: 700 11.5px var(--mono); letter-spacing: .06em; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+  .tag.fail { background: #f6e3e1; color: var(--fail); } .tag.pass { background: #e1efe8; color: var(--pass); } .tag.skip { background: #f3ecdf; color: var(--brass-dark); }
+  .evidence { font: 13.5px var(--mono); color: var(--muted); word-break: break-word; }
+  .evidence ul { margin: 6px 0 0; padding-left: 18px; }
+  .bounds { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 20px; font-size: 14.5px; color: var(--muted); margin-top: 18px; }
+  .bounds b { color: var(--ink); }
+  .err { color: var(--fail); margin-top: 26px; font-weight: 600; }
+  .note { font-size: 14.5px; color: var(--muted); border-top: 1px solid var(--line); margin-top: 40px; padding-top: 18px; }
+  .evidence a { word-break: break-all; }
+  @media (max-width: 640px) {
+    .verdict .meta { margin-left: 0; }
+    table.ledger thead { display: none; }
+    table.ledger, table.ledger tbody, table.ledger tr, table.ledger td { display: block; width: 100%; min-width: 0; }
+    table.ledger tr { padding: 12px 0; border-bottom: 1px solid var(--line); }
+    table.ledger td { border: 0; padding: 3px 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../" style="text-decoration:none">
+      <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true">
+        <line x1="32" y1="7" x2="32" y2="37" stroke="#14161A" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="32" cy="7" r="3.4" fill="#14161A"/>
+        <path d="M32 35 L41 48 L32 58 L23 48 Z" fill="#C8912F"/>
+        <line x1="14" y1="58" x2="50" y2="58" stroke="#14161A" stroke-width="3" stroke-linecap="round" opacity="0.25"/>
+      </svg>
+      <b>PLUMBLINE</b>
+    </a>
+    <nav class="navlinks"><a href="../">About</a><a href="https://github.com/iamrobertmoore/plumbline">Code</a></nav>
+  </header>
+
+  <section class="tool">
+    <h1>Does this repository do what it says?</h1>
+    <p class="lede">Paste any public GitHub repository. Plumbline reads its README and manifest as a list of claims and tests each one: the links, the files it points at, the install command, the published version, the licence.</p>
+    <form class="ask" id="ask">
+      <input id="repo" name="repo" autocomplete="off" spellcheck="false" placeholder="owner/name, or a github.com link" aria-label="GitHub repository">
+      <button id="go" type="submit">Check it</button>
+    </form>
+    <div class="tries">Try one:
+      <button type="button" data-repo="ruvnet/RuView">ruvnet/RuView</button>
+      <button type="button" data-repo="microsoft/generative-ai-for-beginners">microsoft/generative-ai-for-beginners</button>
+      <button type="button" data-repo="denoland/deno">denoland/deno</button>
+    </div>
+
+    <div class="working" id="working" aria-live="polite">
+      <svg class="bob" viewBox="0 0 34 64" aria-hidden="true">
+        <line x1="17" y1="2" x2="17" y2="40" stroke="#14161A" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="17" cy="2" r="2.6" fill="#14161A"/>
+        <path d="M17 38 L26 50 L17 62 L8 50 Z" fill="#C8912F"/>
+      </svg>
+      <span id="status">Reading the README</span>
+    </div>
+    <div class="out" id="out"></div>
+
+    <p class="note">This page runs the free half of Plumbline: the checks that need no judgement, so no AI model is involved. It is the same code that measured the 100 most-starred installable repositories on GitHub. Every bound on a run is printed with the result. A link that could not be reached is reported as untested, never as working.</p>
+  </section>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const TITLES = {
+  'readme.present': 'The repository has a README',
+  'link.relative': 'Links to files in the repository point at files that exist',
+  'link.external': 'Links to other sites still work',
+  'install': 'The install command names a package that exists',
+  'manifest.version': 'The version in package.json is the one published on npm',
+  'readme.versions': 'Versions named in the README were actually published',
+  'license.claimed': 'The licence the README mentions is one GitHub can see',
+};
+const link = (href, text) => `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(text)}</a>`;
+
+function render(b) {
+  const cls = b.verdict === 'FAILS' ? 'fails' : b.verdict === 'HOLDS' ? 'holds' : 'partial';
+  const words = { FAILS: 'SAYS SOMETHING UNTRUE', HOLDS: 'EVERY CHECKED CLAIM HOLDS', 'NOT FULLY TESTED': 'NOTHING FAILED, NOT EVERYTHING WAS TESTED' }[b.verdict];
+  const rows = [];
+  for (const [id, r] of Object.entries(b.checks || {})) {
+    let ev = esc(r.detail || '');
+    if (id === 'link.relative' && b.rel && b.rel.missing.length) {
+      ev += '<ul>' + b.rel.missing.map((p) => `<li>${link(`https://github.com/${b.repo}/blob/${b.branch}/${p}`, p)} (open it: GitHub will show a 404)</li>`).join('') + '</ul>';
+    }
+    if (id === 'link.external' && b.deadLinks && b.deadLinks.length) {
+      ev += '<ul>' + b.deadLinks.map((d) => { const u = d.split(' ').slice(1).join(' '); return `<li>${esc(d.split(' ')[0])} ${link(u, u)}</li>`; }).join('') + '</ul>';
+    }
+    rows.push(`<tr><td>${esc(TITLES[id] || id)}</td><td><span class="tag ${r.ok ? 'pass' : 'fail'}">${r.ok ? 'HOLDS' : 'FAILS'}</span></td><td class="evidence">${ev}</td></tr>`);
+  }
+  for (const s of b.skipped || []) rows.push(`<tr><td>${esc(TITLES[s.id] || s.id)}</td><td><span class="tag skip">NOT JUDGED</span></td><td class="evidence">${esc(s.detail)}</td></tr>`);
+  const L = b.linkStats || {};
+  const bits = [];
+  if (L.found !== undefined) {
+    bits.push(`<b>${L.found}</b> external links found, <b>${L.checked}</b> tested, ${L.badges} badges not treated as claims.`);
+    if (L.unreachable) bits.push(`<b>${L.unreachable}</b> could not be reached, so they are untested rather than working.`);
+    if (L.refused) bits.push(`<b>${L.refused}</b> point at a private or local address, which this page will not fetch for you.`);
+    if (L.capped) bits.push(`This page tests at most ${b.bounds.linkCap} links a run, so <b>${L.untested}</b> were not tested. The command-line tool has no cap.`);
+  }
+  if (b.rel) bits.push(`<b>${b.rel.checked}</b> links to files inside the repository checked against its file tree.`);
+  $('out').innerHTML = `
+    <div class="verdict ${cls}"><span class="repo">${link('https://github.com/' + b.repo, b.repo)}</span><b>${words}</b>
+      <span class="meta">${(b.stars || 0).toLocaleString('en-GB')} stars, checked in ${(b.elapsedMs / 1000).toFixed(1)} s${b.cached ? ', from a run in the last ten minutes' : ''}</span></div>
+    <table class="ledger"><thead><tr><th>CLAIM</th><th>RESULT</th><th>EVIDENCE</th></tr></thead><tbody>${rows.join('') || '<tr><td colspan="3">The README makes no claim these checks can test.</td></tr>'}</tbody></table>
+    <div class="bounds">${bits.join(' ')}</div>`;
+}
+
+let tick;
+async function run(repo) {
+  repo = repo.trim();
+  if (!repo) return;
+  $('repo').value = repo;
+  history.replaceState(null, '', '?repo=' + encodeURIComponent(repo));
+  $('go').disabled = true; $('out').innerHTML = ''; $('working').classList.add('on');
+  const t0 = Date.now();
+  const steps = ['Reading the README', 'Listing the claims', 'Testing every link', 'Asking the registry', 'Checking the licence'];
+  tick = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $('status').textContent = `${steps[Math.min(steps.length - 1, Math.floor(s / 2))]}, ${s} s`; }, 250);
+  try {
+    const r = await fetch('../api/audit?repo=' + encodeURIComponent(repo));
+    const b = await r.json();
+    if (!r.ok) throw new Error(b.error || 'HTTP ' + r.status);
+    render(b);
+  } catch (e) {
+    $('out').innerHTML = `<p class="err">${esc(e.message)}</p>`;
+  } finally {
+    clearInterval(tick); $('go').disabled = false; $('working').classList.remove('on');
+  }
+}
+$('ask').addEventListener('submit', (e) => { e.preventDefault(); run($('repo').value); });
+document.querySelectorAll('[data-repo]').forEach((b) => b.addEventListener('click', () => run(b.dataset.repo)));
+const q = new URLSearchParams(location.search).get('repo');
+if (q) run(q);
+</script>
+</body>
+</html>
