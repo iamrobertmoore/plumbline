@@ -1,7 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="Plumbline. 18 of the 100 most-starred repositories on GitHub fail at least one check.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="Plumbline. 23 of the 100 most-starred installable repositories on GitHub fail at least one check.">
   <title>Plumbline</title>
-  <desc>A pre-ship auditor. 18 of the 100 most-starred installable repositories on GitHub do not do what they say they do.</desc>
-
+  <desc>A pre-ship auditor. 23 of the 100 most-starred installable repositories on GitHub do not do what they say they do.</desc>
   <defs>
     <style>
       .n  { font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
@@ -28,8 +27,8 @@
   <!-- the finding, which is the point of the banner -->
   <line x1="236" y1="196" x2="1136" y2="196" stroke="#E4DFD6"/>
 
-  <text class="n" x="236" y="243" font-size="40" font-weight="700" fill="#C8912F">18 of 100</text>
+  <text class="n" x="236" y="243" font-size="40" font-weight="700" fill="#C8912F">23 of 100</text>
   <text class="n" x="470" y="234" font-size="15" fill="#14161A">of the most-starred installable repositories on GitHub</text>
   <text class="n" x="470" y="256" font-size="15" fill="#14161A">fail at least one check. 14,304,526 stars between them.</text>
-  <text class="m" x="236" y="288" font-size="12" fill="#8A8578">measured 17 Sep 2026 · method and every correction in docs/MEASUREMENT.md</text>
+  <text class="m" x="236" y="288" font-size="12" fill="#8A8578">measured 23 Sep 2026 · method and every correction in docs/MEASUREMENT.md</text>
 </svg>

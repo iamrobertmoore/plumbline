@@ -252,7 +252,7 @@ ul.tight li b { color: var(--ink); }
   <h1>Plumbline</h1>
   <p class="sub">It reads what your project says about itself, then goes and checks whether any of it is true.</p>
   <div class="strip">
-    <b>18 of the 100 most-starred installable repositories on GitHub fail at least one check.</b>
+    <b>23 of the 100 most-starred installable repositories on GitHub fail at least one check.</b>
     That is 14,304,526 stars between them.
   </div>
   <div class="foot">
@@ -273,17 +273,17 @@ ul.tight li b { color: var(--ink); }
 <section class="slide">
   <div class="head">
     <p class="eyebrow"><b>02</b> / The problem, measured</p>
-    <h2>18 of 100. Every one of them wrong about something.</h2>
+    <h2>23 of 100. Every one of them wrong about something.</h2>
   </div>
   <div class="body">
     <div class="figs">
       <div class="fig">
-        <span class="n">11</span>
+        <span class="n">17</span>
         <span class="t">README links that go nowhere
           <small>every one re-checked with a real request, not a HEAD</small></span>
       </div>
       <div class="fig">
-        <span class="n">3</span>
+        <span class="n">4</span>
         <span class="t">manifests whose version is not the version on the registry
           <small>counted only where the registry points back at the repo, so a shared name is not a finding</small></span>
       </div>
@@ -293,12 +293,16 @@ ul.tight li b { color: var(--ink); }
           <small>you click, and get nothing</small></span>
       </div>
     </div>
+    <p style="font-size:14.5px;line-height:1.5;color:var(--faint);margin:12px 0 0">
+      Three of the six checks are shown; all six run. There are <b>26 findings across 23
+      repositories</b>, because three repositories fail more than one check.
+    </p>
     <p class="note">
-      Measured 17 September 2026 against the strongest end of GitHub, not a random sample. My first
-      pass said 89 of 100. That was wrong in the direction that flattered the tool, so I re-checked
-      every finding by hand. Five faults in my own checks, and one in my own process, are written up
-      in the method. The number came down 89, then 47, then 30, then 22, then 19, then 18. Every move
-      was downward, because every move removed an accusation the evidence did not support.
+      Measured 23 September 2026 against the strongest end of GitHub, not a random sample. My first
+      pass said 89 of 100, which was wrong in the direction that flattered the tool, so I re-checked
+      every finding by hand. Thirteen corrections are in the method. A review found I had been testing
+      only the first 25 links in each README, which took the number to 30, and that my requests did
+      not look like a browser, which one server answered accordingly.
     </p>
   </div>
   <div class="foot"><span class="mk">PLUMBLINE</span><span class="pg">02 / 12</span></div>
@@ -415,6 +419,7 @@ ul.tight li b { color: var(--ink); }
 link.relative     accepted    rejected      missing README.md
 link.external     accepted    rejected      ERR plumbline.invalid/__control__
 manifest.version  accepted    rejected      0.0.0-plumbline-control vs 1.3.0
+<span class="c">three of the six rows are shown; all six run in that one command</span>
 <span class="c">a check that cannot tell those two apart is reported UNPROVEN, never a pass</span></div>
   </div>
   <div class="foot"><span class="mk">PLUMBLINE</span><span class="pg">07 / 12</span></div>
@@ -462,7 +467,7 @@ manifest.version  accepted    rejected      0.0.0-plumbline-control vs 1.3.0
 <section class="slide">
   <div class="head">
     <p class="eyebrow"><b>09</b> / The check nothing else can do</p>
-    <h2>Your test plan says 84 cases. Your suite covers 61.</h2>
+    <h2>Every case in the plan, traced to a test that exists.</h2>
   </div>
   <div class="body">
     <p class="lead">
@@ -480,6 +485,12 @@ manifest.version  accepted    rejected      0.0.0-plumbline-control vs 1.3.0
         the suite.</p></div>
       <div class="card acc"><span class="k">WHAT YOU GET</span><p>The cases nobody wrote, named.</p></div>
     </div>
+    <p class="note">
+      <b>This one is an example, not a measurement, and the slide says so.</b> The check runs on the
+      25th, when Bob access opens, and it has not been pointed at a real repository yet. The shape of
+      the answer is <code>84 cases in the plan, 61 with a test behind them, 23 named</code>. Every
+      other figure in this deck was measured against the corpus. This one was not, so it is labelled.
+    </p>
   </div>
   <div class="foot"><span class="mk">PLUMBLINE</span><span class="pg">09 / 12</span></div>
 </section>
@@ -503,11 +514,11 @@ manifest.version  accepted    rejected      0.0.0-plumbline-control vs 1.3.0
       </ul>
       <div class="card acc">
         <span class="k">MEASURED</span>
-        <p class="mono" style="font-size:46px;line-height:1;color:var(--brass);margin:0 0 14px;letter-spacing:-.02em">3,311<span style="font-size:23px;color:var(--faint);margin-left:7px">links</span></p>
+        <p class="mono" style="font-size:46px;line-height:1;color:var(--brass);margin:0 0 14px;letter-spacing:-.02em">11,001<span style="font-size:23px;color:var(--faint);margin-left:7px">links</span></p>
         <p style="font-size:16.5px;color:var(--ink-2);margin-bottom:14px">fetched and tested across
-          100 repositories, in <b>about five minutes</b>. 1,667 over the network, 1,644 against the
+          100 repositories, in <b>about fifteen minutes</b>. 9,351 over the network, 1,650 against the
           repositories' own file trees.</p>
-        <p style="font-size:14.5px;line-height:1.5;color:var(--faint);margin:0">About 3 seconds a
+        <p style="font-size:14.5px;line-height:1.5;color:var(--faint);margin:0">About 9 seconds a
           repository. By hand this is a day of work, and it is the day nobody spends, which is
           exactly why the faults survive.</p>
       </div>
@@ -529,9 +540,15 @@ manifest.version  accepted    rejected      0.0.0-plumbline-control vs 1.3.0
     </p>
     <p>
       The number is a snapshot, which is why it carries its date. The sample is deliberately the
-      strongest end of GitHub, so 18 in 100 is a floor rather than an average. Workflows that can pass
+      strongest end of GitHub, so 23 in 100 is a floor rather than an average. Workflows that can pass
       without checking anything are reported as warnings and kept out of the headline, because
       switching a docs job to <code>continue-on-error</code> is a choice someone made, not a lie.
+    </p>
+    <p>
+      Four full runs on 23 September returned 22, 26, 23 and 22. The counts that come from the corpus
+      are identical in every run; the outcome of each individual link is not, and only a 404 is a
+      finding. 41 of the 100 had a link that could not be reached, so a run prints a candidate set and
+      the published count is what a hand check confirms.
     </p>
     <p>
       If the tool cannot see something, it says so. It never calls it a pass and never calls it a

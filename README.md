@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/brand/readme-banner.svg" alt="Plumbline: 18 of the 100 most-starred installable repositories on GitHub fail at least one check." width="900">
+<img src="docs/brand/readme-banner.svg" alt="Plumbline: 23 of the 100 most-starred installable repositories on GitHub fail at least one check." width="900">
 
 **A pre-ship auditor. It checks whether your repository does what it says it does, and it proves
 that each of its own checks can fail.**
@@ -19,14 +19,14 @@ that each of its own checks can fail.**
 ## The problem, measured
 
 **I checked the 100 most-starred installable repositories on GitHub against their own claims.
-18 of them fail at least one check.**
+23 of them fail at least one check.**
 
 The clearest one is `ruvnet/RuView`, rank 90 of the 100. Its README links the same architecture
 decision record twice, under two different filenames. One exists. The other has never existed in the
 repository.
 
 That is 14,304,526 stars of software. These are the best-maintained, most-read READMEs in public
-existence, and 18 in every 100 still describe themselves inaccurately right now.
+existence, and 23 in every 100 still describe themselves inaccurately right now.
 
 **And more of it is machine-written every month.** In the same 100 repositories, **61 carry commits
 that name an AI agent as a co-author**, and **11% of their 9,936 most recent commits declare one**. I
@@ -34,18 +34,22 @@ measured that too, because every published figure for it turns out to be a marke
 cannot be checked. The method is in [`docs/AUTHORSHIP.md`](docs/AUTHORSHIP.md), and it is deliberately
 a lower bound: a commit that was agent-assisted without saying so is counted as human.
 
-Measured 17 Sep 2026. Method, corpus, and every correction I made to the checks are in
+Measured 23 Sep 2026. Method, corpus, and every correction I made to the checks are in
 [`docs/MEASUREMENT.md`](docs/MEASUREMENT.md). The first pass said 89 of 100. That was wrong, and it
 was wrong in the direction that flattered the product, so I went back through the findings by hand
 until the number survived scrutiny.
 
 | What the repository claims | What is actually true | How many, of 100 |
 |---|---|---|
-| the links in the README work | 11 have links that return 404 or 410 | **11** |
-| the version in the manifest is published | 3 disagree with the registry | **3** |
+| the links in the README work | 17 have links that return 404 or 410 | **17** |
+| the version in the manifest is published | 4 disagree with the registry | **4** |
 | the README points at files that exist | 2 link to files that are not in the repository | **2** |
+| a version named in the README is published | 1 names a version that is not | **1** |
 | the licence shows in the About panel | 1 has a licence file GitHub cannot detect | **1** |
 | it has a README | 1 has no README at all | **1** |
+
+That is **26 findings across 23 repositories**, because three repositories fail more than one check.
+The column counts repositories, not findings.
 
 ## The person this is for
 
@@ -148,10 +152,10 @@ warning is a note about the repository, not a reason to hold a release, so it do
 
 Zero runtime dependencies. Node 20 or later. Reads the repository, writes nothing.
 
-The suite is `node --test test/*.test.mjs` (54 tests). Seven of them reach the npm registry and skip
-rather than fail when the network is down. The rest run offline, including five that prove the
-`HEAD`/`GET` behaviour against a **local HTTP server**, so that correction is tested without depending
-on a real host happening to misbehave on the day.
+The suite is `node --test test/*.test.mjs` (68 tests). Eleven of them reach the npm registry and skip
+rather than fail when the network is down. The rest run offline, including six that run against a
+**local HTTP server**, so the redirect, the request method and the request headers are all tested
+without depending on a real host happening to misbehave on the day.
 
 A claim the tool cannot observe is reported as **not observable**, never as a pass and never as a
 failure. If the About panel cannot be seen, or a package name on the registry turns out to belong to
@@ -166,12 +170,25 @@ a different project, Plumbline says so and moves on. It does not guess, and it d
 - **A failing check is not broken software.** A dead link in a README does not stop anyone installing
   the package. That is precisely why these defects survive: no test looks at what the docs claim.
 - **The number is a snapshot.** Links rot and versions move. It carries its date for that reason.
-- **The corpus is not a random sample of GitHub.** It is deliberately the strongest end, so 18% is a
+- **The corpus is not a random sample of GitHub.** It is deliberately the strongest end, so 23% is a
   floor rather than an average.
-- **Every move in this number has been downward, and that is the point.** The first pass said 89 of
-  100. Each correction removed an accusation the evidence did not support. A tool that finds more
-  problems when you fix it is finding problems that were not there. All eight corrections are in
+- **The number has moved in both directions, and which direction is the point.** The first pass said
+  89 of 100. Corrections 1 to 6 took it down to 18, each removing an accusation the evidence did not
+  support. Correction 10 took it back up to 30, because the harness was testing only the first 25 links
+  in each README and that bound was hiding failures. Correction 11 took it to 22, because the request
+  did not look like a browser and one server answered it accordingly. A tool that finds more problems
+  when you fix it is finding problems that were not there, and a tool that finds fewer when you fix it
+  is admitting it was wrong. All thirteen corrections are in
   [`docs/MEASUREMENT.md`](docs/MEASUREMENT.md).
+- **The number is what a run reports plus what a hand check adds, and the two are not the same.** Four
+  full runs on 23 September returned 22, 26, 23 and 22. The quantities that come from the corpus are
+  identical to the digit in every one of them: 9,715 links found, 9,351 checked, 364 badges, 1,650
+  relative links. The outcome of each individual link is not, because a server that times out in one run
+  can answer 404 in the next, and only the 404 is a finding. **41 of the 100 had at least one link that
+  could not be reached**, so a run reports a candidate set and not a census. The count here is 23: the
+  22 that fail in every run, plus one repository a run clears only because it cannot reach 32 of its
+  links. Both of those links were re-checked by hand and both are 404. A re-run will land between 22
+  and 26.
 - **CI that cannot fail is reported as a warning, not a failure.** Across 1,768 workflow files in the
   same 100 repositories, **6 have a step or job marked `if: false`**, which can never run, and **55
   have a step marked `continue-on-error`**, whose failure does not fail the job. Neither counts toward
