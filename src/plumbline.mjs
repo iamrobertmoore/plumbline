@@ -132,9 +132,24 @@ async function httpOk(url, timeout = 12000) {
         method,
         signal: c.signal,
         redirect: 'follow',
-        headers: method === 'GET'
-          ? { 'User-Agent': 'plumbline/0.1', Range: 'bytes=0-2048' }
-          : { 'User-Agent': 'plumbline/0.1' },
+        headers: {
+          'User-Agent': 'plumbline/0.1',
+          // A reader clicking this link is a browser, and a server is entitled to
+          // answer a request that looks nothing like one differently. IBM's
+          // geo-router is the case that caught this: with no Accept-Language it
+          // emits a malformed `https://www.ibm.com/gb-*` redirect, which 404s, and
+          // with one it resolves to the locale page and returns 200. Sending these
+          // makes the client representative of the reader, which is what "does this
+          // link work" is actually asking.
+          //
+          // The user agent stays the tool's own. A site that blocks this agent
+          // answers 403, which reads as unverifiable rather than as dead, so
+          // identifying honestly costs nothing here and a false accusation is the
+          // one finding this check must never produce.
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'en-GB,en;q=0.9',
+          ...(method === 'GET' ? { Range: 'bytes=0-2048' } : {}),
+        },
       });
       return { ok: r.ok, status: r.status };
     } catch (e) {
@@ -151,19 +166,26 @@ async function httpOk(url, timeout = 12000) {
 }
 
 export async function npmLatest(pkg) {
-  if (!pkg || typeof pkg !== 'string') return { missing: true, status: 0 };
+  if (!pkg || typeof pkg !== 'string') return { error: true, status: 0 };
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), 12000);
   try {
     const r = await fetch(`https://registry.npmjs.org/${pkg.replace('/', '%2F')}`, { signal: c.signal, headers: { 'User-Agent': 'plumbline/0.1' } });
-    if (!r.ok) return { missing: true, status: r.status };
+    // Only a 404 means the package is not published. Every other non-ok status is
+    // the registry declining to answer, and the common one is a 429: this tool asks
+    // about every install command in a README, the registry throttles, and reading a
+    // throttle as "no such package" is a false accusation. That is the one finding
+    // this tool must never produce, so the two cases are separated here rather than
+    // left to each caller to remember.
+    if (r.status === 404) return { missing: true, status: 404 };
+    if (!r.ok) return { error: true, status: r.status };
     const j = await r.json();
     return {
       latest: j['dist-tags'] && j['dist-tags'].latest,
       versions: Object.keys(j.versions || {}),
       repository: j.repository,
     };
-  } catch { return { error: true }; } finally { clearTimeout(t); }
+  } catch { return { error: true, status: 0 }; } finally { clearTimeout(t); }
 }
 
 // Reduce the many spellings of a repository URL to a comparable owner/repo slug.
@@ -244,7 +266,13 @@ export const CHECKS = {
     severity: SEVERITY.BLOCKER,
     async run(ctx, claim) {
       const info = await npmLatest(claim.pkg);
-      if (info && (info.missing || info.error)) return { ok: false, detail: `README says "npm install ${claim.pkg}"; no such package` };
+      // A registry that will not answer is not a package that does not exist. This
+      // used to report a throttled lookup as "no such package", which is a blocker
+      // and therefore the loudest thing the tool can say about a repository that may
+      // be entirely fine. `manifest.version` already had this guard; this check did
+      // not, and the two are asking the registry the same question.
+      if (!info || info.error) return { ok: true, skipped: true, detail: `the registry did not answer (${info && info.status ? info.status : 'no response'})` };
+      if (info.missing) return { ok: false, detail: `README says "npm install ${claim.pkg}"; no such package` };
       return { ok: true, detail: `${claim.pkg}@${info.latest}` };
     },
     mutate: (claim) => ({ ...claim, pkg: 'plumbline-control-package-that-does-not-exist' }),
@@ -259,7 +287,7 @@ export const CHECKS = {
       // "undefined". A blocker check that can never fire is worse than no check.
       if (!claim.name) return { ok: true, skipped: true, detail: 'the manifest carries no package name' };
       const info = await npmLatest(claim.name);
-      if (!info || info.error) return { ok: true, skipped: true, detail: 'the registry was not reachable' };
+      if (!info || info.error) return { ok: true, skipped: true, detail: `the registry did not answer (${info && info.status ? info.status : 'no response'})` };
       if (info.missing) return { ok: true, skipped: true, detail: `${claim.name} is not published to npm` };
       // A name collision is not a finding. Only compare versions once the registry's
       // own repository field points back at the repository being audited.
@@ -303,6 +331,42 @@ export const CHECKS = {
 };
 
 // ---------------------------------------------------------------------------
+// which check answers which claim
+// ---------------------------------------------------------------------------
+
+// The parsers emit eleven claim ids. Eight are answered by one of the six checks
+// above, and three are deliberately not checked. Every id the parsers can emit appears
+// in exactly one of these two maps, and test/mapping.test.mjs asserts that, so a new
+// claim type cannot be added without somebody deciding what to do with it.
+//
+// The distinction that matters here: a bare URL in prose (`link.bare`) and the
+// homepage field in a manifest (`manifest.homepage`) are both claims that a URL works,
+// so both are answered by the external-link check. The measurement harness always
+// treated them that way, because it selects on `kind === 'link'`. The tool selected on
+// the claim id instead, so it dropped them, and the published number came to describe
+// the harness rather than the tool. That is the same defect correction 5 was written
+// about, in a place nobody had looked.
+export const CHECK_FOR = {
+  'link.relative': 'link.relative',
+  'link.external': 'link.external',
+  'link.bare': 'link.external',
+  'manifest.homepage': 'link.external',
+  install: 'install',
+  'manifest.version': 'manifest.version',
+  'license.claimed': 'license.claimed',
+  'ci.claimed': 'ci.claimed',
+};
+
+// Claims the parsers read that no check answers, each with the reason. They are
+// reported rather than dropped, because "not checked" and "held" are different
+// statements and a claim that vanishes is indistinguishable from a claim that passed.
+export const UNCHECKED = {
+  'manifest.name': 'a package name is a fact about the manifest, not a claim about the world',
+  'manifest.license': 'the licence string is answered by license.claimed',
+  version: 'a bare version number in prose is not a claim until something names it',
+};
+
+// ---------------------------------------------------------------------------
 // the run
 // ---------------------------------------------------------------------------
 
@@ -321,9 +385,23 @@ export async function audit({ root, githubLicense, workflows = null } = {}) {
 
   const results = [];
   const skipped = [];
+  const unchecked = [];
   for (const claim of claims) {
-    const check = CHECKS[claim.id];
-    if (!check) continue;
+    // Look the check up through the map rather than by the claim id. The version of
+    // this loop that indexed CHECKS directly dropped every id it did not recognise,
+    // and two of the ids it dropped were external links the measurement had counted.
+    const checkId = CHECK_FOR[claim.id];
+    if (!checkId) {
+      // Named, never silent. A claim that disappears reads exactly like a claim that
+      // held, and this tool does not get to make that mistake about itself.
+      unchecked.push({
+        check: claim.id,
+        claim: claim.text,
+        detail: UNCHECKED[claim.id] || 'no check is registered for this claim type',
+      });
+      continue;
+    }
+    const check = CHECKS[checkId];
     let r;
     try { r = await check.run(ctx, claim); } catch (e) { r = { ok: false, detail: `check threw: ${e.message}` }; }
     // A skipped claim is one the tool could not observe. It is counted and named
@@ -349,6 +427,8 @@ export async function audit({ root, githubLicense, workflows = null } = {}) {
     checked: deduped.length,
     skipped: skipped.length,
     skippedDetail: skipped,
+    unchecked: unchecked.length,
+    uncheckedDetail: unchecked,
     failures: failures.length,
     // Any failure at all rules out PASS. A report that says PASS while listing
     // three things that do not hold is the exact class of untruth this tool exists

@@ -18,6 +18,7 @@ export function renderMarkdown(a, sc) {
   L.push(`- claims checked: ${a.checked}`);
   L.push(`- claims that fail: ${a.failures}`);
   if (a.skipped) L.push(`- claims not observable: ${a.skipped} (counted, not accused)`);
+  if (a.unchecked) L.push(`- claims not checked: ${a.unchecked} (named below, never counted as holding)`);
   if (sc) L.push(`- checks proved able to fail: ${sc.proven}/${sc.total}`);
   L.push('');
 
@@ -55,9 +56,15 @@ export function renderMarkdown(a, sc) {
     ...a.results.filter((r) => !r.ok).sort((x, y) => (y.severity || 0) - (x.severity || 0)),
     ...a.results.filter((r) => r.ok),
     ...(a.skippedDetail || []).map((s) => ({ ...s, ok: null, skipped: true })),
+    // Claims no check answers. They are in the ledger on purpose: a claim that is
+    // absent from the ledger reads as a claim that held, and that is the one thing
+    // this table must not do.
+    ...(a.uncheckedDetail || []).map((u) => ({ ...u, ok: null, unchecked: true })),
   ];
   for (const r of ordered) {
-    const v = r.skipped ? 'not observable' : r.ok ? 'holds' : LABEL[r.severity] || 'fails';
+    const v = r.unchecked ? 'not checked'
+      : r.skipped ? 'not observable'
+        : r.ok ? 'holds' : LABEL[r.severity] || 'fails';
     L.push(`| ${v} | \`${r.check}\` | ${esc(r.claim)} | ${esc(r.detail)} |`);
   }
   L.push('');
