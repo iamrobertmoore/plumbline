@@ -1,0 +1,910 @@
+{
+ "_source": "GitHub REST API, search/repositories",
+ "_query": "q=stars:%3E5000&sort=stars&order=desc&per_page=100&page=1",
+ "_captured": "2026-09-15",
+ "_note": "Page 1 of 2. Page 2 was not kept, and 45 of the 100 corpus entries come from it, so this file cannot rebuild the corpus. It is a projection onto the fields the selection rule reads, not the raw response. Kept as evidence of the response shape, the query, and the star drift between this capture and the corpus build.",
+ "total_count": 5557,
+ "incomplete_results": false,
+ "items": [
+  {
+   "full_name": "codecrafters-io/build-your-own-x",
+   "stars": 547432,
+   "language": "Markdown",
+   "archived": false,
+   "license": null,
+   "homepage": "https://codecrafters.io",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "sindresorhus/awesome",
+   "stars": 506299,
+   "language": null,
+   "archived": false,
+   "license": "CC0-1.0",
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "public-apis/public-apis",
+   "stars": 480539,
+   "language": "Python",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://APILayer.com/?utm_source=Github&utm_medium=Referral&utm_campaign=Public-apis-repo",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "freeCodeCamp/freeCodeCamp",
+   "stars": 455493,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "BSD-3-Clause",
+   "homepage": "https://contribute.freecodecamp.org",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "EbookFoundation/free-programming-books",
+   "stars": 396836,
+   "language": "Python",
+   "archived": false,
+   "license": "CC-BY-4.0",
+   "homepage": "https://ebookfoundation.github.io/free-programming-books/",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "openclaw/openclaw",
+   "stars": 389767,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": "https://openclaw.ai",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "donnemartin/system-design-primer",
+   "stars": 370158,
+   "language": "Python",
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": null,
+   "default_branch": "master"
+  },
+  {
+   "full_name": "nilbuild/developer-roadmap",
+   "stars": 367292,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": "https://roadmap.sh",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "jwasham/coding-interview-university",
+   "stars": 360936,
+   "language": null,
+   "archived": false,
+   "license": "CC-BY-SA-4.0",
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "vinta/awesome-python",
+   "stars": 320809,
+   "language": "Python",
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": "https://awesome-python.com/",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "awesome-selfhosted/awesome-selfhosted",
+   "stars": 319420,
+   "language": null,
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": "https://awesome-selfhosted.net/",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "obra/superpowers",
+   "stars": 287077,
+   "language": "Shell",
+   "archived": false,
+   "license": "MIT",
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "practical-tutorials/project-based-learning",
+   "stars": 283423,
+   "language": "Python",
+   "archived": false,
+   "license": "MIT",
+   "homepage": null,
+   "default_branch": "master"
+  },
+  {
+   "full_name": "996icu/996.ICU",
+   "stars": 277052,
+   "language": null,
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": "https://996.icu",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "mattpocock/skills",
+   "stars": 262746,
+   "language": "Shell",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://aihero.dev/skills",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "affaan-m/ECC",
+   "stars": 259087,
+   "language": "JavaScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://ecc.tools",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "react/react",
+   "stars": 250462,
+   "language": "JavaScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://react.dev",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "torvalds/linux",
+   "stars": 249105,
+   "language": "C",
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": null,
+   "default_branch": "master"
+  },
+  {
+   "full_name": "NousResearch/hermes-agent",
+   "stars": 245811,
+   "language": "Python",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://hermes-agent.nousresearch.com",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "trimstray/the-book-of-secret-knowledge",
+   "stars": 243922,
+   "language": null,
+   "archived": false,
+   "license": "MIT",
+   "homepage": null,
+   "default_branch": "master"
+  },
+  {
+   "full_name": "deepseek-ai/deepseek-harness",
+   "stars": 225229,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://deepseek.com/harness",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "TheAlgorithms/Python",
+   "stars": 224605,
+   "language": "Python",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://thealgorithms.github.io/Python/",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "multica-ai/andrej-karpathy-skills",
+   "stars": 213166,
+   "language": null,
+   "archived": false,
+   "license": null,
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "vuejs/vue",
+   "stars": 212799,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "http://v2.vuejs.org",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "ossu/computer-science",
+   "stars": 209036,
+   "language": "HTML",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://cs.ossu.dev",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "anomalyco/opencode",
+   "stars": 207620,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://opencode.ai",
+   "default_branch": "dev"
+  },
+  {
+   "full_name": "n8n-io/n8n",
+   "stars": 204396,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": "https://n8n.io",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "tensorflow/tensorflow",
+   "stars": 200106,
+   "language": "C++",
+   "archived": false,
+   "license": "Apache-2.0",
+   "homepage": "https://tensorflow.org",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "DigitalPlatDev/FreeDomain",
+   "stars": 199525,
+   "language": "Markdown",
+   "archived": false,
+   "license": "AGPL-3.0",
+   "homepage": "https://dashboard.digitalplat.org",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "trekhleb/javascript-algorithms",
+   "stars": 196720,
+   "language": "JavaScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": null,
+   "default_branch": "master"
+  },
+  {
+   "full_name": "ultraworkers/claw-code",
+   "stars": 195243,
+   "language": "Rust",
+   "archived": false,
+   "license": "MIT",
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "microsoft/vscode",
+   "stars": 192562,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://code.visualstudio.com",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "yt-dlp/yt-dlp",
+   "stars": 191384,
+   "language": "Python",
+   "archived": false,
+   "license": "Unlicense",
+   "homepage": "https://discord.gg/H5MNcFW63r",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "massgravel/Microsoft-Activation-Scripts",
+   "stars": 190738,
+   "language": "Batchfile",
+   "archived": false,
+   "license": "GPL-3.0",
+   "homepage": "https://massgrave.dev",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "ohmyzsh/ohmyzsh",
+   "stars": 189739,
+   "language": "Shell",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://ohmyz.sh",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "Significant-Gravitas/AutoGPT",
+   "stars": 187365,
+   "language": "Python",
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": "https://agpt.co",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "jackfrued/Python-100-Days",
+   "stars": 186486,
+   "language": "Jupyter Notebook",
+   "archived": false,
+   "license": null,
+   "homepage": null,
+   "default_branch": "master"
+  },
+  {
+   "full_name": "CyC2018/CS-Notes",
+   "stars": 186099,
+   "language": null,
+   "archived": false,
+   "license": null,
+   "homepage": "http://cyc2018.xyz",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "getify/You-Dont-Know-JS",
+   "stars": 184902,
+   "language": null,
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": "https://www.amazon.com/dp/B085XXCJ7X",
+   "default_branch": "2nd-ed"
+  },
+  {
+   "full_name": "microsoft/markitdown",
+   "stars": 184329,
+   "language": "Python",
+   "archived": false,
+   "license": "MIT",
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "avelino/awesome-go",
+   "stars": 184248,
+   "language": "Go",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://awesome-go.com",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "ollama/ollama",
+   "stars": 181052,
+   "language": "Go",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://ollama.com",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "firecrawl/firecrawl",
+   "stars": 180782,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "AGPL-3.0",
+   "homepage": "https://firecrawl.dev",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "flutter/flutter",
+   "stars": 178951,
+   "language": "Dart",
+   "archived": false,
+   "license": "BSD-3-Clause",
+   "homepage": "https://flutter.dev",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "521xueweihan/HelloGitHub",
+   "stars": 176719,
+   "language": "Python",
+   "archived": false,
+   "license": null,
+   "homepage": "https://hellogithub.com",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "anthropics/skills",
+   "stars": 176479,
+   "language": "Python",
+   "archived": false,
+   "license": null,
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "github/gitignore",
+   "stars": 175780,
+   "language": null,
+   "archived": false,
+   "license": "CC0-1.0",
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "twbs/bootstrap",
+   "stars": 174807,
+   "language": "MDX",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://getbootstrap.com",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "f/prompts.chat",
+   "stars": 170418,
+   "language": "HTML",
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": "https://prompts.chat",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "huggingface/transformers",
+   "stars": 166179,
+   "language": "Python",
+   "archived": false,
+   "license": "Apache-2.0",
+   "homepage": "https://huggingface.co/transformers",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "AUTOMATIC1111/stable-diffusion-webui",
+   "stars": 164952,
+   "language": "Python",
+   "archived": false,
+   "license": "AGPL-3.0",
+   "homepage": null,
+   "default_branch": "master"
+  },
+  {
+   "full_name": "jlevy/the-art-of-command-line",
+   "stars": 162405,
+   "language": null,
+   "archived": false,
+   "license": null,
+   "homepage": null,
+   "default_branch": "master"
+  },
+  {
+   "full_name": "Snailclimb/JavaGuide",
+   "stars": 158576,
+   "language": "JavaScript",
+   "archived": false,
+   "license": "Apache-2.0",
+   "homepage": "https://javaguide.cn",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "langgenius/dify",
+   "stars": 155833,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": "https://dify.ai",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "langflow-ai/langflow",
+   "stars": 154835,
+   "language": "Python",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "http://www.langflow.org",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "msitarzewski/agency-agents",
+   "stars": 152538,
+   "language": "Shell",
+   "archived": false,
+   "license": "MIT",
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "open-webui/open-webui",
+   "stars": 152171,
+   "language": "Python",
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": "https://openwebui.com",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "Genymobile/scrcpy",
+   "stars": 149690,
+   "language": "C",
+   "archived": false,
+   "license": "Apache-2.0",
+   "homepage": null,
+   "default_branch": "master"
+  },
+  {
+   "full_name": "airbnb/javascript",
+   "stars": 148231,
+   "language": "JavaScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": null,
+   "default_branch": "master"
+  },
+  {
+   "full_name": "langchain-ai/langchain",
+   "stars": 146386,
+   "language": "Python",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://docs.langchain.com/langchain/",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "anthropics/claude-code",
+   "stars": 145173,
+   "language": "TypeScript",
+   "archived": false,
+   "license": null,
+   "homepage": "https://code.claude.com/docs/en/overview",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "clash-verge-rev/clash-verge-rev",
+   "stars": 144688,
+   "language": "Rust",
+   "archived": false,
+   "license": "GPL-3.0",
+   "homepage": "https://www.clashverge.dev",
+   "default_branch": "dev"
+  },
+  {
+   "full_name": "x1xhlol/system-prompts-and-models-of-ai-tools",
+   "stars": 143647,
+   "language": null,
+   "archived": false,
+   "license": "GPL-3.0",
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "yangshun/tech-interview-handbook",
+   "stars": 142673,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://www.techinterviewhandbook.org",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "vercel/next.js",
+   "stars": 142324,
+   "language": "JavaScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://nextjs.org",
+   "default_branch": "canary"
+  },
+  {
+   "full_name": "ytdl-org/youtube-dl",
+   "stars": 141237,
+   "language": "Python",
+   "archived": false,
+   "license": "Unlicense",
+   "homepage": "http://ytdl-org.github.io/youtube-dl/",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "DietrichGebert/ponytail",
+   "stars": 139224,
+   "language": "JavaScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://ponytail.dev",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "golang/go",
+   "stars": 138836,
+   "language": "Go",
+   "archived": false,
+   "license": "BSD-3-Clause",
+   "homepage": "https://go.dev",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "iptv-org/iptv",
+   "stars": 138693,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "Unlicense",
+   "homepage": "https://iptv-org.github.io",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "microsoft/PowerToys",
+   "stars": 138679,
+   "language": "C",
+   "archived": false,
+   "license": "MIT",
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "Shubhamsaboo/awesome-llm-apps",
+   "stars": 138319,
+   "language": "Python",
+   "archived": false,
+   "license": "Apache-2.0",
+   "homepage": "https://www.theunwindai.com",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "ripienaar/free-for-dev",
+   "stars": 137492,
+   "language": "HTML",
+   "archived": false,
+   "license": null,
+   "homepage": "https://free-for.dev/",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "github/spec-kit",
+   "stars": 137004,
+   "language": "Python",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://github.github.com/spec-kit/",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "labuladong/fucking-algorithm",
+   "stars": 135896,
+   "language": "Markdown",
+   "archived": false,
+   "license": null,
+   "homepage": "https://labuladong.online/",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "Comfy-Org/ComfyUI",
+   "stars": 133345,
+   "language": "Python",
+   "archived": false,
+   "license": "GPL-3.0",
+   "homepage": "https://www.comfy.org/",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "garrytan/gstack",
+   "stars": 133192,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "farion1231/cc-switch",
+   "stars": 133013,
+   "language": "Rust",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://ccswitch.io",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "excalidraw/excalidraw",
+   "stars": 132024,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://excalidraw.com",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "krahets/hello-algo",
+   "stars": 130129,
+   "language": "Java",
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": "https://www.hello-algo.com",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "Chalarangelo/30-seconds-of-code",
+   "stars": 129097,
+   "language": "JavaScript",
+   "archived": false,
+   "license": "CC-BY-4.0",
+   "homepage": "https://30secondsofcode.org/",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "ggml-org/llama.cpp",
+   "stars": 128329,
+   "language": "C++",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://llama.app",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "nextlevelbuilder/ui-ux-pro-max-skill",
+   "stars": 127852,
+   "language": "Python",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://www.uupm.cc/",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "kubernetes/kubernetes",
+   "stars": 127743,
+   "language": "Go",
+   "archived": false,
+   "license": "Apache-2.0",
+   "homepage": "https://kubernetes.io",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "react/react-native",
+   "stars": 126615,
+   "language": "C++",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://reactnative.dev",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "openai/codex",
+   "stars": 124373,
+   "language": "Rust",
+   "archived": false,
+   "license": "Apache-2.0",
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "harry0703/MoneyPrinterTurbo",
+   "stars": 123947,
+   "language": "Python",
+   "archived": false,
+   "license": "MIT",
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "shadcn-ui/ui",
+   "stars": 123867,
+   "language": "TypeScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://ui.shadcn.com",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "rustdesk/rustdesk",
+   "stars": 123637,
+   "language": "Rust",
+   "archived": false,
+   "license": "AGPL-3.0",
+   "homepage": "https://rustdesk.com",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "electron/electron",
+   "stars": 123077,
+   "language": "C++",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://electronjs.org",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "nodejs/node",
+   "stars": 121954,
+   "language": "JavaScript",
+   "archived": false,
+   "license": "NOASSERTION",
+   "homepage": "https://nodejs.org",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "Hack-with-Github/Awesome-Hacking",
+   "stars": 120451,
+   "language": null,
+   "archived": false,
+   "license": "CC0-1.0",
+   "homepage": null,
+   "default_branch": "master"
+  },
+  {
+   "full_name": "microsoft/generative-ai-for-beginners",
+   "stars": 119789,
+   "language": "Jupyter Notebook",
+   "archived": false,
+   "license": "MIT",
+   "homepage": null,
+   "default_branch": "main"
+  },
+  {
+   "full_name": "justjavac/free-programming-books-zh_CN",
+   "stars": 118921,
+   "language": null,
+   "archived": false,
+   "license": "GPL-3.0",
+   "homepage": "http://weibo.com/justjavac",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "rust-lang/rust",
+   "stars": 118912,
+   "language": "Rust",
+   "archived": false,
+   "license": "Apache-2.0",
+   "homepage": "https://www.rust-lang.org",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "godotengine/godot",
+   "stars": 117220,
+   "language": "C++",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://godotengine.org",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "Graphify-Labs/graphify",
+   "stars": 116990,
+   "language": "Python",
+   "archived": false,
+   "license": "Apache-2.0",
+   "homepage": "https://www.graphify.com",
+   "default_branch": "v8"
+  },
+  {
+   "full_name": "2dust/v2rayN",
+   "stars": 116215,
+   "language": "C#",
+   "archived": false,
+   "license": "GPL-3.0",
+   "homepage": "https://v2rayn.2dust.link",
+   "default_branch": "master"
+  },
+  {
+   "full_name": "VoltAgent/awesome-design-md",
+   "stars": 115989,
+   "language": null,
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://getdesign.md/",
+   "default_branch": "main"
+  },
+  {
+   "full_name": "mrdoob/three.js",
+   "stars": 115555,
+   "language": "JavaScript",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://threejs.org/",
+   "default_branch": "dev"
+  },
+  {
+   "full_name": "browser-use/browser-use",
+   "stars": 114720,
+   "language": "Python",
+   "archived": false,
+   "license": "MIT",
+   "homepage": "https://browser-use.com",
+   "default_branch": "main"
+  }
+ ]
+}
