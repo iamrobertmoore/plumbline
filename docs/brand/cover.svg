@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Plumbline. 23 of the 100 most-starred installable repositories on GitHub fail at least one check.">
-  <title>Plumbline — cover image</title>
+  <title>Plumbline cover image</title>
   <desc>A pre-ship auditor. 23 of the 100 most-starred installable repositories on GitHub do not do what they say they do.</desc>
 
   <defs>
@@ -15,7 +15,7 @@
   <!-- mark -->
   <g transform="translate(80,64) scale(2.3)">
     <line x1="32" y1="7" x2="32" y2="37" stroke="#14161A" stroke-width="2.5" stroke-linecap="round"/>
-    <circle cx="32" y="7" r="3" fill="#14161A"/>
+    <circle cx="32" cy="7" r="3" fill="#14161A"/>
     <path d="M32 35 L41 48 L32 58 L23 48 Z" fill="#C8912F"/>
     <path d="M32 35 L41 48 L32 48 Z" fill="#A8761F"/>
     <line x1="14" y1="58" x2="50" y2="58" stroke="#14161A" stroke-width="2.5" stroke-linecap="round" opacity="0.25"/>

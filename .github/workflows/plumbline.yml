@@ -48,6 +48,12 @@ jobs:
         run: |
           node -e "const p=require('./package.json');const n=Object.keys(p.dependencies||{}).length+Object.keys(p.devDependencies||{}).length;if(n){console.error('dependencies appeared: '+n);process.exit(1)}console.log('zero dependencies, nothing to install')"
 
+      - name: Tests
+        run: node --test test/*.test.mjs
+
+      - name: Every figure on every surface agrees with facts/facts.json
+        run: node facts/render.mjs --check
+
       - name: Negative controls (prove every check can fail)
         run: node src/cli.mjs --selfcheck --format markdown --out out/selfcheck.md
 
