@@ -1,0 +1,8 @@
+# Large or irrelevant to Bob: keeps context, and Bobcoins, down.
+measure/corpus.json
+measure/corpus-source-page1.json
+deck/
+docs/brand/*.png
+.vercel/
+.env*
+node_modules/
