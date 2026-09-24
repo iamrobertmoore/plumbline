@@ -1,0 +1,5 @@
+# Kept off the Vercel deployment, which runs on the free Hobby plan (non-commercial
+# use only). The deck and the README state a price, so they are served from GitHub
+# instead. The checker, the landing page and the code the function imports stay.
+deck/
+README.md
