@@ -3,3 +3,4 @@
 # instead. The checker, the landing page and the code the function imports stay.
 deck/
 README.md
+.env*
