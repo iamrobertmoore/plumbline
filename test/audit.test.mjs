@@ -178,3 +178,19 @@ test('every registered check declares how to break itself', () => {
     assert.ok(check.severity >= SEVERITY.NOTE, `${id} has no severity`);
   }
 });
+
+test('a README in docs/ is found, and its relative links resolve from docs/', async () => {
+  const { mkdtempSync, mkdirSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { audit } = await import('../src/plumbline.mjs');
+  const root = mkdtempSync(join(tmpdir(), 'pl-docs-'));
+  mkdirSync(join(root, 'docs'));
+  writeFileSync(join(root, 'docs', 'README.md'), '# x\n\nSee [the guide](guide.md) and [the missing one](gone.md).\n');
+  writeFileSync(join(root, 'docs', 'guide.md'), 'ok\n');
+  const r = await audit({ root, githubLicense: null, workflows: [] });
+  const rel = r.results.filter((x) => x.check === 'link.relative');
+  assert.equal(rel.length, 2);
+  assert.equal(rel.find((x) => x.claim === 'docs/guide.md').ok, true);
+  assert.equal(rel.find((x) => x.claim === 'docs/gone.md').ok, false);
+});

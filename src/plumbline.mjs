@@ -13,7 +13,20 @@
 // drew attention to it.
 
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, posix } from 'node:path';
+
+// Where GitHub looks for the README it puts on a repository's front page, in its order.
+export const README_LOCATIONS = ['.github/README.md', 'README.md', 'readme.md', 'README.markdown', 'docs/README.md'];
+
+// A relative link in a README that lives in docs/ is relative to docs/, not to the root.
+export function rebase(claims, dir) {
+  if (!dir || dir === '.') return claims;
+  return claims.map((c) => {
+    if (c.id !== 'link.relative') return c;
+    const path = posix.normalize(posix.join(dir, c.path));
+    return { ...c, path, text: path };
+  });
+}
 
 export const SEVERITY = { BLOCKER: 3, WARNING: 2, NOTE: 1 };
 
@@ -151,7 +164,7 @@ async function httpOk(url, timeout = 12000) {
           ...(method === 'GET' ? { Range: 'bytes=0-2048' } : {}),
         },
       });
-      return { ok: r.ok, status: r.status };
+      return { ok: r.ok, status: r.status, retryAfter: r.headers.get('retry-after') };
     } catch (e) {
       return { ok: false, status: 0, error: String(e.name || e) };
     } finally { clearTimeout(t); }
@@ -159,7 +172,16 @@ async function httpOk(url, timeout = 12000) {
 
   const head = await attempt('HEAD');
   if (head.ok) return head;
-  const get = await attempt('GET');
+  let get = await attempt('GET');
+  // A 429 is the server asking us to slow down, not a statement about the link. Wait as
+  // long as it asks (up to ten seconds) and ask again, twice. On 25 September most of
+  // the links this tool could not test were github.com answering 429 to a burst of
+  // requests, and every one of them was an untested link that should have been tested.
+  for (let i = 0; i < 2 && get.status === 429; i++) {
+    const wait = Math.min(10, Number(get.retryAfter) || 3 * (i + 1)) * 1000;
+    await new Promise((r) => setTimeout(r, wait));
+    get = await attempt('GET');
+  }
   // If the GET could not be made at all, the link is unverifiable rather than dead.
   // Only a real HTTP answer is allowed to decide, and status 0 is not an answer.
   return get.status === 0 ? { ok: false, status: 0, error: get.error || head.error } : get;
@@ -252,7 +274,10 @@ export const CHECKS = {
     title: 'External links in the README resolve',
     severity: SEVERITY.NOTE,
     async run(ctx, claim) {
-      if (/(shields\.io|badge|img\.shields|badgen|travis-ci|codecov|coveralls|discord\.gg)/i.test(claim.url)) {
+      // Open Collective's sponsor and backer slots are badges too: /tiers/<tier>/<n>/website
+      // answers 404 while slot n is empty, which is the design, not a broken promise.
+      if (/(shields\.io|badge|img\.shields|badgen|travis-ci|codecov|coveralls|discord\.gg)/i.test(claim.url)
+        || /opencollective\.com\/[^/]+\/(?:tiers\/[^/]+|sponsor|backer|sponsors|backers)\/\d+\/(?:website|avatar)/i.test(claim.url)) {
         return { ok: true, detail: 'badge, not asserted', skipped: true };
       }
       const r = await httpOk(claim.url);
@@ -286,20 +311,34 @@ export const CHECKS = {
       // carried a version but no package name, so it asked the registry about
       // "undefined". A blocker check that can never fire is worse than no check.
       if (!claim.name) return { ok: true, skipped: true, detail: 'the manifest carries no package name' };
+      // 0.0.0 in source is a placeholder a release pipeline overwrites (semantic-release
+      // writes 0.0.0-development). It is not a claim that 0.0.0 was published, and
+      // coder/code-server was once accused over exactly this.
+      if (/^0\.0\.0(?:-|$)/.test(claim.version)) return { ok: true, skipped: true, detail: `${claim.version} is a placeholder version, set at release time` };
       const info = await npmLatest(claim.name);
       if (!info || info.error) return { ok: true, skipped: true, detail: `the registry did not answer (${info && info.status ? info.status : 'no response'})` };
       if (info.missing) return { ok: true, skipped: true, detail: `${claim.name} is not published to npm` };
       // A name collision is not a finding. Only compare versions once the registry's
       // own repository field points back at the repository being audited.
-      const want = repoSlug(claim.repository);
+      // When the caller knows which repository is being audited, that is what the
+      // registry must point back at. A manifest copied from a template names the
+      // template's repository, and comparing the template with itself is how
+      // dair-ai/Prompt-Engineering-Guide was once accused over a package it never published.
+      const want = repoSlug(claim.auditedRepo || claim.repository);
       const got = repoSlug(info.repository);
       if (!want || !got) return { ok: true, skipped: true, detail: `cannot confirm ${claim.name} on npm is this repository` };
       if (want !== got) return { ok: true, skipped: true, detail: `${claim.name} on npm points at ${got}, not ${want}` };
-      return info.latest === claim.version
-        ? { ok: true, detail: `${claim.version} matches the registry` }
-        : { ok: false, detail: `manifest says ${claim.version}; registry says ${info.latest}` };
+      // The claim is that this version is published, not that it is the latest. A
+      // nightly or preview build is published under its own tag, and comparing it with
+      // "latest" accused google-gemini/gemini-cli of a version the registry has.
+      const published = (info.versions || []).includes(claim.version);
+      return published
+        ? { ok: true, detail: `${claim.version} is published${info.latest === claim.version ? ' and is the latest' : ` (latest is ${info.latest})`}` }
+        : { ok: false, detail: `manifest says ${claim.version}; the registry has no such version (latest is ${info.latest})` };
     },
-    mutate: (claim) => ({ ...claim, version: '0.0.0-plumbline-control' }),
+    // Not 0.0.0-anything: that is now read as a placeholder and skipped, and a control
+    // that is skipped proves nothing.
+    mutate: (claim) => ({ ...claim, version: '999.999.999-plumbline-control' }),
   },
 
   'license.claimed': {
@@ -372,8 +411,13 @@ export const UNCHECKED = {
 
 export async function audit({ root, githubLicense, workflows = null } = {}) {
   root = resolve(root);
-  const readmePath = ['README.md', 'readme.md', 'README.markdown'].map((f) => join(root, f)).find(existsSync);
+  // GitHub shows the README from .github/, then the root, then docs/, and resolves its
+  // relative links from the folder it lives in. Looking only at the root reported two
+  // repositories as having no README when GitHub displays one on their front page.
+  const readmeRel = README_LOCATIONS.find((f) => existsSync(join(root, f)));
+  const readmePath = readmeRel ? join(root, readmeRel) : null;
   const md = readmePath ? readFileSync(readmePath, 'utf8') : '';
+  const readmeDir = readmeRel ? posix.dirname(readmeRel) : '.';
   const pkgPath = join(root, 'package.json');
 
   const rootFiles = readdirSafe(root);
@@ -381,7 +425,7 @@ export async function audit({ root, githubLicense, workflows = null } = {}) {
     : (existsSync(join(root, '.github/workflows')) ? readdirSafe(join(root, '.github/workflows')).filter((f) => /\.ya?ml$/i.test(f)) : []);
 
   const ctx = { root, rootFiles, workflowFiles, githubLicense };
-  const claims = [...claimsFromReadme(md), ...claimsFromManifest(pkgPath)];
+  const claims = [...rebase(claimsFromReadme(md), readmeDir), ...claimsFromManifest(pkgPath)];
 
   const results = [];
   const skipped = [];

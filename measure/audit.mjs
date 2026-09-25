@@ -56,11 +56,15 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // hosted checker so the page and the number cannot drift apart.
 const { auditRepo } = createRemoteAuditor({ token: TOKEN, maxLinks: MAX_LINKS, concurrency: CONC });
 
-const corpus = JSON.parse(readFileSync(new URL('./corpus.json', import.meta.url), 'utf8'));
+// --corpus reads a different corpus file; --slice a:b audits entries a to b-1 of it, so a
+// long run can be split into pieces and the pieces merged. Neither changes what is checked.
+const CORPUS = arg('--corpus', null);
+const corpus = JSON.parse(readFileSync(CORPUS || new URL('./corpus.json', import.meta.url), 'utf8'));
+const SLICE = arg('--slice', null);
 // --repo exists so that a single finding can be re-checked on its own, which is how
 // every candidate in this measurement is confirmed. Re-checking one repository by hand
 // should not require re-running the other ninety-nine.
-const todo = REPO ? corpus.filter((r) => r.full_name.includes(REPO)) : (ONLY ? corpus.slice(0, ONLY) : corpus);
+const todo = REPO ? corpus.filter((r) => r.full_name.includes(REPO)) : SLICE ? corpus.slice(...SLICE.split(':').map(Number)) : (ONLY ? corpus.slice(0, ONLY) : corpus);
 if (!TOKEN) console.error('warning: no GH_TOKEN, GitHub will rate-limit this run');
 
 const results = [];

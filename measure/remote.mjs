@@ -9,7 +9,7 @@
 // The checks themselves are imported from ../src, so the tool, the harness and the
 // hosted page all ask the same questions in the same way.
 
-import { claimsFromReadme, CHECKS, npmLatest, climbsAboveRoot, repoSlug } from '../src/plumbline.mjs';
+import { claimsFromReadme, CHECKS, npmLatest, climbsAboveRoot, repoSlug, rebase } from '../src/plumbline.mjs';
 
 export function createRemoteAuditor({ token = '', ua = 'plumbline-measure/0.1', maxLinks = 0, concurrency = 6, urlFilter = null } = {}) {
 const UA = ua;
@@ -60,7 +60,8 @@ async function fetchTree(full, branch) {
 // A 404 is an answer. A 429, a 5xx or a timeout is not, so it is retried and then
 // reported as unobservable rather than as a failure.
 async function fetchReadme(full, branch) {
-  const names = ['README.md', 'readme.md', 'README.MD', 'Readme.md', 'README.markdown', 'README.rst', 'README.txt'];
+  // GitHub's own order: .github/, then the root, then docs/. Only a 404 moves on.
+  const names = ['.github/README.md', 'README.md', 'readme.md', 'README.MD', 'Readme.md', 'README.markdown', 'README.rst', 'README.txt', 'docs/README.md'];
   const branches = [...new Set([branch, 'main', 'master'].filter(Boolean))];
   let failure = null;
   for (const name of names) {
@@ -68,7 +69,7 @@ async function fetchReadme(full, branch) {
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
           const r = await req(`https://raw.githubusercontent.com/${full}/${br}/${name}`, { timeout: 25000 });
-          if (r.ok) return { text: await r.text(), failure: null };
+          if (r.ok) return { text: await r.text(), failure: null, path: name };
           if (r.status === 404) break;   // this name and branch do not exist; try the next pair
           failure = `HTTP ${r.status}`;  // 429 or 5xx: we do not know, so we do not accuse
         } catch (e) {
@@ -130,7 +131,7 @@ async function auditRepo(repo) {
   add('readme.present', true, 'README found');
 
   const md = rd.text;
-  const claims = claimsFromReadme(md);
+  const claims = rebase(claimsFromReadme(md), rd.path.includes('/') ? rd.path.split('/').slice(0, -1).join('/') : '.');
 
   // 2. relative links point at files that exist
   if (!truncated) {
@@ -161,7 +162,16 @@ async function auditRepo(repo) {
   const allowed = urlFilter ? await Promise.all(capped0.map((u) => urlFilter(u))) : null;
   const targets = allowed ? capped0.filter((_, i) => allowed[i]) : capped0;
   const refused = capped0.length - targets.length;
-  const probe = await pool(targets, CONC, async (url) => ({ url, ...(await CHECKS['link.external'].run({}, { id: 'link.external', url })) }));
+  // Links back to github.com go through a narrower pool of their own, with a pause
+  // between requests. GitHub rate-limits a burst from one client, and a rate-limited
+  // link is an untested link, so pacing them tests more of them.
+  const probeOne = async (url) => ({ url, ...(await CHECKS['link.external'].run({}, { id: 'link.external', url })) });
+  const onGithub = (u) => /^https?:\/\/(www\.)?github\.com\//i.test(u);
+  const [gh, rest] = [targets.filter(onGithub), targets.filter((u) => !onGithub(u))];
+  const probe = (await Promise.all([
+    pool(rest, CONC, probeOne),
+    pool(gh, 2, async (url) => { const r = await probeOne(url); await sleep(250); return r; }),
+  ])).flat();
   const asserted = probe.filter((p) => !p.skipped);
   const gone = asserted.filter((p) => p.ok !== true && /^(404|410)\b/.test(p.detail));
   const unreachable = asserted.filter((p) => p.ok !== true && !/^(404|410)\b/.test(p.detail));
@@ -188,7 +198,7 @@ async function auditRepo(repo) {
     const pj = await fetchPackageJson(full, repo.default_branch);
     if (pj && pj.private !== true && pj.name && pj.version) {
       const r = await CHECKS['manifest.version'].run({}, {
-        id: 'manifest.version', name: pj.name, version: pj.version, repository: pj.repository,
+        id: 'manifest.version', name: pj.name, version: pj.version, repository: pj.repository, auditedRepo: `https://github.com/${full}`,
       });
       R.manifest = { name: pj.name, local: pj.version, detail: r.detail };
       if (r.skipped) skip('manifest.version', r.detail);

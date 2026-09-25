@@ -143,3 +143,25 @@ test('a genuine 404 is still reported as a package that does not exist', async (
     assert.match(r.detail, /no such package/);
   });
 });
+
+test('a server that answers 429 and then 200 is tested, not left untested', async () => {
+  let n = 0;
+  await withServer((req, res) => {
+    if (req.method === 'HEAD') { res.writeHead(405); return res.end(); }
+    n += 1;
+    if (n === 1) { res.writeHead(429, { 'Retry-After': '1' }); return res.end(); }
+    res.writeHead(200); res.end('ok');
+  }, async (url) => {
+    const r = await CHECKS['link.external'].run({}, { id: 'link.external', url });
+    assert.equal(r.ok, true, `expected a pass after the retry, got: ${r.detail}`);
+    assert.equal(n, 2);
+  });
+});
+
+test('a server that answers 429 every time is not reported dead', async () => {
+  await withServer((req, res) => { res.writeHead(429, { 'Retry-After': '1' }); res.end(); }, async (url) => {
+    const r = await CHECKS['link.external'].run({}, { id: 'link.external', url });
+    assert.equal(r.ok, false);
+    assert.match(r.detail, /^429 /);
+  });
+});

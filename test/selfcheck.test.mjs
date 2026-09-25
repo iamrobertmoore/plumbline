@@ -107,11 +107,14 @@ test('a blocker-severity failure produces FAIL, not WARN', async (t) => {
   if (!await online()) return t.skip('offline');
   const root = mkdtempSync(join(tmpdir(), 'plumbline-'));
   try {
-    // left-pad is published at a version that is not 0.0.0, and its registry entry
-    // points back at stevemao/left-pad, so the comparison is allowed to happen.
+    // left-pad has never published 9.9.9, and its registry entry points back at
+    // stevemao/left-pad, so the comparison is allowed to happen. (This test used 0.0.0
+    // until 25 September, when the check changed from "is it the latest" to "is it
+    // published": left-pad did publish 0.0.0, so the old test was asserting a false
+    // accusation.)
     writeFileSync(join(root, 'package.json'), JSON.stringify({
       name: 'left-pad',
-      version: '0.0.0',
+      version: '9.9.9',
       repository: 'https://github.com/stevemao/left-pad.git',
     }));
     const a = await audit({ root });
