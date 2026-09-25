@@ -2,170 +2,520 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Plumbline: check a repository</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plumbline</title>
 <meta name="description" content="Paste a public GitHub repository and see every place its README says something that is not true.">
-<link rel="icon" href="../docs/brand/mark.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../site/style.css">
+<meta name="theme-color" content="#0d1012">
+<link rel="icon" href="../docs/brand/app-icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-  .tool { padding: 40px 0 28px; border-top: 3px solid var(--brass); }
-  .tool h1 { font-family: var(--display); font-weight: 400; font-size: clamp(34px, 5.4vw, 54px); line-height: 1.08; margin: 0 0 12px; letter-spacing: -.01em; }
-  .tool .lede { color: var(--muted); max-width: 640px; margin: 0 0 26px; }
-  form.ask { display: flex; gap: 10px; flex-wrap: wrap; }
-  form.ask input { flex: 1 1 320px; min-width: 0; font: 16px var(--mono); padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); }
-  form.ask input:focus { outline: 2px solid var(--brass); outline-offset: 1px; border-color: transparent; }
-  form.ask button { font: 600 16px var(--sans); padding: 14px 22px; border-radius: 10px; border: 0; background: var(--ink); color: #fff; cursor: pointer; }
-  form.ask button:disabled { opacity: .55; cursor: progress; }
-  .tries { margin: 14px 0 0; font-size: 14px; color: var(--faint); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  .tries button { font: 13.5px var(--mono); padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink); cursor: pointer; }
-  .tries button:hover { border-color: var(--brass); }
-  .working { display: none; align-items: center; gap: 18px; margin: 34px 0 10px; color: var(--muted); }
-  .working.on { display: flex; }
-  .bob { width: 34px; height: 64px; transform-origin: 17px 2px; animation: swing 1.6s ease-in-out infinite alternate; }
-  @keyframes swing { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
-  @media (prefers-reduced-motion: reduce) { .bob { animation: none; } }
-  .out { margin: 30px 0 10px; }
-  .verdict { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; padding: 18px 22px; border-radius: var(--r); background: var(--card); box-shadow: 0 18px 40px -30px rgba(20,22,26,.45); border-left: 6px solid var(--faint); }
-  .verdict.fails { border-left-color: var(--fail); }
-  .verdict.holds { border-left-color: var(--pass); }
-  .verdict.partial { border-left-color: var(--brass); }
-  .verdict b { font: 700 13px var(--mono); letter-spacing: .08em; }
-  .verdict.fails b { color: var(--fail); } .verdict.holds b { color: var(--pass); } .verdict.partial b { color: var(--brass-dark); }
-  .verdict .repo { font: 600 20px var(--sans); }
-  .verdict .meta { color: var(--faint); font-size: 14px; margin-left: auto; }
-  table.ledger { width: 100%; border-collapse: collapse; margin: 18px 0 8px; font-size: 15px; }
-  table.ledger th { text-align: left; font: 600 12px var(--mono); letter-spacing: .06em; color: var(--faint); padding: 8px 10px; border-bottom: 1px solid var(--line); }
-  table.ledger td { padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  .tag { font: 700 11.5px var(--mono); letter-spacing: .06em; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
-  .tag.fail { background: #f6e3e1; color: var(--fail); } .tag.pass { background: #e1efe8; color: var(--pass); } .tag.skip { background: #f3ecdf; color: var(--brass-dark); }
-  .evidence { font: 13.5px var(--mono); color: var(--muted); word-break: break-word; }
-  .evidence ul { margin: 6px 0 0; padding-left: 18px; }
-  .bounds { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 20px; font-size: 14.5px; color: var(--muted); margin-top: 18px; }
-  .bounds b { color: var(--ink); }
-  .err { color: var(--fail); margin-top: 26px; font-weight: 600; }
-  .note { font-size: 14.5px; color: var(--muted); border-top: 1px solid var(--line); margin-top: 40px; padding-top: 18px; }
-  .evidence a { word-break: break-all; }
-  @media (max-width: 640px) {
-    .verdict .meta { margin-left: 0; }
-    table.ledger thead { display: none; }
-    table.ledger, table.ledger tbody, table.ledger tr, table.ledger td { display: block; width: 100%; min-width: 0; }
-    table.ledger tr { padding: 12px 0; border-bottom: 1px solid var(--line); }
-    table.ledger td { border: 0; padding: 3px 0; }
-  }
+:root {
+  color-scheme: dark;
+  --ground: #0d1012;
+  --ground-2: #11161a;
+  --panel: rgba(22, 29, 33, 0.72);
+  --panel-solid: #161d21;
+  --line: #243036;
+  --line-soft: #1a2328;
+  --ink: #e9eeec;
+  --ink-2: #b7c2c0;
+  --muted: #7d8b8a;
+  --brass: #e4ad45;
+  --brass-hi: #ffd27a;
+  --brass-lo: #9b6d1c;
+  --fail: #ff6a55;
+  --fail-bg: rgba(255, 106, 85, 0.1);
+  --hold: #52d6a4;
+  --hold-bg: rgba(82, 214, 164, 0.1);
+  --skip: #8fa8ff;
+  --skip-bg: rgba(143, 168, 255, 0.1);
+  --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --cond: "IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --r: 14px;
+  --ease: cubic-bezier(.2, .7, .1, 1);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { background: var(--ground); }
+body {
+  margin: 0; min-height: 100%;
+  background: var(--ground); color: var(--ink);
+  font: 400 16px/1.55 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; border-radius: 6px; }
+
+/* ---------- atmosphere: drafting grid, grain, a slow survey light ---------- */
+.atmos { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.atmos .grid {
+  position: absolute; inset: -40px;
+  background-image:
+    linear-gradient(to right, rgba(120, 150, 150, .07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(120, 150, 150, .07) 1px, transparent 1px),
+    linear-gradient(to right, rgba(120, 150, 150, .035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(120, 150, 150, .035) 1px, transparent 1px);
+  background-size: 160px 160px, 160px 160px, 32px 32px, 32px 32px;
+  mask-image: radial-gradient(ellipse 80% 70% at 60% 20%, #000 20%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 60% 20%, #000 20%, transparent 85%);
+  animation: drift 60s linear infinite;
+}
+.atmos .glow {
+  position: absolute; width: 900px; height: 900px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(228, 173, 69, .16), transparent 62%);
+  top: -420px; right: -260px; filter: blur(10px);
+}
+.atmos .glow.b { background: radial-gradient(circle, rgba(82, 170, 214, .08), transparent 60%); top: auto; bottom: -520px; left: -380px; right: auto; }
+.atmos .grain {
+  position: absolute; inset: 0; opacity: .5; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.atmos .sweep {
+  position: absolute; left: 0; right: 0; height: 240px; top: -240px;
+  background: linear-gradient(to bottom, transparent, rgba(228, 173, 69, .035), transparent);
+  animation: sweep 14s var(--ease) infinite;
+}
+@keyframes drift { to { transform: translate(32px, 32px); } }
+@keyframes sweep { 0% { top: -240px; } 70%, 100% { top: 110%; } }
+
+/* ---------- frame ---------- */
+.wrap { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding-inline: max(20px, env(safe-area-inset-left)); padding-block: 0 64px; }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 22px; }
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.brand svg { width: 30px; height: 30px; }
+.brand b { font: 600 20px/1 var(--cond); letter-spacing: .01em; }
+.brand b i { font-style: normal; color: var(--brass); }
+.nav { display: flex; gap: 6px; align-items: center; }
+.nav a { font: 500 13px var(--sans); color: var(--ink-2); text-decoration: none; padding: 8px 12px; border-radius: 999px; border: 1px solid transparent; transition: .2s; }
+.nav a:hover { color: var(--ink); border-color: var(--line); background: rgba(255,255,255,.02); }
+.tag { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--brass); border: 1px solid rgba(228,173,69,.35); padding: 6px 10px; border-radius: 999px; background: rgba(228,173,69,.06); }
+
+/* ---------- hero ---------- */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 24px; align-items: end; padding-block: 36px 28px; }
+.eyebrow { font: 500 12px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); display: flex; gap: 10px; align-items: center; }
+.eyebrow::before { content: ""; width: 26px; height: 1px; background: var(--brass); }
+h1 { font: 700 clamp(40px, 7.2vw, 84px)/.95 var(--cond); letter-spacing: -.02em; margin: 16px 0 18px; text-wrap: balance; }
+h1 .true { color: var(--brass); position: relative; white-space: nowrap; }
+h1 .true::after { content: ""; position: absolute; left: 0; right: 0; bottom: .06em; height: .07em; background: linear-gradient(90deg, var(--brass), transparent); transform-origin: left; animation: rule 1.1s .5s var(--ease) both; }
+@keyframes rule { from { transform: scaleX(0); } }
+.lede { color: var(--ink-2); max-width: 60ch; margin: 0; font-size: 17px; }
+
+.pendulum { justify-self: center; height: 230px; width: 120px; position: relative; }
+.pendulum svg { position: absolute; inset: 0; overflow: visible; }
+.pendulum .arm { transform-origin: 60px 8px; animation: swing 5.2s ease-in-out infinite alternate; }
+@keyframes swing { from { transform: rotate(-3.2deg); } to { transform: rotate(3.2deg); } }
+
+/* ---------- the console ---------- */
+.console {
+  position: relative; border-radius: 18px; padding: 10px;
+  background: linear-gradient(180deg, rgba(30, 39, 44, .9), rgba(18, 24, 27, .9));
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 30px 80px -40px rgba(0,0,0,.9), 0 0 0 6px rgba(228,173,69,.0);
+  transition: box-shadow .3s, border-color .3s;
+}
+.console:focus-within { border-color: rgba(228,173,69,.55); box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 30px 80px -40px rgba(0,0,0,.9), 0 0 0 6px rgba(228,173,69,.08); }
+.console form { display: flex; gap: 10px; align-items: stretch; }
+.field { flex: 1; min-width: 0; display: flex; align-items: center; gap: 0; border-radius: 12px; background: rgba(8, 11, 13, .7); border: 1px solid var(--line-soft); padding-left: 16px; }
+.field .pre { font: 500 15px var(--mono); color: var(--muted); white-space: nowrap; }
+.field input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: var(--ink); font: 500 17px var(--mono); padding: 18px 14px 18px 2px; }
+.field input::placeholder { color: #4d5a5c; }
+.field kbd { font: 500 11px var(--mono); color: var(--muted); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 2px 7px; margin-right: 12px; }
+.go {
+  position: relative; overflow: hidden; border: 0; cursor: pointer; border-radius: 12px; padding: 0 26px;
+  font: 600 16px var(--sans); color: #1b1305;
+  background: linear-gradient(180deg, var(--brass-hi), var(--brass) 55%, #c88f2b);
+  box-shadow: 0 1px 0 rgba(255,255,255,.5) inset, 0 10px 30px -10px rgba(228,173,69,.6);
+  display: inline-flex; align-items: center; gap: 10px; transition: transform .15s, filter .2s;
+}
+.go:hover { filter: brightness(1.06); }
+.go:active { transform: translateY(1px); }
+.go:disabled { cursor: progress; filter: saturate(.6) brightness(.9); }
+.go .arrow { transition: transform .2s; }
+.go:hover .arrow { transform: translateX(3px); }
+.tries { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 6px 4px; font: 500 12px var(--mono); color: var(--muted); }
+.tries span { letter-spacing: .08em; text-transform: uppercase; margin-right: 4px; }
+.chip { font: 500 13px var(--mono); color: var(--ink-2); background: rgba(255,255,255,.025); border: 1px solid var(--line); padding: 6px 12px; border-radius: 999px; cursor: pointer; transition: .2s var(--ease); }
+.chip:hover { color: var(--ink); border-color: rgba(228,173,69,.5); transform: translateY(-1px); }
+
+/* ---------- working state ---------- */
+.working { display: grid; grid-template-columns: 90px 1fr; gap: 24px; align-items: center; margin-top: 28px; padding: 22px 24px; border-radius: var(--r); background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(6px); }
+.drop { height: 96px; position: relative; }
+.drop .cord { position: absolute; left: 50%; top: 0; width: 1.5px; background: linear-gradient(var(--ink-2), var(--brass)); transform: translateX(-50%); animation: lower 1.6s var(--ease) infinite alternate; }
+.drop .bob { position: absolute; left: 50%; width: 22px; height: 30px; transform: translateX(-50%); animation: lowerbob 1.6s var(--ease) infinite alternate; }
+@keyframes lower { from { height: 20px; } to { height: 60px; } }
+@keyframes lowerbob { from { top: 18px; } to { top: 58px; } }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font: 500 14px var(--mono); color: var(--muted); }
+.steps li { display: flex; gap: 10px; align-items: center; }
+.steps li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--muted); }
+.steps li.on { color: var(--ink); }
+.steps li.on::before { background: var(--brass); border-color: var(--brass); box-shadow: 0 0 0 4px rgba(228,173,69,.15); }
+.clock { font: 600 13px var(--mono); color: var(--brass); margin-top: 10px; }
+
+/* ---------- result ---------- */
+.result { margin-top: 30px; display: grid; gap: 18px; }
+.banner { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; font: 500 12px var(--mono); color: var(--muted); letter-spacing: .04em; }
+.banner .example { color: var(--brass); border: 1px dashed rgba(228,173,69,.45); padding: 5px 10px; border-radius: 999px; }
+.head {
+  position: relative; overflow: hidden; border-radius: 18px; padding: 26px 28px;
+  background: linear-gradient(135deg, rgba(30,39,44,.92), rgba(17,22,25,.92));
+  border: 1px solid var(--line);
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px 28px; align-items: center;
+}
+.head::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--state); box-shadow: 0 0 30px 2px var(--state); opacity: .9; }
+.head.fails { --state: var(--fail); } .head.holds { --state: var(--hold); } .head.partial { --state: var(--skip); }
+.head .repo { font: 700 clamp(24px, 3.6vw, 34px)/1.1 var(--cond); letter-spacing: -.01em; text-decoration: none; word-break: break-word; }
+.head .repo:hover { color: var(--brass-hi); }
+.head .meta { font: 500 13px var(--mono); color: var(--muted); margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.verdict { display: inline-flex; align-items: center; gap: 10px; font: 600 13px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--state); padding: 10px 16px; border-radius: 999px; background: color-mix(in srgb, var(--state) 12%, transparent); border: 1px solid color-mix(in srgb, var(--state) 40%, transparent); white-space: nowrap; }
+.verdict .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--state); box-shadow: 0 0 0 0 var(--state); animation: ping 2s ease-out 3; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--state) 60%, transparent); } 100% { box-shadow: 0 0 0 12px transparent; } }
+
+.readouts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.readout { padding: 16px 18px; border-radius: var(--r); background: var(--panel); border: 1px solid var(--line); }
+.readout b { display: block; font: 700 34px/1 var(--cond); font-variant-numeric: tabular-nums; }
+.readout span { display: block; margin-top: 8px; font: 500 11.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.readout.fail b { color: var(--fail); } .readout.hold b { color: var(--hold); } .readout.skip b { color: var(--skip); }
+
+.links { padding: 18px 20px; border-radius: var(--r); background: var(--panel); border: 1px solid var(--line); }
+.links h3, .ledger-h h3 { margin: 0; font: 600 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+.meter { display: flex; height: 12px; border-radius: 999px; overflow: hidden; margin: 14px 0 12px; background: rgba(255,255,255,.04); }
+.meter i { display: block; height: 100%; transform-origin: left; animation: grow .9s var(--ease) both; }
+@keyframes grow { from { transform: scaleX(0); } }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font: 500 12.5px var(--mono); color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend span::before { content: ""; width: 9px; height: 9px; border-radius: 3px; background: var(--c); }
+.links p { margin: 12px 0 0; color: var(--muted); font-size: 14px; }
+
+/* the ledger hangs off a plumb line: a claim that holds sits on true, one that fails is off it */
+.ledger-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 6px; }
+.seg { display: inline-flex; padding: 4px; border-radius: 999px; background: rgba(255,255,255,.03); border: 1px solid var(--line); gap: 2px; }
+.seg button { font: 500 12.5px var(--mono); color: var(--muted); background: transparent; border: 0; padding: 7px 12px; border-radius: 999px; cursor: pointer; transition: .2s; }
+.seg button[aria-pressed="true"] { background: rgba(228,173,69,.14); color: var(--brass-hi); }
+.seg button:hover { color: var(--ink); }
+.ledger { list-style: none; margin: 0; padding: 0 0 0 34px; position: relative; display: grid; gap: 10px; }
+.ledger::before { content: ""; position: absolute; left: 11px; top: -6px; bottom: 18px; width: 1.5px; background: linear-gradient(var(--ink-2), var(--brass) 85%, transparent); animation: cord .8s var(--ease) both; transform-origin: top; }
+@keyframes cord { from { transform: scaleY(0); } }
+.row { position: relative; border-radius: var(--r); background: var(--panel); border: 1px solid var(--line); animation: rise .5s var(--ease) both; animation-delay: calc(var(--i) * 70ms + 200ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+.row::before { content: ""; position: absolute; left: -28px; top: 24px; width: 12px; height: 12px; border-radius: 50%; background: var(--ground); border: 2px solid var(--state); box-shadow: 0 0 12px -2px var(--state); }
+.row::after { content: ""; position: absolute; left: -16px; top: 30px; width: 16px; height: 1.5px; background: var(--state); opacity: .7; }
+.row.fail { --state: var(--fail); border-color: rgba(255,106,85,.35); transform: rotate(-.35deg); }
+.row.hold { --state: var(--hold); }
+.row.skip { --state: var(--skip); }
+.row summary { list-style: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: center; padding: 16px 18px; cursor: pointer; }
+.row summary::-webkit-details-marker { display: none; }
+.row .claim { font: 500 16px/1.35 var(--sans); }
+.row .brief { grid-column: 1; font: 400 13px var(--mono); color: var(--muted); }
+.pill { grid-row: 1 / span 2; grid-column: 2; font: 600 11px var(--mono); letter-spacing: .1em; padding: 6px 10px; border-radius: 999px; color: var(--state); background: color-mix(in srgb, var(--state) 12%, transparent); border: 1px solid color-mix(in srgb, var(--state) 35%, transparent); white-space: nowrap; display: inline-flex; gap: 8px; align-items: center; }
+.pill::after { content: "▾"; font-size: 10px; opacity: .6; transition: transform .2s; }
+.row[open] .pill::after { transform: rotate(180deg); }
+.evidence { padding: 0 18px 16px; display: grid; gap: 8px; }
+.ev { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 10px 12px; border-radius: 10px; background: rgba(8,11,13,.55); border: 1px solid var(--line-soft); font: 400 13.5px var(--mono); }
+.ev code { font: 600 12px var(--mono); color: var(--state); }
+.ev a { color: var(--ink); text-decoration-color: rgba(228,173,69,.5); text-underline-offset: 3px; word-break: break-all; }
+.ev a:hover { color: var(--brass-hi); }
+.ev small { display: block; color: var(--muted); margin-top: 3px; font-size: 12px; word-break: normal; }
+.empty { color: var(--muted); font: 400 14px var(--mono); padding: 12px 0; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.ghost { font: 500 13px var(--sans); color: var(--ink-2); background: rgba(255,255,255,.03); border: 1px solid var(--line); padding: 9px 14px; border-radius: 10px; cursor: pointer; text-decoration: none; transition: .2s; }
+.ghost:hover { color: var(--ink); border-color: rgba(228,173,69,.5); }
+
+.err { margin-top: 26px; padding: 18px 20px; border-radius: var(--r); background: var(--fail-bg); border: 1px solid rgba(255,106,85,.35); color: #ffc9c0; }
+
+/* ---------- how it works ---------- */
+.how { margin-top: 56px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.how article { padding: 20px; border-radius: var(--r); border: 1px solid var(--line-soft); background: rgba(255,255,255,.015); }
+.how h4 { margin: 0 0 8px; font: 600 18px var(--cond); }
+.how p { margin: 0; color: var(--muted); font-size: 14.5px; }
+.how .k { font: 600 11px var(--mono); letter-spacing: .12em; color: var(--brass); text-transform: uppercase; display: block; margin-bottom: 12px; }
+footer { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line-soft); color: var(--muted); font-size: 13.5px; display: flex; flex-wrap: wrap; gap: 10px 24px; justify-content: space-between; }
+footer p { margin: 0; max-width: 70ch; }
+
+@media (max-width: 820px) {
+  .hero { grid-template-columns: 1fr; }
+  .pendulum { display: none; }
+  .readouts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .how { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .console form { flex-direction: column; }
+  .go { justify-content: center; padding: 16px; }
+  .field .pre { display: none; }
+  .field { padding-left: 12px; }
+  .field kbd { display: none; }
+  .head { grid-template-columns: 1fr; padding: 22px; }
+  .working { grid-template-columns: 60px 1fr; padding: 18px; }
+  .nav .hide-sm { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
 </style>
 </head>
 <body>
+<div class="atmos" aria-hidden="true"><div class="grid"></div><div class="glow"></div><div class="glow b"></div><div class="sweep"></div><div class="grain"></div></div>
+
 <div class="wrap">
-  <header class="masthead">
-    <a class="brand" href="../" style="text-decoration:none">
-      <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true">
-        <line x1="32" y1="7" x2="32" y2="37" stroke="#14161A" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="32" cy="7" r="3.4" fill="#14161A"/>
-        <path d="M32 35 L41 48 L32 58 L23 48 Z" fill="#C8912F"/>
-        <line x1="14" y1="58" x2="50" y2="58" stroke="#14161A" stroke-width="3" stroke-linecap="round" opacity="0.25"/>
+  <header class="bar">
+    <a class="brand" href="../">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <defs><linearGradient id="bg1" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#ffd27a"/><stop offset=".55" stop-color="#e4ad45"/><stop offset="1" stop-color="#9b6d1c"/></linearGradient></defs>
+        <rect x="18" y="6" width="28" height="3" rx="1.5" fill="#e9eeec"/>
+        <line x1="32" y1="9" x2="32" y2="33" stroke="#e9eeec" stroke-width="2"/>
+        <path d="M32 31 L42 44 L32 60 L22 44 Z" fill="url(#bg1)"/>
+        <path d="M32 31 L32 60 L22 44 Z" fill="#000" opacity=".22"/>
       </svg>
-      <b>PLUMBLINE</b>
+      <b>plumb<i>line</i></b>
     </a>
-    <nav class="navlinks"><a href="../">About</a><a href="https://github.com/iamrobertmoore/plumbline">Code</a></nav>
+    <nav class="nav">
+      <span class="tag hide-sm">Free tier · no AI</span>
+      <a href="../">About</a>
+      <a href="https://github.com/iamrobertmoore/plumbline">Code</a>
+    </nav>
   </header>
 
-  <section class="tool">
-    <h1>Does this repository do what it says?</h1>
-    <p class="lede">Paste any public GitHub repository. Plumbline reads its README and manifest as a list of claims and tests each one: the links, the files it points at, the install command, the published version, the licence.</p>
-    <form class="ask" id="ask">
-      <input id="repo" name="repo" autocomplete="off" spellcheck="false" placeholder="owner/name, or a github.com link" aria-label="GitHub repository">
-      <button id="go" type="submit">Check it</button>
-    </form>
-    <div class="tries">Try one:
-      <button type="button" data-repo="react/create-react-app">react/create-react-app</button>
-      <button type="button" data-repo="fastapi/fastapi">fastapi/fastapi</button>
-      <button type="button" data-repo="kubernetes/kubernetes">kubernetes/kubernetes</button>
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Repository audit</div>
+      <h1>Does this repo do what it <span class="true">says?</span></h1>
+      <p class="lede">Paste any public GitHub repository. Plumbline reads its README and manifest as a list of claims and tests every one: the links, the files it points at, the install command, the published version, the licence.</p>
     </div>
-
-    <div class="working" id="working" aria-live="polite">
-      <svg class="bob" viewBox="0 0 34 64" aria-hidden="true">
-        <line x1="17" y1="2" x2="17" y2="40" stroke="#14161A" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="17" cy="2" r="2.6" fill="#14161A"/>
-        <path d="M17 38 L26 50 L17 62 L8 50 Z" fill="#C8912F"/>
+    <div class="pendulum" aria-hidden="true">
+      <svg viewBox="0 0 120 230">
+        <defs>
+          <linearGradient id="bg2" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#ffd27a"/><stop offset=".5" stop-color="#e4ad45"/><stop offset="1" stop-color="#8a5f16"/></linearGradient>
+                  </defs>
+        <rect x="30" y="2" width="60" height="5" rx="2.5" fill="#b7c2c0"/>
+        <line x1="60" y1="7" x2="60" y2="226" stroke="#e4ad45" stroke-width="1" stroke-dasharray="2 5" opacity=".45"/>
+        <g class="arm">
+          <line x1="60" y1="8" x2="60" y2="160" stroke="#c9d2cf" stroke-width="1.6"/>
+          <circle cx="60" cy="8" r="3.5" fill="#e9eeec"/>
+          <path d="M60 156 L76 178 L60 214 L44 178 Z" fill="url(#bg2)"/>
+          <path d="M60 156 L60 214 L44 178 Z" fill="#000" opacity=".25"/>
+          <path d="M60 156 L76 178 L60 180 Z" fill="#fff" opacity=".18"/>
+        </g>
+        <g font-family="IBM Plex Mono, monospace" font-size="8" fill="#7d8b8a">
+          <line x1="34" y1="222" x2="86" y2="222" stroke="#7d8b8a" stroke-width="1"/>
+          <line x1="60" y1="218" x2="60" y2="226" stroke="#e4ad45" stroke-width="1.5"/>
+          <text x="88" y="225">0.00°</text>
+        </g>
       </svg>
-      <span id="status">Reading the README</span>
     </div>
-    <div class="out" id="out"></div>
-
-    <p class="note">This page runs the free half of Plumbline: the checks that need no judgement, so no AI model is involved. It is the same code that measured the 100 most-starred installable repositories on GitHub. Every bound on a run is printed with the result. A link that could not be reached is reported as untested, never as working.</p>
   </section>
+
+  <div class="console">
+    <form id="ask" autocomplete="off">
+      <label class="field" for="repo">
+        <span class="pre">github.com/</span>
+        <input id="repo" name="repo" spellcheck="false" placeholder="owner/name" aria-label="GitHub repository, as owner/name or a github.com link">
+        <kbd aria-hidden="true">/</kbd>
+      </label>
+      <button class="go" id="go" type="submit">Check it <span class="arrow" aria-hidden="true">→</span></button>
+    </form>
+    <div class="tries">
+      <span>Try</span>
+      <button class="chip" type="button" data-repo="react/create-react-app">react/create-react-app</button>
+      <button class="chip" type="button" data-repo="fastapi/fastapi">fastapi/fastapi</button>
+      <button class="chip" type="button" data-repo="kubernetes/kubernetes">kubernetes/kubernetes</button>
+      <button class="chip" type="button" data-repo="n8n-io/n8n">n8n-io/n8n</button>
+    </div>
+  </div>
+
+  <div class="working" id="working" hidden aria-live="polite">
+    <div class="drop" aria-hidden="true">
+      <div class="cord"></div>
+      <svg class="bob" viewBox="0 0 22 30"><path d="M11 0 L22 10 L11 30 L0 10 Z" fill="#e4ad45"/><path d="M11 0 L11 30 L0 10 Z" fill="#000" opacity=".25"/></svg>
+    </div>
+    <div>
+      <ol class="steps" id="steps">
+        <li>Reading the README and the file tree</li>
+        <li>Listing every claim it makes</li>
+        <li>Testing each link, one request at a time where a site asks</li>
+        <li>Asking the package registry</li>
+        <li>Checking the licence GitHub can see</li>
+      </ol>
+      <div class="clock" id="clock">0.0 s</div>
+    </div>
+  </div>
+
+  <div id="out"></div>
+
+  <section class="how" aria-label="How it works">
+    <article><span class="k">Claims</span><h4>Everything the README promises</h4><p>Links to other sites, links to files in the repository, the install command, the version in the manifest, the licence it names.</p></article>
+    <article><span class="k">Evidence</span><h4>Every verdict is clickable</h4><p>A failed claim comes with the address that failed, so you can open it and see the 404 yourself before believing a word of this.</p></article>
+    <article><span class="k">Bounds</span><h4>Untested is never passed</h4><p>A link that could not be reached is reported as untested. The limits on a hosted run are printed with the result, every time.</p></article>
+  </section>
+
+  <footer>
+    <p>This page runs the free half of Plumbline: checks that need no judgement, so no AI model is involved. It is the same code that measured the 100 most-starred installable repositories owned by organisations on GitHub.</p>
+    <a class="ghost" href="https://github.com/iamrobertmoore/plumbline">Source on GitHub</a>
+  </footer>
 </div>
 
 <script>
+const EXAMPLE = {"repo":"react/create-react-app","stars":103250,"branch":"main","checkedAt":"2026-09-25T13:43:42.372Z","elapsedMs":2812,"bounds":{"linkCap":150,"deadlineSeconds":50},"verdict":"FAILS","checks":{"readme.present":{"ok":true,"detail":"README found"},"link.relative":{"ok":true,"detail":"0 of 1 point at nothing"},"link.external":{"ok":false,"detail":"7 gone, 1 unverifiable of 38"},"install":{"ok":true,"detail":"1 ok"},"license.claimed":{"ok":true,"detail":"MIT"}},"fails":["link.external"],"skipped":[],"treeTruncated":false,"rel":{"checked":1,"missing":[]},"linkStats":{"found":42,"checked":38,"gone":7,"unreachable":1,"badges":2,"capped":false,"refused":2,"untested":2},"unreachableDetail":["403 https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b"],"deadLinks":["404 https://facebook.github.io/create-react-app/","404 https://facebook.github.io/create-react-app/docs/running-tests","404 https://facebook.github.io/create-react-app/docs/updating-to-new-releases","404 https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app","404 https://facebook.github.io/create-react-app/docs/available-scripts#npm-run-eject","404 https://neutrino.js.org/packages/react-components/"],"installs":["create-react-app"]};
 const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const TITLES = {
   'readme.present': 'The repository has a README',
   'link.relative': 'Links to files in the repository point at files that exist',
   'link.external': 'Links to other sites still work',
   'install': 'The install command names a package that exists',
-  'manifest.version': 'The version in package.json is the one published on npm',
+  'manifest.version': 'The version in the manifest is one that was published',
   'readme.versions': 'Versions named in the README were actually published',
   'license.claimed': 'The licence the README mentions is one GitHub can see',
 };
-const link = (href, text) => `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(text)}</a>`;
+const ORDER = { fail: 0, skip: 1, hold: 2 };
+let filter = 'all';
+let current = null;
 
-function render(b) {
-  const cls = b.verdict === 'FAILS' ? 'fails' : b.verdict === 'HOLDS' ? 'holds' : 'partial';
-  const words = { FAILS: 'SAYS SOMETHING UNTRUE', HOLDS: 'EVERY CHECKED CLAIM HOLDS', 'NOT FULLY TESTED': 'NOTHING FAILED, NOT EVERYTHING WAS TESTED' }[b.verdict];
+function parseInput(v) {
+  const m = String(v).trim().replace(/\.git$/, '').replace(/\/+$/, '').match(/^(?:https?:\/\/)?(?:www\.)?(?:github\.com\/)?([^/\s]+\/[^/\s#?]+)/i);
+  return m ? m[1] : String(v).trim();
+}
+
+function rowsFor(b) {
   const rows = [];
   for (const [id, r] of Object.entries(b.checks || {})) {
-    let ev = esc(r.detail || '');
-    if (id === 'link.relative' && b.rel && b.rel.missing.length) {
-      ev += '<ul>' + b.rel.missing.map((p) => `<li>${link(`https://github.com/${b.repo}/blob/${b.branch}/${p}`, p)} (open it: GitHub will show a 404)</li>`).join('') + '</ul>';
-    }
-    if (id === 'link.external' && b.deadLinks && b.deadLinks.length) {
-      ev += '<ul>' + b.deadLinks.map((d) => { const u = d.split(' ').slice(1).join(' '); return `<li>${esc(d.split(' ')[0])} ${link(u, u)}</li>`; }).join('') + '</ul>';
-    }
-    rows.push(`<tr><td>${esc(TITLES[id] || id)}</td><td><span class="tag ${r.ok ? 'pass' : 'fail'}">${r.ok ? 'HOLDS' : 'FAILS'}</span></td><td class="evidence">${ev}</td></tr>`);
+    const ev = [];
+    if (id === 'link.relative' && b.rel && b.rel.missing && b.rel.missing.length)
+      for (const p of b.rel.missing) ev.push({ code: 'MISSING', href: `https://github.com/${b.repo}/blob/${b.branch}/${p}`, text: p, note: 'Open it: GitHub shows a 404.' });
+    if (id === 'link.external' && b.deadLinks && b.deadLinks.length)
+      for (const d of b.deadLinks) { const [code, ...u] = d.split(' '); const url = u.join(' '); ev.push({ code, href: url, text: url }); }
+    if (id === 'link.external' && r.ok === false && b.linkStats && b.linkStats.gone > (b.deadLinks || []).length)
+      ev.push({ code: 'MORE', text: `${b.linkStats.gone - b.deadLinks.length} more in the full report from the command-line tool` });
+    rows.push({ state: r.ok ? 'hold' : 'fail', title: TITLES[id] || id, brief: r.detail, ev });
   }
-  for (const s of b.skipped || []) rows.push(`<tr><td>${esc(TITLES[s.id] || s.id)}</td><td><span class="tag skip">NOT JUDGED</span></td><td class="evidence">${esc(s.detail)}</td></tr>`);
+  for (const s of b.skipped || []) rows.push({ state: 'skip', title: TITLES[s.id] || s.id, brief: s.detail, ev: [] });
+  return rows.sort((a, c) => ORDER[a.state] - ORDER[c.state]);
+}
+
+function countUp(el, to) {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || to < 2) { el.textContent = to; return; }
+  const t0 = performance.now(), d = 700;
+  const step = (t) => { const k = Math.min(1, (t - t0) / d); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+
+function render(b, { example = false } = {}) {
+  current = b;
+  const rows = rowsFor(b);
+  const n = { fail: rows.filter((r) => r.state === 'fail').length, hold: rows.filter((r) => r.state === 'hold').length, skip: rows.filter((r) => r.state === 'skip').length };
+  const cls = b.verdict === 'FAILS' ? 'fails' : b.verdict === 'HOLDS' ? 'holds' : 'partial';
+  const words = { FAILS: 'Says something untrue', HOLDS: 'Every checked claim holds', 'NOT FULLY TESTED': 'Nothing failed · not all tested' }[b.verdict] || b.verdict;
   const L = b.linkStats || {};
-  const bits = [];
-  if (L.found !== undefined) {
-    bits.push(`<b>${L.found}</b> external links found, <b>${L.checked}</b> tested, ${L.badges} badges not treated as claims.`);
-    if (L.unreachable) bits.push(`<b>${L.unreachable}</b> could not be reached, so they are untested rather than working.`);
-    if (L.refused) bits.push(`<b>${L.refused}</b> point at a private or local address, which this page will not fetch for you.`);
-    if (L.capped) bits.push(`This page tests at most ${b.bounds.linkCap} links a run, so <b>${L.untested}</b> were not tested. The command-line tool has no cap.`);
-  }
-  if (b.rel) bits.push(`<b>${b.rel.checked}</b> links to files inside the repository checked against its file tree.`);
+  const working = Math.max(0, (L.checked || 0) - (L.gone || 0) - (L.unreachable || 0));
+  const parts = [
+    ['work', working, 'var(--hold)', 'work'],
+    ['gone', L.gone || 0, 'var(--fail)', 'gone'],
+    ['unreach', L.unreachable || 0, 'var(--skip)', 'unreachable, so untested'],
+    ['untested', (L.untested || 0), '#56636a', 'not tested (over the cap, or private)'],
+    ['badges', L.badges || 0, '#2c373c', 'badges, not claims'],
+  ];
+  const total = parts.reduce((a, p) => a + p[1], 0) || 1;
+  const when = new Date(b.checkedAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   $('out').innerHTML = `
-    <div class="verdict ${cls}"><span class="repo">${link('https://github.com/' + b.repo, b.repo)}</span><b>${words}</b>
-      <span class="meta">${(b.stars || 0).toLocaleString('en-GB')} stars, checked in ${(b.elapsedMs / 1000).toFixed(1)} s${b.cached ? ', from a run in the last ten minutes' : ''}</span></div>
-    <table class="ledger"><thead><tr><th>CLAIM</th><th>RESULT</th><th>EVIDENCE</th></tr></thead><tbody>${rows.join('') || '<tr><td colspan="3">The README makes no claim these checks can test.</td></tr>'}</tbody></table>
-    <div class="bounds">${bits.join(' ')}</div>`;
+  <section class="result" aria-live="polite">
+    <div class="banner">
+      ${example ? `<span class="example">Example result, checked ${esc(when)}. Run any repository above.</span>` : `<span>Checked ${esc(when)}${b.cached ? ' · from a run in the last ten minutes' : ''}</span>`}
+      <div class="actions"><button class="ghost" id="copy" type="button">Copy link to this result</button>${example ? '' : `<button class="ghost" id="again" type="button">Run again</button>`}</div>
+    </div>
+    <div class="head ${cls}">
+      <div>
+        <a class="repo" href="https://github.com/${esc(b.repo)}" target="_blank" rel="noopener">${esc(b.repo)}</a>
+        <div class="meta"><span>★ ${(b.stars || 0).toLocaleString('en-GB')}</span><span>branch ${esc(b.branch)}</span><span>${((b.elapsedMs || 0) / 1000).toFixed(1)} s</span></div>
+      </div>
+      <div class="verdict"><span class="dot"></span>${esc(words)}</div>
+    </div>
+    <div class="readouts">
+      <div class="readout"><b data-n="${rows.length}">0</b><span>Kinds of claim tested</span></div>
+      <div class="readout fail"><b data-n="${n.fail}">0</b><span>Fail</span></div>
+      <div class="readout hold"><b data-n="${n.hold}">0</b><span>Hold</span></div>
+      <div class="readout skip"><b data-n="${n.skip}">0</b><span>Not judged</span></div>
+    </div>
+    ${L.found !== undefined ? `
+    <div class="links">
+      <h3>${L.found} links to other sites, ${(b.rel && b.rel.checked) || 0} to files in the repository</h3>
+      <div class="meter" role="img" aria-label="${parts.map((p) => `${p[1]} ${p[3]}`).join(', ')}">${parts.filter((p) => p[1]).map((p, i) => `<i style="width:${(100 * p[1] / total).toFixed(2)}%;background:${p[2]};animation-delay:${i * 90}ms"></i>`).join('')}</div>
+      <div class="legend">${parts.filter((p) => p[1]).map((p) => `<span style="--c:${p[2]}">${p[1]} ${esc(p[3])}</span>`).join('')}</div>
+      ${L.capped ? `<p>A hosted run tests at most ${b.bounds.linkCap} links. The command-line tool has no cap.</p>` : ''}
+    </div>` : ''}
+    <div class="ledger-h">
+      <h3>Every claim, hung on a plumb line</h3>
+      <div class="seg" role="group" aria-label="Filter claims">
+        ${['all', 'fail', 'hold', 'skip'].map((f) => `<button type="button" data-f="${f}" aria-pressed="${f === filter}">${{ all: 'All', fail: 'Fails', hold: 'Holds', skip: 'Not judged' }[f]}</button>`).join('')}
+      </div>
+    </div>
+    <ul class="ledger" id="ledger"></ul>
+  </section>`;
+  drawLedger(rows);
+  document.querySelectorAll('.readout b').forEach((el) => countUp(el, +el.dataset.n));
+  document.querySelectorAll('.seg button').forEach((btn) => btn.addEventListener('click', () => {
+    filter = btn.dataset.f;
+    document.querySelectorAll('.seg button').forEach((x) => x.setAttribute('aria-pressed', String(x === btn)));
+    drawLedger(rows);
+  }));
+  $('copy').addEventListener('click', async (e) => {
+    const url = location.origin + location.pathname + '?repo=' + encodeURIComponent(b.repo);
+    try { await navigator.clipboard.writeText(url); e.target.textContent = 'Copied'; } catch { e.target.textContent = url; }
+    setTimeout(() => { e.target.textContent = 'Copy link to this result'; }, 2200);
+  });
+  if ($('again')) $('again').addEventListener('click', () => run(b.repo));
+}
+
+function drawLedger(rows) {
+  const shown = rows.filter((r) => filter === 'all' || r.state === filter);
+  const pill = { fail: 'FAILS', hold: 'HOLDS', skip: 'NOT JUDGED' };
+  $('ledger').innerHTML = shown.length ? shown.map((r, i) => `
+    <li class="row ${r.state}" style="--i:${i}">
+      <details ${r.state === 'fail' ? 'open' : ''}>
+        <summary><span class="claim">${esc(r.title)}</span><span class="pill">${pill[r.state]}</span><span class="brief">${esc(r.brief)}</span></summary>
+        ${r.ev.length ? `<div class="evidence">${r.ev.map((e) => `<div class="ev"><code>${esc(e.code)}</code><div>${e.href ? `<a href="${esc(e.href)}" target="_blank" rel="noopener">${esc(e.text)}</a>` : esc(e.text)}${e.note ? `<small>${esc(e.note)}</small>` : ''}</div></div>`).join('')}</div>` : ''}
+      </details>
+    </li>`).join('') : `<li class="empty">No claims in this group.</li>`;
 }
 
 let tick;
-async function run(repo) {
-  repo = repo.trim();
-  if (!repo) return;
+async function run(input) {
+  const repo = parseInput(input);
+  if (!repo) { $('repo').focus(); return; }
   $('repo').value = repo;
   history.replaceState(null, '', '?repo=' + encodeURIComponent(repo));
-  $('go').disabled = true; $('out').innerHTML = ''; $('working').classList.add('on');
-  const t0 = Date.now();
-  const steps = ['Reading the README', 'Listing the claims', 'Testing every link', 'Asking the registry', 'Checking the licence'];
-  tick = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $('status').textContent = `${steps[Math.min(steps.length - 1, Math.floor(s / 2))]}, ${s} s`; }, 250);
+  $('go').disabled = true; $('out').innerHTML = ''; $('working').hidden = false;
+  const steps = [...document.querySelectorAll('#steps li')];
+  const t0 = performance.now();
+  tick = setInterval(() => {
+    const s = (performance.now() - t0) / 1000;
+    $('clock').textContent = s.toFixed(1) + ' s';
+    steps.forEach((li, i) => li.classList.toggle('on', i <= Math.min(steps.length - 1, Math.floor(s / 1.4))));
+  }, 100);
   try {
     const r = await fetch('../api/audit?repo=' + encodeURIComponent(repo));
-    const b = await r.json();
+    const b = await r.json().catch(() => ({ error: `The checker answered with HTTP ${r.status}.` }));
     if (!r.ok) throw new Error(b.error || 'HTTP ' + r.status);
+    filter = 'all';
     render(b);
+    $('out').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   } catch (e) {
-    $('out').innerHTML = `<p class="err">${esc(e.message)}</p>`;
+    $('out').innerHTML = `<div class="err" role="alert">${esc(e.message)}</div>`;
   } finally {
-    clearInterval(tick); $('go').disabled = false; $('working').classList.remove('on');
+    clearInterval(tick); $('go').disabled = false; $('working').hidden = true;
   }
 }
+
 $('ask').addEventListener('submit', (e) => { e.preventDefault(); run($('repo').value); });
-document.querySelectorAll('[data-repo]').forEach((b) => b.addEventListener('click', () => run(b.dataset.repo)));
+document.querySelectorAll('.chip').forEach((c) => c.addEventListener('click', () => run(c.dataset.repo)));
+document.addEventListener('keydown', (e) => { if (e.key === '/' && document.activeElement !== $('repo')) { e.preventDefault(); $('repo').focus(); } });
+$('repo').addEventListener('paste', () => setTimeout(() => { $('repo').value = parseInput($('repo').value); }, 0));
+
 const q = new URLSearchParams(location.search).get('repo');
-if (q) run(q);
+if (q) run(q); else render(EXAMPLE, { example: true });
 </script>
 </body>
 </html>
