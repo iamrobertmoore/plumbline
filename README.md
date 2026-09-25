@@ -152,7 +152,7 @@ warning is a note about the repository, not a reason to hold a release, so it do
 
 Zero runtime dependencies. Node 20 or later. Reads the repository, writes nothing.
 
-The suite is `node --test test/*.test.mjs` (78 tests). Eleven of them reach the npm registry and skip
+The suite is `node --test test/*.test.mjs` (86 tests). Eleven of them reach the npm registry and skip
 rather than fail when the network is down. The rest run offline, including six that run against a
 **local HTTP server**, so the redirect, the request method and the request headers are all tested
 without depending on a real host happening to misbehave on the day.

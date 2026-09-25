@@ -10,7 +10,9 @@
   "scripts": {
     "audit": "node src/cli.mjs",
     "selfcheck": "node src/cli.mjs --selfcheck",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "run": "node .bob/skills/plumbline/plumbline-run.mjs",
+    "report": "node .bob/skills/plumbline/render-report.mjs"
   },
   "repository": { "type": "git", "url": "git+https://github.com/iamrobertmoore/plumbline.git" },
   "homepage": "https://iamrobertmoore.github.io/plumbline/",

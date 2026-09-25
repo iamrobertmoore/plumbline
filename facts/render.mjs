@@ -22,7 +22,15 @@ function computed(root, kind) {
   if (kind === 'tests') {
     let n = 0;
     for (const f of readdirSync(join(root, 'test')).filter((f) => f.endsWith('.test.mjs'))) {
-      n += (readFileSync(join(root, 'test', f), 'utf8').match(/^test\(/gm) || []).length;
+      // Count top-level test( lines, skipping any inside a template literal: a test
+      // file that writes a fixture test file as a string is not adding a test to
+      // this suite. Counting those once made the README say 88 when 86 ran.
+      let inTemplate = false;
+      for (const line of readFileSync(join(root, 'test', f), 'utf8').split('\n')) {
+        if (!inTemplate && /^test\(/.test(line)) n++;
+        const ticks = (line.replace(/\\`/g, '').match(/`/g) || []).length;
+        if (ticks % 2) inTemplate = !inTemplate;
+      }
     }
     return String(n);
   }
