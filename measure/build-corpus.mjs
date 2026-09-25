@@ -1,12 +1,20 @@
-// build-corpus.mjs — the rule that selected measure/corpus.json, executable.
+// build-corpus.mjs: the rule that selected measure/corpus.json, executable.
 //
 // The corpus is the strongest end of GitHub: the most-starred repositories that
-// ship something you can install. The rule has four steps and no judgement in it:
+// ship something you can install, owned by organisations. The rule has five steps
+// and no judgement in it:
 //
-//   1. ask GitHub for the top 200 repositories by star count
-//   2. drop the archived ones
-//   3. drop the ones with no installable manifest at the repository root
-//   4. take the first 100 of what is left, still in star order
+//   1. ask GitHub for the top 400 repositories by star count
+//   2. drop the ones owned by a person rather than an organisation
+//   3. drop the archived ones
+//   4. drop the ones with no installable manifest at the repository root
+//   5. take the first 100 of what is left, still in star order
+//
+// Step 2 was added on 25 September 2026. The measurement publishes findings next to
+// repository names, and a repository owned by a personal account names a person.
+// This entry works with no personal information, so the corpus is organisation-owned
+// by rule rather than by editing, and verify-corpus.mjs fails if a personal account
+// ever appears in it.
 //
 // That is the whole selection rule. It is written down here, in code, because a
 // selection rule stated only in prose is a selection rule nobody can check.
@@ -14,13 +22,16 @@
 // IMPORTANT: this does NOT reproduce measure/corpus.json. It cannot, and it is not
 // meant to. Stars drift by a few hundred a day at this end of GitHub, so step 1
 // returns a different 200 every time it runs. corpus.json is a FROZEN ARTEFACT
-// captured on 17 September 2026; this script is the rule that produced it. Running
+// captured on 25 September 2026; this script is the rule that produced it. Running
 // it today gives you today's corpus, which is a different and equally valid corpus.
 //
 // To check the committed corpus rather than rebuild it, run verify-corpus.mjs.
 //
 //   GH_TOKEN=$(gh auth token) node measure/build-corpus.mjs
-//   GH_TOKEN=$(gh auth token) node measure/build-corpus.mjs --out corpus-today.json
+//   GH_TOKEN=$(gh auth token) node measure/build-corpus.mjs --out corpus-today.json --source source.json
+//
+// --source keeps every page of the search response, projected to the fields the rule
+// reads, so the selection can be re-derived from the file rather than taken on trust.
 //
 // Needs network (GitHub). Reads only, writes only with --out.
 
@@ -34,6 +45,7 @@ if (TOKEN) H.Authorization = `Bearer ${TOKEN}`;
 const args = process.argv.slice(2);
 const arg = (name, dflt) => { const i = args.indexOf(name); return i === -1 ? dflt : args[i + 1]; };
 const OUT = arg('--out', null);
+const SOURCE = arg('--source', null);
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -42,8 +54,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // it cannot fail the install-related checks for a reason anyone cares about.
 const MANIFESTS = ['package.json', 'pyproject.toml', 'Cargo.toml', 'go.mod', 'setup.py', 'pom.xml', 'Gemfile', 'composer.json'];
 
-// Step 1. The pool. 200 is two pages of 100, which is the API's maximum page size.
-const POOL = 200;
+// Step 1. The pool. Four pages of 100, the API's maximum page size. Roughly a third
+// of the most-starred repositories are personal, and some of the rest have no
+// manifest, so 200 is no longer enough to leave 100.
+const POOL = 400;
 
 async function j(url, tries = 3) {
   for (let i = 0; i < tries; i++) {
@@ -68,8 +82,19 @@ console.error(`pool: ${pool.length} repositories`);
 
 // Steps 2 and 3 need each repository's file tree, because the manifest is a fact
 // about the tree and the search response does not carry it.
+if (SOURCE) {
+  writeFileSync(SOURCE, JSON.stringify(pool.map((i) => ({
+    full_name: i.full_name, owner_type: (i.owner || {}).type || null, stars: i.stargazers_count,
+    archived: i.archived, default_branch: i.default_branch, language: i.language,
+    license: (i.license || {}).spdx_id || null, homepage: i.homepage || null,
+  })), null, 1));
+  console.error(`wrote ${SOURCE}`);
+}
+
 const kept = [];
 for (const i of pool) {
+  // Step 2. A personal account names a person. Organisations only.
+  if ((i.owner || {}).type !== 'Organization') continue;
   if (i.archived) continue;
   const t = await j(`https://api.github.com/repos/${i.full_name}/git/trees/${i.default_branch}?recursive=1`);
   const paths = t && Array.isArray(t.tree) ? t.tree.filter((x) => x.type === 'blob').map((x) => x.path) : [];
@@ -78,6 +103,7 @@ for (const i of pool) {
   if (!manifest) { await sleep(90); continue; }
   kept.push({
     full_name: i.full_name,
+    owner_type: i.owner.type,
     stars: i.stargazers_count,
     lang: i.language,
     manifest,
@@ -93,7 +119,7 @@ for (const i of pool) {
   await sleep(90);
 }
 
-// Step 4. Still in star order, which the pool already is.
+// Step 5. Still in star order, which the pool already is.
 const corpus = kept.slice(0, 100);
 console.error(`corpus: ${corpus.length} repositories, ${corpus.reduce((a, r) => a + r.stars, 0).toLocaleString('en-GB')} stars`);
 

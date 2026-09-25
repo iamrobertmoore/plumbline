@@ -22,8 +22,8 @@ const MANIFESTS = ['package.json', 'pyproject.toml', 'Cargo.toml', 'go.mod', 'se
 // If the corpus changes and these do not, the document is wrong, and this fails.
 const EXPECTED = {
   count: 100,
-  stars: 14304526,
-  manifests: { 'package.json': 65, 'pyproject.toml': 25, 'go.mod': 4, 'Cargo.toml': 3, 'setup.py': 2, 'pom.xml': 1 },
+  stars: 12269541,
+  manifests: { 'package.json': 65, 'pyproject.toml': 22, 'go.mod': 5, 'Cargo.toml': 5, 'setup.py': 2, 'composer.json': 1 },
 };
 
 const corpus = JSON.parse(readFileSync(FILE, 'utf8'));
@@ -63,6 +63,10 @@ function check(c, fails) {
     if (derived !== !!r.has_ci) bad.push(`${r.full_name}: has_ci is ${r.has_ci} but workflows lists ${(r.workflows || []).length}`);
   }
 
+  // Organisations only. A repository owned by a personal account names a person, and
+  // this measurement publishes findings next to repository names.
+  for (const r of c) if (r.owner_type !== 'Organization') bad.push(`${r.full_name} is owned by a ${r.owner_type || 'unknown'} account, not an organisation`);
+
   // The audit needs a branch to fetch trees and READMEs from.
   for (const r of c) if (!r.default_branch) bad.push(`${r.full_name} has no default_branch`);
 
@@ -94,6 +98,7 @@ if (process.argv.includes('--self-test')) {
     ['default_branch removed', (c) => { delete c[11].default_branch; }],
     ['a star count moved', (c) => { c[13].stars -= 1; }],
     ['an entry removed', (c) => { c.pop(); }],
+    ['a personal account present', (c) => { c[17].owner_type = 'User'; }],
   ];
   let failures = 0;
   for (const [name, mutate] of cases) {
