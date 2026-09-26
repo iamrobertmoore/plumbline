@@ -8,7 +8,8 @@ which gets 40 Bobcoins for the whole event.
 Everything under `.bob/`, plus `test/plumbline-run.test.mjs`, was written by Bob, apart from the
 corrections listed below. Tasks 04 to 08 ran in the Plumbline mode Bob built, on the sample project in
 `examples/turnstile`, the same way a customer would run it. The deterministic checks in `src/` and the
-measurement in `measure/` were written before the event and aren't Bob's work.
+measurement in `measure/` were written in the nine days before Bob access opened on 25 September
+(16 to 24 September, in the git history) and aren't Bob's work.
 
 | Task | Mode | What Bob did | Files Bob wrote | Bobcoins |
 |---|---|---|---|---|

@@ -164,9 +164,11 @@ the npm registry and skip rather than fail when you're offline.
 
 ## What was built when
 
-- **Before the event:** the free side (`src/`, the CLI, the negative controls), the measurement
-  (`measure/`), the hosted checker, and the Turnstile sample with its answer key. None of that uses AI.
-- **During the event, with Bob:** everything in [`.bob/`](.bob/), `test/plumbline-run.test.mjs`, and
+- **In the run-up, 16 to 24 September, before Bob access opened:** the free side (`src/`, the CLI,
+  the negative controls), the measurement (`measure/`), the hosted checker, and the Turnstile sample
+  with its answer key. None of it uses AI, and the answer key had to exist before Bob could see the
+  sample. The git history shows the dates: the first commit is 16 September.
+- **From 25 September, when Bob access opened, with Bob:** everything in [`.bob/`](.bob/), `test/plumbline-run.test.mjs`, and
   every audit of Turnstile. Eight Bob tasks, each exported to [`docs/bob/tasks/`](docs/bob/tasks/),
   with a screenshot of what it cost in [`bob_sessions/`](bob_sessions/).
 
