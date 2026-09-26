@@ -4,7 +4,7 @@ Every Bob task for this entry, in order, with what Bob wrote and what it cost. T
 task's summary is in [`bob_sessions/`](../../bob_sessions/). Bob ran in Bob IDE 2.2.0 on the hackathon
 account (team ibm-coding-challenge-2, us-east), which has 40 Bobcoins for the whole event.
 
-Everything under `.bob/`, plus `test/plumbline-run.test.mjs`, was written by Bob, with the corrections listed below. Tasks 04 to 06 ran in the Plumbline mode Bob built, on the sample project in `examples/turnstile`, as a customer would run it. Plumbline's
+Everything under `.bob/`, plus `test/plumbline-run.test.mjs`, was written by Bob, with the corrections listed below. Tasks 04 to 08 ran in the Plumbline mode Bob built, on the sample project in `examples/turnstile`, as a customer would run it. Plumbline's
 deterministic checks in `src/` and the measurement in `measure/` were written before the event and are
 not Bob's work.
 
@@ -55,6 +55,9 @@ wrote and what I changed stays visible.
   PARTIAL, called "the spec has been reviewed" unverifiable although its own verdicts showed four false
   clauses, and wrote 28 unmapped cases where its file had 24. Task 08 fixed all three in Bob's own
   hands: two judging rules written into the skill, and counts taken by script.
+
+- **After task 08, the report's first screen.** I added a second row of tiles to Bob's renderer
+  (spec clauses, checklist ticks and summary lines found false), so the whole result reads at a glance.
 
 ## Checked against the answer key
 

@@ -277,6 +277,17 @@ export function renderReport(claims) {
     `<div class="tile ${cls}"><div class="val">${val}</div><div class="lbl">${lbl}</div></div>`
   ).join('\n');
 
+  // Review addition: the same at-a-glance view for the spec, checklist and summary claims.
+  const docGroups = [
+    { rows: specClaims, lbl: 'Spec clauses false' },
+    { rows: checklistClaims, lbl: 'Checklist ticks false' },
+    { rows: summarySection, lbl: 'Summary lines false' },
+  ].filter((g) => g.rows.length > 0);
+  const docTiles = docGroups.map(({ rows, lbl }) => {
+    const n = rows.filter((c) => c.verdict === 'FAILS').length;
+    return `<div class="tile ${n > 0 ? 'bad' : 'ok'}"><div class="val">${n}<small style="font-size:0.5em;color:var(--muted)"> of ${rows.length}</small></div><div class="lbl">${lbl}</div></div>`;
+  }).join('\n');
+
   const generated = new Date().toISOString();
 
   return `<!DOCTYPE html>
@@ -295,6 +306,7 @@ export function renderReport(claims) {
 
 <h2>Test-plan headline</h2>
 <div class="tiles">${tiles}</div>
+${docTiles ? `<h2>Documents headline</h2>\n<div class="tiles">${docTiles}</div>` : ''}
 
 ${nameOnlySection}
 
