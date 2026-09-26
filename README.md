@@ -77,6 +77,8 @@ automated cases are covered and all pass, and its release checklist has all 10 i
 
 The full score against the key is in [`examples/README.md`](examples/README.md).
 
+<img src="docs/brand/report-turnstile.png" alt="The top of Plumbline's report on Turnstile: 84 automated cases, 60 with a test, 24 without, 8 tests in name only; 4 of 24 spec clauses, 4 of 10 checklist ticks and 3 of 6 summary lines false; then the tests in name only, each with its mutation and witness." width="820">
+
 ### Why it does not accuse a test that does its job
 
 Every mutation tester has the same weakness: a change that looks like a break but leaves the behaviour
