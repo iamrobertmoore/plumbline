@@ -101,13 +101,16 @@ For each `.docx` file:
 
 For each `.pdf` file:
 
-1. **Try native read first:** call `office_read mode:text` on the PDF.
-2. If the call succeeds and returns non-empty text, split on checklist-item
+1. **Try `office_read` first:** call `office_read mode:text` on the PDF.
+2. **If `office_read` refuses or returns empty, try `read_file`:** call
+   `read_file` on the same path. `office_read` does not support `.pdf`; it will
+   throw or return nothing. `read_file` may succeed for text-based or
+   linearised PDFs.
+3. If **either** call returns non-empty text, split on checklist-item
    patterns: lines beginning with `[ ]`, `[x]`, `☐`, `☑`, a bullet (`-`, `*`,
    `•`), or a numbered list item (`1.`, `2.`, etc.). Emit one claim per item.
    The `source` field is `<filename>!line:<approximate-line-number>`.
-3. **If the native read fails** (throws, returns empty, or returns only
-   whitespace):
+4. **If both calls fail** (throw, return empty, or return only whitespace):
    - Emit a single claim entry:
      ```json
      {
@@ -126,8 +129,8 @@ For each `.pdf` file:
    - This failure is surfaced in the report as an amber row. Do **not** skip
      the file silently.
 
-**Cost rule:** one `office_read` call per `.pdf` file (the attempt counts even
-if it fails).
+**Cost rule:** up to two calls per `.pdf` file (`office_read` attempt + `read_file`
+fallback). Both attempts count toward the cost even if both fail.
 
 ### 1.5 Claims JSON schema
 
@@ -212,7 +215,8 @@ match retain `testFile: null`. Write the updated `claims.json`.
 
 **Goal:** for every mapped claim, produce the smallest source edit that would
 make the claim's *described behaviour* false -- not necessarily the specific
-assertion in the test.
+assertion in the test. Each mutation carries a **witness** that proves the
+mutation truly breaks the claim before the test result is trusted.
 
 ### 3.1 Critical rule -- what the mutation targets
 
@@ -247,7 +251,8 @@ The subagent must return a JSON array of:
     "file": "src/auth.mjs",
     "search": "return 401;",
     "replace": "return 200;"
-  }
+  },
+  "witness": "export default async (load) => {\n  const { login } = await load('src/auth.mjs');\n  return login('x', 'bad').status === 401;\n};\n"
 }
 ```
 
@@ -261,14 +266,32 @@ Rules for the subagent:
   `"search": ["line A", "line B"]`, `"replace": ["line A'", "line B'"]`.
 - If no source-level mutation can falsify the claim (e.g. the claim is a
   process/documentation requirement with no code counterpart), set
-  `"mutation": null`.
+  `"mutation": null` and `"witness": null`.
+
+**Witness rules:**
+- Every non-null mutation **must** include a `witness`.
+- The witness is the full text of an ES module whose **default export** is:
+  `async (load) => boolean`
+  where `load(relPath)` dynamically imports a module **from the code tree being
+  tested** (not from the host system).
+- The witness must return `true` when run against the **unbroken** code
+  (confirming the claim holds before the mutation).
+- The witness must return `false` when run against the **mutated** code
+  (confirming the mutation actually breaks the claim's described behaviour).
+- The witness reasons from the claim text and the production source alone —
+  it must **not** replicate the mapped test's assertions. It is an independent
+  proof that the described behaviour holds or is broken.
+- Keep the witness as short as possible: import only what is needed, call the
+  minimum function(s) needed to verify the claim, return a boolean.
 
 **Cost rule:** one subagent call per test file (even though the subagent never
 sees the test file -- the grouping is for batching efficiency).
 
 ### 3.3 Merge results
 
-Update `claims.json` with `mutation` for each claim. Write the file.
+Update `claims.json` with `mutation` and `witness` for each claim. Write the
+file. The `witness` field is a JSON string (the ES module source). Null when
+`mutation` is null.
 
 ### 3.4 Run the mutation runner (Bob does this)
 
@@ -278,6 +301,12 @@ runner directly**:
 ```bash
 node .bob/skills/plumbline/plumbline-run.mjs
 ```
+
+The runner now executes the witness on the unbroken worktree (must return
+`true`, else `WITNESS_INVALID`) and on the mutated worktree (must return
+`false`, else `WEAK_MUTATION`). Only when the witness confirms the break **and**
+the mapped test still passes is the result `NAME_ONLY`. This prevents false
+NAME_ONLY verdicts caused by mutations that do not actually break the claim.
 
 This populates `mutationResult` on every mapped row and regenerates
 `.plumbline/report.html`. The skill does not ask the user to run the script;

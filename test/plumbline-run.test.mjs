@@ -220,11 +220,29 @@ test('add is callable', () => { assert.equal(typeof add, 'function'); });
     );
     assert.equal(result1, 'CAUGHT', `Expected CAUGHT but got ${result1}`);
 
-    // Claim 2: name-only check — same mutation, weak assertion in its own file, exit 0.
+    // Claim 2: the weak test survives the mutation. A witness proves the mutation
+    // really broke the claim, so the survival is an accusation: NAME_ONLY.
+    const witness = `export default async (load) => { const { add } = await load('src/add.mjs'); return add(2, 3) === 5; };`;
     const result2 = await processRow(
-      'TP-WEAK', mutation, 'test/add-weak.test.mjs', 'add is callable', root
+      'TP-WEAK', mutation, 'test/add-weak.test.mjs', 'add is callable', root, witness
     );
     assert.equal(result2, 'NAME_ONLY', `Expected NAME_ONLY but got ${result2}`);
+
+    // Claim 2b: the same survival with no witness is UNPROVEN, never NAME_ONLY.
+    // Review correction: five false accusations reached the first run's report
+    // from mutations that looked like breaks and left the claim true.
+    const result2b = await processRow(
+      'TP-WEAK-NOWITNESS', mutation, 'test/add-weak.test.mjs', 'add is callable', root
+    );
+    assert.equal(result2b, 'UNPROVEN', `Expected UNPROVEN but got ${result2b}`);
+
+    // Claim 2c: a mutation that leaves the claim true is WEAK_MUTATION, and nobody
+    // is accused. b + a is still the sum.
+    const harmless = { file: 'src/add.mjs', search: 'return a + b', replace: 'return b + a' };
+    const result2c = await processRow(
+      'TP-HARMLESS', harmless, 'test/add-weak.test.mjs', 'add is callable', root, witness
+    );
+    assert.equal(result2c, 'WEAK_MUTATION', `Expected WEAK_MUTATION but got ${result2c}`);
 
     // Claim 3: a name that selects no test. Node then reports the file itself as
     // one passing test and exits 0, which without this check read as NAME_ONLY:

@@ -40,6 +40,11 @@ function rowClass(claim) {
   if (claim.mutationResult === 'BASELINE_FAIL') return 'warn';
   if (claim.mutationResult === 'MUTATION_INVALID') return 'warn';
   if (claim.mutationResult === 'NO_SUCH_TEST') return 'warn';
+  // Review correction: a surviving mutation is only a finding when its witness
+  // proved the break. Without that proof the row is held back, not accused.
+  if (claim.mutationResult === 'UNPROVEN') return 'warn';
+  if (claim.mutationResult === 'WEAK_MUTATION') return 'warn';
+  if (claim.mutationResult === 'WITNESS_INVALID') return 'warn';
   if (claim.verdict === 'FAILS') return 'bad';
   if (claim.verdict === 'UNVERIFIABLE') return 'warn';
   if (claim.verdict === 'PARTIAL') return 'warn';
@@ -55,7 +60,9 @@ function headline(claims) {
   const withTest = automated.filter((c) => c.testFile != null);
   const withoutTest = automated.filter((c) => c.testFile == null);
   const nameOnly = automated.filter((c) => c.mutationResult === 'NAME_ONLY');
-  return { testPlan, automated, withTest, withoutTest, nameOnly };
+  const held = automated.filter((c) =>
+    ['UNPROVEN', 'WEAK_MUTATION', 'WITNESS_INVALID'].includes(c.mutationResult));
+  return { testPlan, automated, withTest, withoutTest, nameOnly, held };
 }
 
 // ── main render ────────────────────────────────────────────────────────────
@@ -140,6 +147,12 @@ export function renderReport(claims) {
     .name-only-list li { background: rgba(255,106,85,0.1); border-left: 3px solid var(--red);
                          padding: 0.5rem 0.75rem; margin-bottom: 0.4rem; border-radius: 0 4px 4px 0; }
     .name-only-list li code { background: transparent; }
+    .witness { margin-top: 0.4rem; }
+    .witness summary { cursor: pointer; color: var(--muted); font-size: 0.8rem; }
+    .witness pre { font-family: var(--mono); font-size: 0.75rem; white-space: pre-wrap; margin: 0.4rem 0 0;
+                   padding: 0.5rem; background: rgba(0,0,0,0.25); border-radius: 4px; }
+    td:first-child { white-space: nowrap; }
+    td .mutation { display: inline-block; max-width: 34ch; overflow-wrap: anywhere; }
     footer { text-align: center; color: var(--muted); font-size: 0.75rem; margin-top: 3rem;
              padding-top: 1rem; border-top: 1px solid var(--border); }
   `.trim();
@@ -157,6 +170,9 @@ export function renderReport(claims) {
       BASELINE_FAIL: ['baseline', 'BASELINE FAIL'],
       MUTATION_INVALID: ['invalid', 'INVALID'],
       NO_SUCH_TEST: ['invalid', 'NO SUCH TEST'],
+      UNPROVEN: ['invalid', 'UNPROVEN'],
+      WEAK_MUTATION: ['invalid', 'WEAK MUTATION'],
+      WITNESS_INVALID: ['invalid', 'WITNESS INVALID'],
       ERROR: ['error', 'ERROR'],
     };
     const [cls, label] = map[r] ?? ['', r];
@@ -234,13 +250,16 @@ export function renderReport(claims) {
 
   const nameOnlyItems = h.nameOnly.map((c) =>
     `<li><strong><code>${esc(c.id)}</code></strong> — ${esc(c.text)}<br>` +
-    `<span class="mutation">Mutation: <span class="del">${esc(c.mutation?.search)}</span> → <span class="ins">${esc(c.mutation?.replace)}</span></span></li>`
+    `<span class="mutation">Mutation: <span class="del">${esc(c.mutation?.search)}</span> → <span class="ins">${esc(c.mutation?.replace)}</span></span>` +
+    (c.witness ? `<details class="witness"><summary>Witness: true on the real code, false on the mutant</summary><pre>${esc(c.witness)}</pre></details>` : '') +
+    `</li>`
   ).join('\n');
 
   const nameOnlySection = h.nameOnly.length > 0 ? `
     <h2>⚠ Tests in name only (${h.nameOnly.length})</h2>
     <p style="color:var(--muted);margin-bottom:0.75rem">
-      These tests did not detect their own mutation. They assert a name but not the behaviour.
+      Each mutation broke the claimed behaviour (its witness returned true on the real code and false on the
+      mutant), and the named test still passed.
     </p>
     <ul class="name-only-list">${nameOnlyItems}</ul>
   ` : '';
@@ -253,6 +272,7 @@ export function renderReport(claims) {
     { val: h.withTest.length,    lbl: 'With a test',      cls: h.withTest.length === h.automated.length ? 'ok' : 'warn' },
     { val: h.withoutTest.length, lbl: 'Without a test',   cls: h.withoutTest.length > 0 ? 'warn' : 'ok' },
     { val: h.nameOnly.length,    lbl: 'Tests in name only', cls: h.nameOnly.length > 0 ? 'bad' : 'ok' },
+    ...(h.held.length ? [{ val: h.held.length, lbl: 'Held back, unproven', cls: 'warn' }] : []),
   ].map(({ val, lbl, cls }) =>
     `<div class="tile ${cls}"><div class="val">${val}</div><div class="lbl">${lbl}</div></div>`
   ).join('\n');

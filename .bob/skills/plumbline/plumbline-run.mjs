@@ -4,19 +4,29 @@
 // For every mapped claim in .plumbline/claims.json:
 //   1. Run the mapped test on the unbroken code (baseline). If the baseline
 //      fails, record BASELINE_FAIL and skip the mutation.
-//   2. Apply the mutation in a throwaway git worktree.
-//   3. Run only that test (anchored --test-name-pattern).
-//   4. Record CAUGHT (test failed ← good) or NAME_ONLY (test still passed ← bad).
-//   5. Always remove the worktree (finally).
+//   2. If a witness is present:
+//      a. Evaluate the witness against the UNBROKEN worktree — must return true,
+//         else record WITNESS_INVALID and skip.
+//      b. Apply the mutation and evaluate the witness against the MUTATED worktree —
+//         must return false, else record WEAK_MUTATION and skip (the mutation does
+//         not break the claim; a stronger mutation is needed).
+//   3. Apply the mutation in a throwaway git worktree.
+//   4. Run only that test (anchored --test-name-pattern).
+//   5. Record CAUGHT (test failed ← good) or NAME_ONLY (test still passed ← bad).
+//      A result is NAME_ONLY only when the witness confirmed the break AND the
+//      mapped test still passed.
+//   6. Always remove the worktree (finally).
 //
 // Mutation's search string must appear exactly once in the file or the row is
 // recorded as MUTATION_INVALID.
 //
+// --only <id1,id2,...>  Process only the specified claim IDs (comma-separated).
+//
 // Zero external dependencies. Node >= 20.
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { join, resolve, dirname } from 'node:path';
+import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
@@ -153,13 +163,75 @@ export function countMatching(testFile, testName, root) {
   return runTestCounted(root ?? REPO_ROOT, testFile, testName).ran;
 }
 
+// ── witness evaluation ─────────────────────────────────────────────────────
+
+/**
+ * Evaluate a witness function against a worktree.
+ *
+ * `witnessSource` is the full text of an ES module whose default export is:
+ *   async (load) => boolean
+ * where `load(relPath)` dynamically imports a module from `worktreePath`.
+ *
+ * Returns: true | false | throws on evaluation error.
+ *
+ * The witness is run in a fresh child node process to avoid the ESM module
+ * cache returning a pre-mutation version of a source module when the same
+ * worktree path is used for both the baseline and the mutated check.
+ *
+ * The wrapper script:
+ *   1. imports the user's witness module (the source is inlined via a
+ *      data: URL so no temp file path appears in cache keys),
+ *   2. builds a `load` function that imports from `worktreePath`,
+ *   3. calls the default export and prints "true" or "false" to stdout.
+ */
+export async function evalWitness(witnessSource, worktreePath) {
+  // Build a self-contained runner that can be fed to node --input-type=module
+  // via stdin. Using a data: URL for the witness avoids file-system temp files
+  // entirely and guarantees a fresh module per invocation.
+  const b64 = Buffer.from(witnessSource, 'utf8').toString('base64');
+  const runner = `
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
+import { join } from 'node:path';
+const worktreePath = ${JSON.stringify(worktreePath)};
+const src = Buffer.from(${JSON.stringify(b64)}, 'base64').toString('utf8');
+const dataUrl = 'data:text/javascript;base64,' + ${JSON.stringify(b64)};
+const { default: fn } = await import(dataUrl);
+if (typeof fn !== 'function') { process.stdout.write('error:not-a-function'); process.exit(1); }
+const load = (relPath) => import(pathToFileURL(join(worktreePath, relPath)).href);
+const result = await fn(load);
+process.stdout.write(String(Boolean(result)));
+`;
+
+  const env = Object.fromEntries(
+    Object.entries(process.env).filter(([k]) => !k.startsWith('NODE_TEST'))
+  );
+
+  const child = spawnSync(process.execPath, ['--input-type=module'], {
+    input: runner,
+    encoding: 'utf8',
+    timeout: 15_000,
+    env,
+  });
+
+  if (child.status !== 0) {
+    throw new Error(`Witness process failed (exit ${child.status}): ${child.stderr}`);
+  }
+  const out = (child.stdout ?? '').trim();
+  if (out === 'true') return true;
+  if (out === 'false') return false;
+  throw new Error(`Witness returned unexpected output: ${out}`);
+}
+
 // ── per-row orchestrator ───────────────────────────────────────────────────
 
 /**
  * Process one mapped claim row.
- * Returns one of: CAUGHT | NAME_ONLY | NO_SUCH_TEST | BASELINE_FAIL | MUTATION_INVALID | ERROR
+ * Returns one of:
+ *   CAUGHT | NAME_ONLY | NO_SUCH_TEST | BASELINE_FAIL |
+ *   MUTATION_INVALID | WITNESS_INVALID | WEAK_MUTATION | UNPROVEN | ERROR
  */
-export async function processRow(claimId, mutation, testFile, testName, root) {
+export async function processRow(claimId, mutation, testFile, testName, root, witness) {
   const repoRoot = root ?? REPO_ROOT;
 
   // Worktree lives in the OS temp dir, not inside the repo, so relative
@@ -183,6 +255,17 @@ export async function processRow(claimId, mutation, testFile, testName, root) {
   }
 
   try {
+    // 2a. If a witness is present, verify it passes on the unbroken worktree.
+    if (witness) {
+      let baselineOk;
+      try {
+        baselineOk = await evalWitness(witness, wtPath);
+      } catch (e) {
+        return 'WITNESS_INVALID';
+      }
+      if (!baselineOk) return 'WITNESS_INVALID';
+    }
+
     // 3. Apply mutation
     try {
       applyMutation(wtPath, mutation);
@@ -191,10 +274,30 @@ export async function processRow(claimId, mutation, testFile, testName, root) {
       return 'ERROR';
     }
 
+    // 2b. If a witness is present, verify it returns false on the mutated worktree.
+    //     If it still returns true the mutation does not break the claim — report
+    //     WEAK_MUTATION so Stage 3 can provide a stronger mutation.
+    if (witness) {
+      let mutatedOk;
+      try {
+        mutatedOk = await evalWitness(witness, wtPath);
+      } catch (e) {
+        // An error during evaluation on the mutated tree counts as "broke something"
+        // (the witness confirmed the break), so we continue to the test step.
+        mutatedOk = false;
+      }
+      if (mutatedOk) return 'WEAK_MUTATION';
+    }
+
     // 4. Run test
     const after = runTestCounted(wtPath, testFile, testName);
     if (after.ran !== 1 && after.code === 0) return 'NO_SUCH_TEST';
-    return after.code !== 0 ? 'CAUGHT' : 'NAME_ONLY';
+    if (after.code !== 0) return 'CAUGHT';
+    // Review correction: the test survived. That is an accusation only when a witness
+    // has proved the mutation broke the claim. Without one, it is UNPROVEN: the
+    // mutation may have left the claim true, which is how five false accusations
+    // reached the first run's report.
+    return witness ? 'NAME_ONLY' : 'UNPROVEN';
   } finally {
     // 5. Always clean up
     spawnSync('git', ['worktree', 'remove', '--force', wtPath], {
@@ -209,6 +312,18 @@ export async function processRow(claimId, mutation, testFile, testName, root) {
 async function main() {
   assertGit();
 
+  // Parse --only flag: --only TP-001,TP-005,...
+  const onlyArg = process.argv.indexOf('--only');
+  let onlyIds = null;
+  if (onlyArg !== -1) {
+    const val = process.argv[onlyArg + 1];
+    if (!val || val.startsWith('--')) {
+      console.error('plumbline-run: --only requires a comma-separated list of claim IDs');
+      process.exit(1);
+    }
+    onlyIds = new Set(val.split(',').map((s) => s.trim()).filter(Boolean));
+  }
+
   const cp = claimsPath();
   if (!existsSync(cp)) {
     console.error(`plumbline-run: claims file not found at ${cp}`);
@@ -217,7 +332,8 @@ async function main() {
 
   const claims = loadClaims(cp);
   const rows = claims.filter(
-    (c) => c.mutation != null && c.testFile != null && c.testName != null
+    (c) => c.mutation != null && c.testFile != null && c.testName != null &&
+           (onlyIds == null || onlyIds.has(c.id))
   );
 
   if (rows.length === 0) {
@@ -225,19 +341,27 @@ async function main() {
     process.exit(0);
   }
 
-  let caught = 0, nameOnly = 0, baselineFail = 0, invalid = 0, noSuch = 0, errors = 0;
+  if (onlyIds) {
+    console.log(`plumbline-run: --only mode, processing ${rows.length} row(s): ${[...onlyIds].join(', ')}`);
+  }
+
+  let caught = 0, nameOnly = 0, baselineFail = 0, invalid = 0, noSuch = 0,
+      witnessInvalid = 0, weakMutation = 0, unproven = 0, errors = 0;
 
   for (const row of rows) {
-    const result = await processRow(row.id, row.mutation, row.testFile, row.testName);
+    const result = await processRow(row.id, row.mutation, row.testFile, row.testName, undefined, row.witness ?? null);
     row.mutationResult = result;
 
     switch (result) {
-      case 'CAUGHT':        caught++;       break;
-      case 'NAME_ONLY':     nameOnly++;     break;
-      case 'BASELINE_FAIL': baselineFail++; break;
-      case 'MUTATION_INVALID': invalid++;   break;
-      case 'NO_SUCH_TEST':  noSuch++;       break;
-      default:              errors++;       break;
+      case 'CAUGHT':          caught++;          break;
+      case 'NAME_ONLY':       nameOnly++;        break;
+      case 'BASELINE_FAIL':   baselineFail++;    break;
+      case 'MUTATION_INVALID': invalid++;        break;
+      case 'NO_SUCH_TEST':    noSuch++;          break;
+      case 'WITNESS_INVALID': witnessInvalid++;  break;
+      case 'WEAK_MUTATION':   weakMutation++;    break;
+      case 'UNPROVEN':        unproven++;        break;
+      default:                errors++;          break;
     }
 
     console.log(`  ${row.id}: ${result}`);
@@ -257,7 +381,8 @@ async function main() {
   console.log(
     `plumbline-run: ${rows.length} rows — ` +
     `CAUGHT=${caught} NAME_ONLY=${nameOnly} ` +
-    `BASELINE_FAIL=${baselineFail} MUTATION_INVALID=${invalid} NO_SUCH_TEST=${noSuch} ERROR=${errors}`
+    `BASELINE_FAIL=${baselineFail} MUTATION_INVALID=${invalid} NO_SUCH_TEST=${noSuch} ` +
+    `WITNESS_INVALID=${witnessInvalid} WEAK_MUTATION=${weakMutation} UNPROVEN=${unproven} ERROR=${errors}`
   );
 }
 
