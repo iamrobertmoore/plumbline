@@ -31,6 +31,7 @@ Every claim in this README, and where to check it.
 | 23 of the 100 most-starred installable repositories on GitHub owned by organisations fail a check against their own README | [`docs/MEASUREMENT.md`](docs/MEASUREMENT.md); two final runs, 23 and 22 |
 | You can paste any public repository and get a result | the [hosted checker](https://plumbline-smoky.vercel.app/check/) |
 | Every number on every page here agrees with every other | `node facts/render.mjs --check` (and `--self-test`, which proves it can fail) |
+| Plumbline passes its own audit | `npx github:iamrobertmoore/plumbline --repo .` in a clone of this repository |
 
 ## Why I built this
 
