@@ -355,6 +355,20 @@ No other shell commands are permitted in this stage.
      requirement, a PDF that failed extraction, or a purely external dependency).
 5. Set both `verdict` and `verdictDetail` on each entry.
 
+**Additional judging rules (applied after steps 1–5 above):**
+
+**Rule A — universal quantifiers:** A claim that uses *every*, *all*, or *none*
+(or their equivalents) fails on a single counterexample. Do not use `PARTIAL`
+for such a claim; assign `FAILS` and cite the counterexample in `verdictDetail`.
+
+**Rule B — check / review / test attestations:** A claim that asserts something
+was *checked*, *reviewed*, or *tested* is judged by what that check would have
+found — not merely by whether a check occurred. Scan this audit's own verdicts
+for the relevant topic. If any verdict in `claims.json` for that topic is `FAILS`
+or `PARTIAL`, the attestation claim also `FAILS`; cite those claim IDs and their
+verdicts in `verdictDetail`. Use `UNVERIFIABLE` only when no audit evidence at
+all is available for the topic being attested.
+
 **Cost rule:** batch clauses by topic; do not spawn a subagent per clause.
 
 ---

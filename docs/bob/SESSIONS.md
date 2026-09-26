@@ -10,12 +10,15 @@ not Bob's work.
 
 | Task | Mode | What Bob did | Files Bob wrote | Bobcoins |
 |---|---|---|---|---|
-| 01 | Plan | Read the repository and planned the Plumbline skill, mode and runner as six sub-tasks | [`docs/bob/plumbline-skill-plan.md`](plumbline-skill-plan.md) | 1.18 |
-| 02 | Agent | Built the custom mode and the five-stage skill, with the decisions recorded in the plan | `.bob/custom_modes.yaml`, `.bob/skills/plumbline/SKILL.md` | 0.975 |
-| 03 | Agent | Built the mutation runner, the HTML report renderer and their tests, and ran the suite | `.bob/skills/plumbline/plumbline-run.mjs`, `.bob/skills/plumbline/render-report.mjs`, `test/plumbline-run.test.mjs` | 9.51 |
+| 01 | Plan | Read the repository and planned the Plumbline skill, mode and runner as six sub-tasks | [`docs/bob/plumbline-skill-plan.md`](plumbline-skill-plan.md) ([export](tasks/task01-plan.md)) | 1.18 |
+| 02 | Agent | Built the custom mode and the five-stage skill, with the decisions recorded in the plan | `.bob/custom_modes.yaml`, `.bob/skills/plumbline/SKILL.md` ([export](tasks/task02-skill-and-mode.md)) | 0.975 |
+| 03 | Agent | Built the mutation runner, the HTML report renderer and their tests, and ran the suite | `.bob/skills/plumbline/plumbline-run.mjs`, `.bob/skills/plumbline/render-report.mjs`, `test/plumbline-run.test.mjs` ([export](tasks/task03-runner-and-report.md)) | 9.51 |
 | 04 | Plumbline | Audited the sample project: read the test plan, spec and checklist into claims, then mapped every automated case to a test, one subagent per test file | `.plumbline/claims.json` in the sample ([export](tasks/task04-read-and-map.md)) | 1.20 |
 | 05 | Plumbline | Wrote a mutation for every mapped case, without seeing the tests, and ran the runner: 48 caught, 12 survived | mutations in `claims.json` ([export](tasks/task05-break-and-run.md)) | 2.93 |
 | 06 | Plumbline | Proved each surviving break with a witness, strengthened the weak mutations, extended the runner and skill to require witnesses, and reran | witnesses in `claims.json`, witness support in the runner and skill ([export](tasks/task06-witness.md)) | 4.795 |
+| 07 | Plumbline | Wrote a zero-dependency PDF reader for the release checklist, judged all 24 spec clauses, 10 checklist items and 6 summary lines against the code and git history, and rendered the report | `.bob/skills/plumbline/pdf-text.mjs`, verdicts in `claims.json` ([export](tasks/task07-judge-and-report.md)) | 5.85 |
+| 08 | Plumbline | Added two judging rules to the skill, re-judged the checklist and summary under them, recounted by script, and fixed its own report's count of automated cases | `SKILL.md` §4.2, `render-report.mjs` ([export](tasks/task08-judging-rules.md)) | 3.79 |
+| | | **Total** | | **30.23 of 40** |
 
 ## Where I corrected Bob
 
@@ -45,6 +48,14 @@ wrote and what I changed stays visible.
 - **Task 06, the report.** The renderer now shows the held-back results and prints each accusation's
   witness next to it, so a reader can check the proof.
 
+- **Task 07, tick marks in the PDF.** Bob's PDF reader looked for "zapf" in the font's resource name
+  (`/F3`), so the tick glyphs came out as the letter n. Bob worked out the ticks from the raw stream
+  anyway. I changed the script to resolve each resource name to its font first; it now prints ■.
+- **Task 07, two soft verdicts and a miscount.** Bob found the missing changelog entry and still said
+  PARTIAL, called "the spec has been reviewed" unverifiable although its own verdicts showed four false
+  clauses, and wrote 28 unmapped cases where its file had 24. Task 08 fixed all three in Bob's own
+  hands: two judging rules written into the skill, and counts taken by script.
+
 ## Checked against the answer key
 
 Given the answer key's own mutations for the 61 test-plan cases that have a test, Bob's runner
@@ -59,6 +70,9 @@ Bob's own run, scored against the key:
 - **Mapping (task 04):** 83 of 84 automated cases agree with the key, including all 11 tests whose
   names do not carry the case id. The one difference, TC-43, Bob declined to map because the test does
   not assert single use; the key records that test as one in name only, so both readings flag it.
+- **Judging (tasks 07 and 08):** 24 of 24 spec clauses, 10 of 10 checklist items and 6 of 6 summary
+  lines agree with the key: the four false spec clauses (bcrypt, minimum length, token lifetime,
+  session cap), the four false checklist ticks, and "100%" and "Release gate: Met".
 - **Breaking (tasks 05 and 06):** 8 tests survive a mutation whose witness proves the claim broken.
   3 are in the key (TC-41, TC-57, TC-71). 2 are real and the key missed them: TC-12 (the bad username
   example fails on its capitals, so the dot is never tested) and TC-42 (`notEqual` passes when the

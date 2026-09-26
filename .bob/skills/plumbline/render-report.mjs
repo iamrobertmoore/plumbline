@@ -56,7 +56,7 @@ function rowClass(claim) {
 
 function headline(claims) {
   const testPlan = claims.filter((c) => c.kind === 'test-plan');
-  const automated = testPlan; // all test-plan rows are automated (manual filtered in Stage 1)
+  const automated = testPlan.filter((c) => !/Type:\s*Manual/i.test(c.text));
   const withTest = automated.filter((c) => c.testFile != null);
   const withoutTest = automated.filter((c) => c.testFile == null);
   const nameOnly = automated.filter((c) => c.mutationResult === 'NAME_ONLY');
