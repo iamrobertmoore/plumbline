@@ -19,8 +19,8 @@
       "source": "docs/MEASUREMENT.md"
     },
     "bob.coins": {
-      "value": "30.23",
-      "source": "working log of each task header, docs/bob/SESSIONS.md"
+      "value": "29.86",
+      "source": "sum of the eight task headers in bob_sessions/ (29.855)"
     },
     "tests.count": {
       "computed": "tests",
@@ -105,7 +105,7 @@
     },
     {
       "fact": "bob.coins",
-      "pattern": "for (?<v>\\d+\\.\\d+) of the 40 Bobcoins",
+      "pattern": "(?<v>\\d+\\.\\d+) of the 40 Bobcoins",
       "files": [
         "README.md"
       ]
@@ -221,7 +221,7 @@
     },
     {
       "fact": "sample.nameOnly",
-      "pattern": "found (?<v>\\d+) of these",
+      "pattern": "Bob found (?<v>\\d+) tests like this",
       "files": [
         "index.html"
       ]

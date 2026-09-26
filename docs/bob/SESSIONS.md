@@ -1,12 +1,14 @@
 # How IBM Bob was used
 
-Every Bob task for this entry, in order, with what Bob wrote and what it cost. The screenshot of each
-task's summary is in [`bob_sessions/`](../../bob_sessions/). Bob ran in Bob IDE 2.2.0 on the hackathon
-account (team ibm-coding-challenge-2, us-east), which has 40 Bobcoins for the whole event.
+Every Bob task I ran for this, in order, with what Bob wrote and what it cost. The screenshot of each
+task's summary is in [`bob_sessions/`](../../bob_sessions/), and the cost column is the figure on that
+screenshot. Bob ran in Bob IDE 2.2.0 on the hackathon account (team ibm-coding-challenge-2, us-east),
+which gets 40 Bobcoins for the whole event.
 
-Everything under `.bob/`, plus `test/plumbline-run.test.mjs`, was written by Bob, with the corrections listed below. Tasks 04 to 08 ran in the Plumbline mode Bob built, on the sample project in `examples/turnstile`, as a customer would run it. Plumbline's
-deterministic checks in `src/` and the measurement in `measure/` were written before the event and are
-not Bob's work.
+Everything under `.bob/`, plus `test/plumbline-run.test.mjs`, was written by Bob, apart from the
+corrections listed below. Tasks 04 to 08 ran in the Plumbline mode Bob built, on the sample project in
+`examples/turnstile`, the same way a customer would run it. The deterministic checks in `src/` and the
+measurement in `measure/` were written before the event and aren't Bob's work.
 
 | Task | Mode | What Bob did | Files Bob wrote | Bobcoins |
 |---|---|---|---|---|
@@ -15,15 +17,15 @@ not Bob's work.
 | 03 | Agent | Built the mutation runner, the HTML report renderer and their tests, and ran the suite | `.bob/skills/plumbline/plumbline-run.mjs`, `.bob/skills/plumbline/render-report.mjs`, `test/plumbline-run.test.mjs` ([export](tasks/task03-runner-and-report.md)) | 9.51 |
 | 04 | Plumbline | Audited the sample project: read the test plan, spec and checklist into claims, then mapped every automated case to a test, one subagent per test file | `.plumbline/claims.json` in the sample ([export](tasks/task04-read-and-map.md)) | 1.20 |
 | 05 | Plumbline | Wrote a mutation for every mapped case, without seeing the tests, and ran the runner: 48 caught, 12 survived | mutations in `claims.json` ([export](tasks/task05-break-and-run.md)) | 2.93 |
-| 06 | Plumbline | Proved each surviving break with a witness, strengthened the weak mutations, extended the runner and skill to require witnesses, and reran | witnesses in `claims.json`, witness support in the runner and skill ([export](tasks/task06-witness.md)) | 4.795 |
+| 06 | Plumbline | Proved each surviving break with a witness, strengthened the weak mutations, extended the runner and skill to require witnesses, and reran | witnesses in `claims.json`, witness support in the runner and skill ([export](tasks/task06-witness.md)) | 4.42 |
 | 07 | Plumbline | Wrote a zero-dependency PDF reader for the release checklist, judged all 24 spec clauses, 10 checklist items and 6 summary lines against the code and git history, and rendered the report | `.bob/skills/plumbline/pdf-text.mjs`, verdicts in `claims.json` ([export](tasks/task07-judge-and-report.md)) | 5.85 |
 | 08 | Plumbline | Added two judging rules to the skill, re-judged the checklist and summary under them, recounted by script, and fixed its own report's count of automated cases | `SKILL.md` §4.2, `render-report.mjs` ([export](tasks/task08-judging-rules.md)) | 3.79 |
-| | | **Total** | | **30.23 of 40** |
+| | | **Total** | | **29.86 of 40** |
 
 ## Where I corrected Bob
 
-Reviewing Bob's work is part of using it. Each correction is listed so the line between what Bob
-wrote and what I changed stays visible.
+I reviewed everything Bob produced. Each correction is listed here so it's clear what Bob wrote and
+what I changed.
 
 - **Task 01, the mutation target.** Bob's plan said a mutation should be "the smallest change that
   makes the named test fail". That would aim every mutation at whatever the test already asserts, and
@@ -38,7 +40,6 @@ wrote and what I changed stays visible.
   with one deliberately wrong test name.
 - **Task 03, two-line mutations.** The skill allows a mutation as parallel `search` and `replace`
   arrays; the runner accepted only strings. It now applies each pair with the same exactly-once rule.
-
 - **Task 05, accusations without proof.** Of the 12 mutations that survived, 4 did not actually break
   the claim (for TC-01, an address with no @ was still refused). Every mutation tester has this
   problem. In task 06 Bob added witnesses: a few lines, written from the claim and the code, that must
@@ -47,7 +48,6 @@ wrote and what I changed stays visible.
   from the 12 rows gives 0 accusations; Bob's original TC-01 mutation gives `WEAK_MUTATION`.
 - **Task 06, the report.** The renderer now shows the held-back results and prints each accusation's
   witness next to it, so a reader can check the proof.
-
 - **Task 07, tick marks in the PDF.** Bob's PDF reader looked for "zapf" in the font's resource name
   (`/F3`), so the tick glyphs came out as the letter n. Bob worked out the ticks from the raw stream
   anyway. I changed the script to resolve each resource name to its font first; it now prints ■.
@@ -55,7 +55,6 @@ wrote and what I changed stays visible.
   PARTIAL, called "the spec has been reviewed" unverifiable although its own verdicts showed four false
   clauses, and wrote 28 unmapped cases where its file had 24. Task 08 fixed all three in Bob's own
   hands: two judging rules written into the skill, and counts taken by script.
-
 - **After task 08, the report's first screen.** I added a second row of tiles to Bob's renderer
   (spec clauses, checklist ticks and summary lines found false), so the whole result reads at a glance.
 

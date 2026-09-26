@@ -176,7 +176,7 @@ footer a { color: var(--ink-2); }
     <div>
       <p class="eyebrow">Built with IBM Bob 2.0 · solo entry</p>
       <h1>Is your test plan still <span class="true">true?</span></h1>
-      <p class="lede">Plumbline has IBM Bob read the test plan, the spec and the release checklist, find the test behind every claim, then break the code to prove the test is real. A test that stays green on broken code is a test in name only.</p>
+      <p class="lede">Plumbline gets IBM Bob to read your test plan, spec and release checklist, find the test behind each claim, and then break the code to see if the test notices. If it stays green on broken code, it's a test in name only.</p>
       <div class="cta">
         <a class="btn primary" href="report/turnstile.html">Open a real Plumbline report</a>
         <a class="btn" href="check/">Check any public repository</a>
@@ -200,14 +200,14 @@ footer a { color: var(--ink-2); }
 
   <section id="problem">
     <p class="eyebrow">01 · The problem</p>
-    <h2>Green is not the same as <em>true.</em></h2>
-    <p class="sub">I once shipped a project whose CI badge was green for days while it ran no tests at all. The job skipped every test, waiting on a credential that did not exist. It passed, so nobody looked. A test plan is the same kind of promise, kept in a spreadsheet: before a release somebody signs a checklist that says every case has a passing test and the spec matches the code. Nothing checks it.</p>
+    <h2>Green isn't the same as <em>true.</em></h2>
+    <p class="sub">A while back I shipped a project whose CI badge was green for days while it ran no tests at all. The job was skipping every test, waiting on a credential that didn't exist, and nobody looked because it was green. Test plans have the same problem, just in a spreadsheet. Someone signs a checklist before every release saying every case has a passing test and the spec matches the code, and nobody really checks.</p>
   </section>
 
   <section id="result">
-    <p class="eyebrow">02 · What Bob found on a real audit</p>
-    <h2>The plan says 100%. The suite is green. <em>Here is what is true.</em></h2>
-    <p class="sub">Turnstile is a small authentication service written for this entry, with its defects recorded in an answer key before Bob saw it. Its test plan says all 84 automated cases pass, and every item on its release checklist is ticked.</p>
+    <p class="eyebrow">02 · A real audit</p>
+    <h2>The plan says 100%. The suite's green. <em>Here's what Bob found.</em></h2>
+    <p class="sub">Turnstile is a small auth service I wrote for this, and I wrote down every defect in an answer key before Bob saw it. Its test plan says all 84 automated cases pass, and every item on its release checklist is ticked.</p>
     <div class="tiles">
       <div class="tile warn"><b>84</b><span>automated cases in the plan</span></div>
       <div class="tile ok"><b>60</b><span>with a test Bob could find</span></div>
@@ -250,7 +250,7 @@ return result.valid === false &amp;&amp; result.reason === 'expired';
         </div>
         <div class="verdict">
           <b>Test in name only</b>
-          <p>The behaviour is gone, the witness proves it, and TC-41 still passes. So does the whole suite. Plumbline found 8 of these; 2 are real defects the answer key had missed.</p>
+          <p>The expiry check is gone, the witness proves it, and TC-41 still passes, along with the rest of the suite. Bob found 8 tests like this, including 2 I'd missed in my own answer key.</p>
         </div>
       </div>
     </div>
@@ -259,7 +259,7 @@ return result.valid === false &amp;&amp; result.reason === 'expired';
   <section id="how">
     <p class="eyebrow">04 · How it works</p>
     <h2>A Bob mode and a skill. <em>Five stages.</em></h2>
-    <p class="sub">Copy <code>.bob/</code> into a repository, open it in IBM Bob, pick the Plumbline mode and ask it to audit.</p>
+    <p class="sub">Copy <code>.bob/</code> into your repository, open it in IBM Bob, switch to the Plumbline mode and ask it to audit.</p>
     <ol class="stages">
       <li><b>Read</b><p>The <code>.xlsx</code> plan, <code>.docx</code> spec and <code>.pdf</code> checklist become claims, each with its source cell or clause.</p></li>
       <li><b>Map</b><p>One subagent per test file finds the test behind each case, even when its name carries no id.</p></li>
@@ -271,12 +271,12 @@ return result.valid === false &amp;&amp; result.reason === 'expired';
 
   <section id="proof">
     <p class="eyebrow">05 · No accusation without proof</p>
-    <h2>Every mutation tester can be fooled. <em>This one has to prove it was not.</em></h2>
+    <h2>Mutation testing can blame a good test. <em>So Bob has to prove it.</em></h2>
     <div class="split">
       <ul class="list">
-        <li><b>A change that does not break the claim is not a finding.</b> In the first run, 4 of 12 surviving changes left the behaviour intact. Now every accusation needs a witness.</li>
+        <li><b>Sometimes a change looks like a break but isn't.</b> My first run blamed 4 tests out of 12 that way. So now every accusation needs a witness.</li>
         <li><b>No witness:</b> <code>UNPROVEN</code>. <b>Witness false on the real code:</b> <code>WITNESS_INVALID</code>. <b>Witness still true on the broken code:</b> <code>WEAK_MUTATION</code>.</li>
-        <li><b>With every witness removed, the same run accuses nobody.</b> The rule is tested, not just stated.</li>
+        <li><b>Strip every witness out of the same run and it accuses nobody.</b> I tested that, rather than just saying it.</li>
       </ul>
       <div class="card">
         <header><span>Bob's audit against the answer key</span><span>node examples/score.mjs</span></header>
@@ -294,11 +294,11 @@ return result.valid === false &amp;&amp; result.reason === 'expired';
 
   <section id="bob">
     <p class="eyebrow">06 · How IBM Bob is used</p>
-    <h2>Remove any one and the document tier <em>stops working.</em></h2>
+    <h2>Bob didn't just build it. <em>Plumbline runs inside Bob.</em></h2>
     <div class="feats">
       <div class="feat"><span class="n">01</span><b>Custom mode</b><p>The Plumbline mode: its role and the tools it may use. <code>.bob/custom_modes.yaml</code></p></div>
       <div class="feat"><span class="n">02</span><b>Skills</b><p>The five-stage procedure, the claim schema and the cost rules. <code>.bob/skills/plumbline/SKILL.md</code></p></div>
-      <div class="feat"><span class="n">03</span><b>Document understanding</b><p>Reads the plan and the spec as they are. For the PDF, which its file tools could not read, Bob wrote a zero-dependency reader.</p></div>
+      <div class="feat"><span class="n">03</span><b>Document understanding</b><p>Reads the plan and the spec as they are. Its file tools couldn't read the PDF, so Bob wrote a small reader for it.</p></div>
       <div class="feat"><span class="n">04</span><b>Subagents</b><p>One per test file to map cases to tests, and one per test file to write mutations and witnesses, with the test withheld.</p></div>
       <div class="feat"><span class="n">05</span><b>Agent mode with commands</b><p>Runs the mutation runner, and read-only git to judge the spec and the checklist against history.</p></div>
       <div class="feat"><span class="n">06</span><b>Bob as the builder</b><p>Bob planned and wrote the mode, the skill, the runner, the report and their tests, in 8 exported tasks.</p></div>
@@ -310,10 +310,10 @@ return result.valid === false &amp;&amp; result.reason === 'expired';
     <div class="split" style="align-items:center">
       <div>
         <p class="big">23<small> of 100</small></p>
-        <p class="sub" style="margin-bottom:0">of the most-starred installable repositories on GitHub owned by organisations fail a check against their own README. Dead links, missing files, a licence that is not there. No AI, no judgement: the checks a machine can settle, each with a negative control that proves it can fail. Measured 25 September 2026, every candidate confirmed by hand.</p>
+        <p class="sub" style="margin-bottom:0">of the most-starred installable repositories on GitHub owned by organisations fail a check against their own README: dead links, missing files, a licence that isn't there. No AI involved, just the checks a machine can settle, each with a negative control to prove it can fail. Measured on 25 September 2026, and I checked every one by hand.</p>
       </div>
       <ul class="list">
-        <li><b>react/create-react-app</b> sends readers to its documentation at an address that no longer exists.</li>
+        <li><b>react/create-react-app</b> still sends people to documentation at an address that stopped working.</li>
         <li><b>kubernetes/kubernetes</b> links to a case-studies page that is a 404.</li>
         <li><b>laravel/laravel</b> refers to a licence file that is not at the repository root.</li>
         <li><a class="btn" style="margin-top:4px" href="check/">Paste any public repository</a></li>
