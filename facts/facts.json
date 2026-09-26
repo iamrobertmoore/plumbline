@@ -67,13 +67,6 @@
       ]
     },
     {
-      "fact": "headline.failing",
-      "pattern": ">(?<v>\\d+) of 100</text>",
-      "files": [
-        "docs/brand/cover.svg"
-      ]
-    },
-    {
       "fact": "headline.spread",
       "pattern": "two final runs, (?<v>\\d+ and \\d+)",
       "files": [
@@ -99,7 +92,8 @@
       "fact": "method.corrections",
       "pattern": "all (?<v>[a-z]+) corrections",
       "files": [
-        "README.md"
+        "README.md",
+        "deck/index.html"
       ]
     },
     {
@@ -190,7 +184,8 @@
       "fact": "headline.failing",
       "pattern": "class=\"big\">(?<v>\\d+)<small>",
       "files": [
-        "index.html"
+        "index.html",
+        "deck/index.html"
       ]
     },
     {
@@ -202,23 +197,26 @@
     },
     {
       "fact": "sample.withTest",
-      "pattern": "<b>(?<v>\\d+)</b><span>with a test Bob",
+      "pattern": "<b>(?<v>\\d+)</b><span>with a test",
       "files": [
-        "index.html"
+        "index.html",
+        "deck/index.html"
       ]
     },
     {
       "fact": "sample.withoutTest",
       "pattern": "<b>(?<v>\\d+)</b><span>with no test",
       "files": [
-        "index.html"
+        "index.html",
+        "deck/index.html"
       ]
     },
     {
       "fact": "sample.nameOnly",
       "pattern": "<b>(?<v>\\d+)</b><span>tests in name only",
       "files": [
-        "index.html"
+        "index.html",
+        "deck/index.html"
       ]
     },
     {
@@ -232,14 +230,44 @@
       "fact": "sample.specFalse",
       "pattern": "<b>(?<v>\\d+)<small> of 24</small></b><span>spec",
       "files": [
-        "index.html"
+        "index.html",
+        "deck/index.html"
       ]
     },
     {
       "fact": "sample.checklistFalse",
       "pattern": "<b>(?<v>\\d+)<small> of 10</small></b><span>checklist",
       "files": [
-        "index.html"
+        "index.html",
+        "deck/index.html"
+      ]
+    },
+    {
+      "fact": "bob.coins",
+      "pattern": "<b>(?<v>\\d+\\.\\d+)</b><span>of 40 Bobcoins",
+      "files": [
+        "deck/index.html"
+      ]
+    },
+    {
+      "fact": "tests.count",
+      "pattern": "<b>(?<v>\\d+)</b><span>tests, all green",
+      "files": [
+        "deck/index.html"
+      ]
+    },
+    {
+      "fact": "sample.nameOnly",
+      "pattern": "<b>(?<v>\\d+) tests</b>",
+      "files": [
+        "docs/brand/cover.html"
+      ]
+    },
+    {
+      "fact": "sample.automated",
+      "pattern": "<b>(?<v>\\d+)</b><span>automated cases",
+      "files": [
+        "deck/index.html"
       ]
     }
   ],
@@ -257,6 +285,8 @@
     "docs/MEASUREMENT.md",
     "docs/brand/readme-banner.svg",
     "check/index.html",
-    "index.html"
+    "index.html",
+    "deck/index.html",
+    "docs/brand/cover.html"
   ]
 }

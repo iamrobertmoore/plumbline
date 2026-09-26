@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Plumbline cover</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+html, body { margin: 0; background: #0d1012; }
+.c { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #0d1012; color: #e9eeec; font-family: "IBM Plex Sans", sans-serif; }
+.c::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(to right, rgba(120,150,150,.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(120,150,150,.07) 1px, transparent 1px); background-size: 120px 120px; mask-image: radial-gradient(ellipse 80% 80% at 70% 30%, #000 20%, transparent 85%); -webkit-mask-image: radial-gradient(ellipse 80% 80% at 70% 30%, #000 20%, transparent 85%); }
+.glow { position: absolute; width: 1300px; height: 1300px; border-radius: 50%; top: -700px; right: -380px; background: radial-gradient(circle, rgba(228,173,69,.2), transparent 62%); }
+.l { position: absolute; left: 130px; top: 150px; width: 1120px; }
+.brand { display: flex; align-items: center; gap: 22px; font: 600 58px "IBM Plex Sans Condensed"; }
+.brand i { font-style: normal; color: #e4ad45; }
+h1 { font: 700 158px/.92 "IBM Plex Sans Condensed"; letter-spacing: -.025em; margin: 64px 0 40px; }
+h1 em { font-style: normal; color: #e4ad45; }
+p { font-size: 36px; line-height: 1.4; color: #b7c2c0; margin: 0; max-width: 1040px; }
+.tag { position: absolute; left: 130px; bottom: 90px; font: 500 24px "IBM Plex Mono"; letter-spacing: .14em; color: #7d8b8a; text-transform: uppercase; }
+.tag b { color: #e4ad45; font-weight: 600; }
+.plumb { position: absolute; right: 250px; top: 0; width: 260px; height: 1080px; }
+.stat { position: absolute; right: 120px; bottom: 150px; width: 520px; padding: 30px 34px; border-radius: 24px; background: rgba(22,29,33,.85); border: 1px solid rgba(255,106,85,.45); }
+.stat b { display: block; font: 700 120px/1 "IBM Plex Sans Condensed"; color: #ff6a55; }
+.stat span { display: block; margin-top: 12px; font: 500 22px "IBM Plex Mono"; letter-spacing: .06em; color: #b7c2c0; text-transform: uppercase; line-height: 1.4; }
+</style>
+</head>
+<body>
+<div class="c">
+  <div class="glow"></div>
+  <svg class="plumb" viewBox="0 0 260 1080" aria-hidden="true">
+    <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#ffd27a"/><stop offset=".5" stop-color="#e4ad45"/><stop offset="1" stop-color="#8a5f16"/></linearGradient></defs>
+    <rect x="60" y="60" width="140" height="10" rx="5" fill="#b7c2c0"/>
+    <line x1="130" y1="70" x2="130" y2="1080" stroke="#e4ad45" stroke-width="2" stroke-dasharray="3 9" opacity=".4"/>
+    <g transform="rotate(-2.4 130 70)">
+      <line x1="130" y1="70" x2="130" y2="440" stroke="#c9d2cf" stroke-width="3"/>
+      <circle cx="130" cy="70" r="7" fill="#e9eeec"/>
+      <path d="M130 432 L166 482 L130 566 L94 482 Z" fill="url(#g)"/>
+      <path d="M130 432 L130 566 L94 482 Z" fill="#000" opacity=".25"/>
+      <path d="M130 432 L166 482 L130 486 Z" fill="#fff" opacity=".18"/>
+    </g>
+  </svg>
+  <div class="l">
+    <div class="brand">
+      <svg width="84" height="84" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="m" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#ffd27a"/><stop offset=".55" stop-color="#e4ad45"/><stop offset="1" stop-color="#9b6d1c"/></linearGradient></defs><rect x="18" y="6" width="28" height="3" rx="1.5" fill="#e9eeec"/><line x1="32" y1="9" x2="32" y2="33" stroke="#e9eeec" stroke-width="2"/><path d="M32 31 L42 44 L32 60 L22 44 Z" fill="url(#m)"/><path d="M32 31 L32 60 L22 44 Z" fill="#000" opacity=".22"/></svg>
+      <span>plumb<i>line</i></span>
+    </div>
+    <h1>Is your test plan<br>still <em>true?</em></h1>
+    <p>IBM Bob reads the test plan, the spec and the checklist, finds the test behind every claim, and breaks the code to prove it is real.</p>
+  </div>
+  <div class="stat"><b>8 tests</b><span>stayed green on broken code<br>in a plan that said 100%</span></div>
+  <div class="tag"><b>IBM Bob 2.0 Hackathon</b> · solo entry</div>
+</div>
+</body>
+</html>

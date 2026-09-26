@@ -98,7 +98,7 @@ function selfTest() {
     return d;
   };
   const cases = [
-    ['a surface disagrees with facts.json', (d) => { const f = join(d, 'docs/brand/cover.svg'); writeFileSync(f, readFileSync(f, 'utf8').replace(/>\d+ of 100<\/text>/, '>99 of 100</text>')); }],
+    ['a surface disagrees with facts.json', (d) => { const f = join(d, 'deck/index.html'); writeFileSync(f, readFileSync(f, 'utf8').replace(/class="big">\d+<small>/, 'class="big">99<small>')); }],
     ['a surface loses the phrase that carried a number', (d) => { const f = join(d, 'README.md'); writeFileSync(f, readFileSync(f, 'utf8').replace(/\(\d+ tests\)/, '(the tests)')); }],
     ['a retired figure comes back', (d) => { const f = join(d, 'README.md'); writeFileSync(f, readFileSync(f, 'utf8') + '\n14,304,526\n'); }],
     ['a test is added and the count is not updated', (d) => { writeFileSync(join(d, 'test/extra.test.mjs'), "test('x', () => {});\n"); }],
