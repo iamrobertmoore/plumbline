@@ -5,7 +5,7 @@
 //
 //   node facts/render.mjs --check      exit 1 if any surface disagrees, or a binding matches nothing
 //   node facts/render.mjs --write      put the values from facts.json into every surface
-//   node facts/render.mjs --self-test  prove --check can fail, three ways
+//   node facts/render.mjs --self-test  prove --check can fail, five ways
 //
 // A binding that matches nothing is a failure, not a pass: it means a surface was
 // rewritten and the phrase that carried the number is gone, so nobody knows whether
@@ -32,6 +32,23 @@ function computed(root, kind) {
         if (ticks % 2) inTemplate = !inTemplate;
       }
     }
+    return String(n);
+  }
+  // Figures about the worked example are read from Bob's own output, so a surface can
+  // never state a Bob result the audit file does not contain.
+  if (kind.startsWith('sample.')) {
+    const claims = JSON.parse(readFileSync(join(root, 'examples/turnstile/.plumbline/claims.json'), 'utf8'));
+    const plan = claims.filter((c) => c.kind === 'test-plan' && !/Type:\s*Manual/i.test(c.text));
+    const fails = (k) => claims.filter((c) => c.kind === k && c.verdict === 'FAILS').length;
+    const n = {
+      'sample.automated': plan.length,
+      'sample.withTest': plan.filter((c) => c.testFile != null).length,
+      'sample.withoutTest': plan.filter((c) => c.testFile == null).length,
+      'sample.nameOnly': plan.filter((c) => c.mutationResult === 'NAME_ONLY').length,
+      'sample.specFalse': fails('spec'),
+      'sample.checklistFalse': fails('checklist'),
+    }[kind];
+    if (n === undefined) throw new Error(`unknown computed fact ${kind}`);
     return String(n);
   }
   throw new Error(`unknown computed fact ${kind}`);
@@ -77,14 +94,15 @@ export function run(root = ROOT_DEFAULT, { write = false } = {}) {
 function selfTest() {
   const copy = () => {
     const d = mkdtempSync(join(tmpdir(), 'facts-'));
-    for (const p of ['facts', 'test', 'README.md', 'index.html', 'deck', 'docs', 'check']) cpSync(join(ROOT_DEFAULT, p), join(d, p), { recursive: true });
+    for (const p of ['facts', 'test', 'README.md', 'index.html', 'deck', 'docs', 'check', 'examples']) cpSync(join(ROOT_DEFAULT, p), join(d, p), { recursive: true });
     return d;
   };
   const cases = [
     ['a surface disagrees with facts.json', (d) => { const f = join(d, 'docs/brand/cover.svg'); writeFileSync(f, readFileSync(f, 'utf8').replace(/>\d+ of 100<\/text>/, '>99 of 100</text>')); }],
     ['a surface loses the phrase that carried a number', (d) => { const f = join(d, 'README.md'); writeFileSync(f, readFileSync(f, 'utf8').replace(/\(\d+ tests\)/, '(the tests)')); }],
-    ['a retired figure comes back', (d) => { const f = join(d, 'index.html'); writeFileSync(f, readFileSync(f, 'utf8') + '\n<!-- 18 in 100 -->\n'); }],
+    ['a retired figure comes back', (d) => { const f = join(d, 'README.md'); writeFileSync(f, readFileSync(f, 'utf8') + '\n14,304,526\n'); }],
     ['a test is added and the count is not updated', (d) => { writeFileSync(join(d, 'test/extra.test.mjs'), "test('x', () => {});\n"); }],
+    ["Bob's audit changes and a surface does not", (d) => { const f = join(d, 'examples/turnstile/.plumbline/claims.json'); const c = JSON.parse(readFileSync(f, 'utf8')); c.find((x) => x.mutationResult === 'NAME_ONLY').mutationResult = 'CAUGHT'; writeFileSync(f, JSON.stringify(c)); }],
   ];
   const base = copy();
   if (run(base).problems.length) { console.log('self-test needs a clean tree first:\n' + run(base).problems.join('\n')); return 1; }

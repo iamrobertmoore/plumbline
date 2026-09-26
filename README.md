@@ -1,112 +1,92 @@
 <div align="center">
 
-<img src="docs/brand/readme-banner.svg" alt="Plumbline: 23 of the 100 most-starred installable repositories on GitHub fail at least one check." width="900">
+<img src="docs/brand/readme-banner.svg" alt="Plumbline: checks that your test plan, spec and README are still true, and proves it." width="900">
 
-**A pre-ship auditor. It checks whether your repository does what it says it does, and it proves
-that each of its own checks can fail.**
+**Is your test plan still true? Plumbline has IBM Bob read the test plan, the spec and the release
+checklist, find the test behind every claim, then break the code to prove the test is real.**
 
-[Live report](https://iamrobertmoore.github.io/plumbline/) ·
-[Slide deck](deck/plumbline-deck.pdf) ·
-[Architecture](docs/architecture.svg) ·
-[How the number was measured](docs/MEASUREMENT.md) ·
-[Who wrote the code](docs/AUTHORSHIP.md) ·
-[Run it in CI](.github/workflows/plumbline.yml)
+[Hosted checker](https://plumbline-smoky.vercel.app/check/) ·
+[A real Plumbline report](https://plumbline-smoky.vercel.app/report/turnstile.html) ·
+[The worked example, scored](examples/README.md) ·
+[How Bob was used](docs/bob/SESSIONS.md) ·
+[Slides](deck/plumbline-deck.pdf) ·
+[How the number was measured](docs/MEASUREMENT.md)
 
 </div>
 
 ---
 
-## The problem, measured
+## Check every claim here in five minutes
 
-**I checked the 100 most-starred installable repositories on GitHub against their own claims.
-23 of them fail at least one check.**
-
-The clearest one is `ruvnet/RuView`, rank 90 of the 100. Its README links the same architecture
-decision record twice, under two different filenames. One exists. The other has never existed in the
-repository.
-
-That is 14,304,526 stars of software. These are the best-maintained, most-read READMEs in public
-existence, and 23 in every 100 still describe themselves inaccurately right now.
-
-**And more of it is machine-written every month.** In the same 100 repositories, **61 carry commits
-that name an AI agent as a co-author**, and **11% of their 9,936 most recent commits declare one**. I
-measured that too, because every published figure for it turns out to be a marketing number that
-cannot be checked. The method is in [`docs/AUTHORSHIP.md`](docs/AUTHORSHIP.md), and it is deliberately
-a lower bound: a commit that was agent-assisted without saying so is counted as human.
-
-Measured 23 Sep 2026. Method, corpus, and every correction I made to the checks are in
-[`docs/MEASUREMENT.md`](docs/MEASUREMENT.md). The first pass said 89 of 100. That was wrong, and it
-was wrong in the direction that flattered the product, so I went back through the findings by hand
-until the number survived scrutiny.
-
-| What the repository claims | What is actually true | How many, of 100 |
-|---|---|---|
-| the links in the README work | 17 have links that return 404 or 410 | **17** |
-| the version in the manifest is published | 4 disagree with the registry | **4** |
-| the README points at files that exist | 2 link to files that are not in the repository | **2** |
-| a version named in the README is published | 1 names a version that is not | **1** |
-| the licence shows in the About panel | 1 has a licence file GitHub cannot detect | **1** |
-| it has a README | 1 has no README at all | **1** |
-
-That is **26 findings across 23 repositories**, because three repositories fail more than one check.
-The column counts repositories, not findings.
-
-## The person this is for
-
-It is the hour before you ship. You think you are finished. Nobody has read your README since you
-wrote it, your CI has been green for a month, and the demo link in it was renamed in March.
-
-Green is not the same as true. Nothing in a normal pipeline reads what the documentation claims and
-goes and checks. So the claims rot quietly, and the first person to find out is a user.
-
-## What it does
-
-Plumbline reads everything a project says about itself. The README, the manifest, and the documents
-a real team keeps: the specification, the release checklist, the test plan. It treats all of that as
-a set of **claims**, then tests each one against reality, in parallel, with one subagent per claim.
-
-It does not tell you whether your code works. It tells you every place your project says something
-that is not true, ordered by what a reader would hit first.
-
-### Try this, watch what happens
-
-| | |
+| Claim | How to check it |
 |---|---|
-| **See a real finding** | [The report on ruvnet/RuView](https://iamrobertmoore.github.io/plumbline/#finding). Its README links the same architecture decision record twice, to two different filenames. One exists. One never has. |
-| **Check the tool, not the claim** | [The negative controls](https://iamrobertmoore.github.io/plumbline/#controls). Every check is run against an input designed to fail it. A check that cannot fail is reported as unproven, never as a pass. |
-| **Run it on your own repo** | `npx github:iamrobertmoore/plumbline --repo .` |
+| On the Turnstile sample, the test plan says all 84 automated cases pass. Bob found a test for 60 of them. | [`examples/turnstile/.plumbline/claims.json`](examples/turnstile/.plumbline/claims.json), or the [report](https://plumbline-smoky.vercel.app/report/turnstile.html) |
+| 8 of those tests stay green when Bob breaks the behaviour they are named for, and each accusation carries a witness that proves the break | the report's first list; the witnesses are in `claims.json` |
+| Bob found 4 of the 24 spec clauses and 4 of the 10 ticked checklist items false | the report's second row of tiles, one line of evidence each |
+| Bob's audit agrees with an answer key written before Bob ran: 83 of 84 mappings, 24 of 24 spec clauses, 10 of 10 checklist items | `node examples/score.mjs` |
+| The answer key is proved, not asserted | `node examples/answer-key/verify-ground-truth.mjs <clone> --self-test` flips every expectation and catches all 83 |
+| Everything Bob does here was built with Bob during the event, in 8 tasks, for 30.23 of the 40 Bobcoins | [`docs/bob/SESSIONS.md`](docs/bob/SESSIONS.md), the exports in [`docs/bob/tasks/`](docs/bob/tasks/), the screenshots in [`bob_sessions/`](bob_sessions/) |
+| 23 of the 100 most-starred installable repositories on GitHub owned by organisations fail a check against their own README | [`docs/MEASUREMENT.md`](docs/MEASUREMENT.md); two final runs, 23 and 22 |
+| Paste any public repository and see its result | the [hosted checker](https://plumbline-smoky.vercel.app/check/) |
+| Every figure on every surface agrees | `node facts/render.mjs --check`, and `--self-test` to prove the check can fail |
 
-## Why it is not a bundle of linters
+## The problem
 
-Every check here has a tool that does something similar. None of them does this.
+I once shipped a project whose CI badge was green for days while it ran no tests at all. The job
+skipped every test because it was waiting on a credential that did not exist. It passed, so nobody
+looked.
 
-| What you already use | What it does | What it does not do |
-|---|---|---|
-| **SonarQube**, **Snyk** | read your code | read what your project claims about itself. Neither has an opinion on whether the README is true. |
-| **Dependabot**, **Renovate** | keep your dependencies current | check that your own published version exists. |
-| **lychee**, **markdown-link-check** | check that links resolve | anything else. That is one of the six checks here, and it is not the interesting one. |
-| **documentation drift tools** | compare a commit against the docs it should have touched | see anything the commit did not touch, so a README that was wrong when it was written stays invisible. |
-| **all of them** | report a result | show that the result means anything. |
+A test plan is the same kind of promise, kept in a spreadsheet. Before a release somebody signs a
+checklist that says every case in the plan has a passing test and the spec matches the code. Nothing
+checks it. Coverage says a line ran, not that anything was asserted. Mutation testing scores a whole
+suite at random and never reads the plan. Doc drift tools diff a commit and cannot see a claim that was
+wrong from the day it was written.
 
-**This is not a documentation drift detector**, and it is worth saying so plainly, because that is
-the category it gets filed under. A drift detector compares what a commit changed against the
-documentation it should have updated. That question cannot see a README that was wrong the day it
-was written, and that is most of what I found: the RuView link above was never correct, so there is
-no commit to diff against. Two teams independently shipped a project called DriftGuard in the last
-IBM Bob hackathon. I am not the third. Drift is the first thing this model gets pointed at, not the
-model.
+## What Plumbline does
 
-That last row is the point, and it is the one thing all four of the tools above have in common. What
-none of them do is **prove their own checks can fail**.
+Plumbline is a **Bob custom mode and a Bob skill**. Copy [`.bob/`](.bob/) into a repository, open it in
+IBM Bob, pick the **Plumbline** mode and ask it to audit the repository. It runs five stages:
 
-A check that has never been observed to fail is not evidence. I have shipped a green CI badge that
-was doing nothing at all: a conformance job that ran nightly for days and skipped every test, because
-it gated on a credential that did not exist. It passed, so nothing drew attention to it. I found it
-on submission day.
+1. **Read.** Bob reads the test plan (`.xlsx`), the spec (`.docx`) and the release checklist (`.pdf`)
+   and turns every row, clause and ticked item into a claim, with its source cell or clause.
+2. **Map.** One subagent per test file finds the test that proves each automated case, including tests
+   whose names do not carry the case id. A case with no test is a finding, not a guess.
+3. **Break.** For every mapped case, one subagent per test file writes a change to the code that makes
+   the case's behaviour false. **It never sees the test.** It also writes a **witness**: a few lines
+   that must pass on the real code and fail on the broken code. `plumbline-run.mjs` applies each change
+   in a throwaway git worktree, checks the witness both ways, and runs the mapped test. A test that stays
+   green while its witness proves the behaviour broken is a **test in name only**.
+4. **Judge.** Bob judges every spec clause, checklist item and summary line against the code, the
+   changelog and the git history, with one line of evidence each.
+5. **Report.** A self-contained HTML report.
 
-So every check in Plumbline ships with a **negative control**. Before it is allowed to report a pass,
-it is run against an input built to fail it. If the check does not fail, the result is `UNPROVEN` and
-the run exits non-zero.
+### What it found on Turnstile
+
+Turnstile is a small authentication service I wrote for this, with its defects recorded in an
+[answer key](examples/answer-key/GROUND-TRUTH.md) before Bob saw it. Its test plan says 100% of the 84
+automated cases are covered and all pass, and its release checklist has all 10 items ticked.
+
+- **24 of the 84 cases have no test.** Bob found a test for 60.
+- **8 tests pass on broken code.** TC-41, "rejects an expired access token", asserts only that a
+  result exists; delete the expiry check and it stays green. Two of the eight are real defects the
+  answer key missed: TC-12's bad example fails on its capital letters, so the rule it is named for is
+  never tested, and TC-42 passes when the refresh token is `undefined`.
+- **The spec is wrong in 4 places**, including bcrypt (the code uses scrypt) and 15-minute access
+  tokens (60 minutes since commit `1838534`, which the changelog does not mention).
+- **4 of the 10 ticks are false**, including "the spec has been reviewed against the implementation".
+
+The full score against the key is in [`examples/README.md`](examples/README.md).
+
+### Why it does not accuse a test that does its job
+
+Every mutation tester has the same weakness: a change that looks like a break but leaves the behaviour
+intact. In my first run, 4 of the 12 surviving changes were like that. So an accusation needs proof. A
+surviving change with no witness is reported as `UNPROVEN`. A witness that is not true on the real code
+is `WITNESS_INVALID`. A change the witness shows did not break anything is `WEAK_MUTATION`. With every
+witness removed, the same run makes **0** accusations.
+
+The free half follows the same rule: every deterministic check ships with a negative control, and a
+check that cannot be shown to fail is reported as unproven, never as a pass.
 
 ```
 $ npx github:iamrobertmoore/plumbline --selfcheck
@@ -115,88 +95,84 @@ $ npx github:iamrobertmoore/plumbline --selfcheck
 
 ## How IBM Bob is used
 
-**Bob access starts on 25 September, so this section is a design, not a description of code that runs
-today.** The half of the tool that needs no judgement is built, runs in CI on every push, and is what
-produced the number above. The half below is what gets wired in on the 25th.
+**Remove any one of these and the document tier stops working.**
 
-Four of Bob's capabilities do real work in that design, and none of them is decoration.
+| # | Bob feature | What it does in Plumbline | Where |
+|---|---|---|---|
+| 1 | **Custom mode** | the Plumbline mode: its role, and the tools it may use (read, edit, execute, skills, subagents, todo) | [`.bob/custom_modes.yaml`](.bob/custom_modes.yaml) |
+| 2 | **Skills** | the five-stage procedure, the claim schema and the cost rules, loaded when the mode runs | [`.bob/skills/plumbline/SKILL.md`](.bob/skills/plumbline/SKILL.md) |
+| 3 | **Document understanding** | reads the `.xlsx` plan and the `.docx` spec with `office_read`; for the `.pdf` checklist, which Bob's file tools could not read, Bob wrote a zero-dependency reader | `SKILL.md` §1.2 to §1.4, [`pdf-text.mjs`](.bob/skills/plumbline/pdf-text.mjs) |
+| 4 | **Subagents** | one per test file to map cases to tests, and one per test file to write the mutations and witnesses, with the test file withheld | `SKILL.md` §2.2 and §3.2 |
+| 5 | **Agent mode with commands** | runs the mutation runner and read-only git (`git log`, `git diff v2.2.0 v2.3.0`) to judge the spec and checklist | `SKILL.md` §3.4 and §4 |
+| 6 | **Bob as the builder** | Bob planned and wrote the mode, the skill, the runner, the report renderer, the PDF reader and their tests, and ran every audit | [`docs/bob/SESSIONS.md`](docs/bob/SESSIONS.md) |
 
-- **Document understanding.** The claims come out of real documents, not just markdown. Bob reads
-  `.docx`, `.pdf` and `.xlsx` as they are, so a specification, a release checklist or a test plan can
-  be the source of a claim. The flagship check is test-plan coverage: every case in the `.xlsx` plan
-  traced to a test that exists, and a list of the ones nobody wrote. No existing tool can do that,
-  because no existing tool reads the plan.
-- **Subagents.** One subagent per claim, each with its own clean context, so nothing gets checked by
-  accident while something else is being checked.
-- **Parallel tasks.** Claims that do not depend on each other are checked at the same time, so a
-  hundred-repository corpus does not have to queue up.
-- **Agent mode.** Runs the whole thing, decides what is left to check, and writes the result.
+Remove Bob and the plan, the spec and the checklist are unread, nothing maps a claim to a test, and
+nothing writes the counterexample. What is left is the free link checker.
 
-A claim the tool cannot observe is reported as **not observable**, never as a pass. That holds for the
-half that runs today, and it will hold for the half Bob handles.
+**Reviewing Bob's work was part of using it.** Bob's first plan aimed each mutation at "the smallest
+change that makes the named test fail", which would only ever confirm what a test already asserts; its
+first runner could not tell a mistyped test name from a passing test; its first judging called a false
+checklist tick "partial". Each correction is listed in [`docs/bob/SESSIONS.md`](docs/bob/SESSIONS.md),
+with who fixed it. The small ones I fixed myself; the larger ones Bob fixed in a later task, from a brief I wrote.
 
-## Architecture
+## The free half: any repository, no Bob
 
-![Architecture](docs/architecture.svg)
+The checks that need no judgement run without Bob: README links, file references, install commands,
+published versions, licences, CI that cannot fail. They run in the hosted checker and on the command
+line.
 
-## Run it
+**23 of the 100 most-starred installable repositories on GitHub owned by organisations fail at least one
+of them.** `react/create-react-app`'s README sends readers to its documentation at an address that has
+not existed since the site moved. 12,269,541 stars between them, measured 25 Sep 2026. The method, the
+corpus rule and all eighteen corrections I made to the checks are in
+[`docs/MEASUREMENT.md`](docs/MEASUREMENT.md). The first pass said 89 of 100. That was wrong, in the
+direction that flattered the tool, so I went through the findings by hand until the number survived.
 
 ```bash
 npx github:iamrobertmoore/plumbline --repo .   # audit the current repository
 npx github:iamrobertmoore/plumbline --selfcheck # prove every check can fail
-npx github:iamrobertmoore/plumbline --repo . --format json --out r.json
 ```
 
-Exits `0` on a pass or a warning, `1` on a blocker, `2` when a check cannot be shown to fail. A
-warning is a note about the repository, not a reason to hold a release, so it does not break the build.
+Exits `0` on a pass or a warning, `1` on a blocker, `2` when a check cannot be shown to fail. Zero
+runtime dependencies, Node 20 or later. The suite is `npm test` (86 tests); eleven reach the npm
+registry and skip rather than fail offline.
 
-Zero runtime dependencies. Node 20 or later. Reads the repository, writes nothing.
+## Business
 
-The suite is `node --test test/*.test.mjs` (86 tests). Eleven of them reach the npm registry and skip
-rather than fail when the network is down. The rest run offline, including six that run against a
-**local HTTP server**, so the redirect, the request method and the request headers are all tested
-without depending on a real host happening to misbehave on the day.
+| | |
+|---|---|
+| **Free** | The deterministic checks, hosted and in CI, for any repository. No Bob, no marginal cost. |
+| **Paid** | **$20 per repository per month** for the document tier: the test plan, the spec and the checklist, every claim mapped and every test proved by breaking the code behind it. |
+| **Who pays** | The release owner, the person who signs the checklist. |
+| **Whose Bob** | The team's own Bob seat. Plumbline installs as a mode and a skill; the Bobcoins are the team's, and the $20 is for Plumbline. On the sample, tasks 04 to 08 (the audit of 90 cases, 24 clauses and 10 items, including every rerun and the skill improvements made along the way) cost 18.57 Bobcoins. |
+| **What grows** | Repositories, then documents. It sits in the release path, so one repository leads to the rest. |
 
-A claim the tool cannot observe is reported as **not observable**, never as a pass and never as a
-failure. If the About panel cannot be seen, or a package name on the registry turns out to belong to
-a different project, Plumbline says so and moves on. It does not guess, and it does not accuse.
+## What was built when
 
-> **On the package name.** `plumbline` on npm is an unrelated Angular component-testing utility
-> (v10.0.9, last published 2022), so `npx plumbline` installs the wrong tool. Until this is published
-> under a name that is free, the `github:` form above is the correct way to run it.
+- **Before the event:** the free half (`src/`, the CLI, the negative controls), the measurement
+  (`measure/`), the hosted checker, and the Turnstile sample with its answer key. None of it uses AI.
+- **During the event, with Bob:** everything in [`.bob/`](.bob/), `test/plumbline-run.test.mjs`, and
+  every audit of Turnstile. Eight Bob tasks, each exported to [`docs/bob/tasks/`](docs/bob/tasks/) with
+  a screenshot of its Bobcoin cost in [`bob_sessions/`](bob_sessions/).
 
 ## Honest limitations
 
-- **A failing check is not broken software.** A dead link in a README does not stop anyone installing
-  the package. That is precisely why these defects survive: no test looks at what the docs claim.
-- **The number is a snapshot.** Links rot and versions move. It carries its date for that reason.
-- **The corpus is not a random sample of GitHub.** It is deliberately the strongest end, so 23% is a
-  floor rather than an average.
-- **The number has moved in both directions, and which direction is the point.** The first pass said
-  89 of 100. Corrections 1 to 6 took it down to 18, each removing an accusation the evidence did not
-  support. Correction 10 took it back up to 30, because the harness was testing only the first 25 links
-  in each README and that bound was hiding failures. Correction 11 took it to 22, because the request
-  did not look like a browser and one server answered it accordingly. A tool that finds more problems
-  when you fix it is finding problems that were not there, and a tool that finds fewer when you fix it
-  is admitting it was wrong. All thirteen corrections are in
-  [`docs/MEASUREMENT.md`](docs/MEASUREMENT.md).
-- **The number is what a run reports plus what a hand check adds, and the two are not the same.** Four
-  full runs on 23 September returned 22, 26, 23 and 22. The quantities that come from the corpus are
-  identical to the digit in every one of them: 9,715 links found, 9,351 checked, 364 badges, 1,650
-  relative links. The outcome of each individual link is not, because a server that times out in one run
-  can answer 404 in the next, and only the 404 is a finding. **41 of the 100 had at least one link that
-  could not be reached**, so a run reports a candidate set and not a census. The count here is 23: the
-  22 that fail in every run, plus one repository a run clears only because it cannot reach 32 of its
-  links. Both of those links were re-checked by hand and both are 404. A re-run will land between 22
-  and 26.
-- **CI that cannot fail is reported as a warning, not a failure.** Across 1,768 workflow files in the
-  same 100 repositories, **6 have a step or job marked `if: false`**, which can never run, and **55
-  have a step marked `continue-on-error`**, whose failure does not fail the job. Neither counts toward
-  the headline, because `continue-on-error` on a docs job is a deliberate choice rather than a lie.
-  Reproduce it with [`measure/ci-warnings.mjs`](measure/ci-warnings.mjs).
-  An earlier pass put this figure at 47 by counting any `|| true`. That was wrong. `|| true` is used
-  legitimately inside command substitution and at the end of best-effort cleanup, and the pattern even
-  matched a comment explaining why a workflow does **not** use it.
+- **The sample is mine.** Turnstile was written for this, so the answer key could be written before Bob
+  ran. That is what makes Bob's result checkable; it also means it is one repository. Bob found two
+  defects the key had missed, which is some evidence the key did not flatter it.
+- **Bob can miscount in prose.** Twice it wrote a count its own file contradicted. Counts in the report
+  now come from a script, and the skill says so.
+- **One mapping differs from the key.** Bob declined to map TC-43 to a test that does not test it; the
+  key maps it and marks it a test in name only. Both flag it, differently.
+- **The free-tier number is a snapshot.** Links rot and servers time out; the figure carries its date
+  and its spread.
+
+## Data used
+
+No personal information, client data or social media. The Turnstile sample and every name in it are
+invented (addresses are on the reserved `example` domain). The free tier and its measurement read
+public data only: GitHub's REST API and raw file host (repository metadata, READMEs and file trees of
+organisation-owned repositories), the npm registry, and the URLs those READMEs link to.
 
 ## Licence
 

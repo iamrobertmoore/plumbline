@@ -4,10 +4,10 @@ import { readFileSync } from 'node:fs';
 import { parseRepo, isPrivateAddress, publicUrl, createLimiter } from '../api/_guard.mjs';
 
 test('parseRepo accepts the three ways people write a repository', () => {
-  assert.equal(parseRepo('ruvnet/RuView'), 'ruvnet/RuView');
-  assert.equal(parseRepo('github.com/ruvnet/RuView'), 'ruvnet/RuView');
-  assert.equal(parseRepo('https://github.com/ruvnet/RuView.git'), 'ruvnet/RuView');
-  assert.equal(parseRepo('https://github.com/ruvnet/RuView/blob/main/README.md'), 'ruvnet/RuView');
+  assert.equal(parseRepo('react/create-react-app'), 'react/create-react-app');
+  assert.equal(parseRepo('github.com/react/create-react-app'), 'react/create-react-app');
+  assert.equal(parseRepo('https://github.com/react/create-react-app.git'), 'react/create-react-app');
+  assert.equal(parseRepo('https://github.com/react/create-react-app/blob/main/README.md'), 'react/create-react-app');
 });
 
 test('parseRepo refuses anything that is not plainly a repository', () => {

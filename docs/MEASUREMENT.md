@@ -1,56 +1,59 @@
-# How the headline number was measured
+# How the free tier's number was measured
 
 The claim on the front page is:
 
-> **23 of the 100 most-starred installable repositories on GitHub fail at least one check.**
+> **23 of the 100 most-starred installable repositories on GitHub owned by organisations fail at least
+> one check against their own README.**
 >
-> Measured 23 Sep 2026. **Four full runs the same afternoon returned 22, 26, 23 and 22**, and the published
-> count is the set confirmed by hand rather than the output of any one of them. The spread is the
-> network's: the corpus-side quantities are identical to the digit in every run, and the outcome
-> of each individual link is not. Section "The result" shows both.
+> Measured 25 Sep 2026. **The two full runs on the final code returned 23 and 22.** They agree
+> repository for repository on 22; the 23rd fails whenever its link can be reached. Every candidate was
+> re-checked by hand: every dead link is a 404 or a 410, and every missing file is missing.
 
-Measured 17 Sep 2026, re-measured 23 Sep 2026. This document is the method, including every correction
-I made to the checks along the way, because a measurement that only reports its final answer cannot be
-audited.
+This is the free, deterministic half of Plumbline: no IBM Bob, no judgement, only claims a machine can
+settle. It is here to show the problem is real at the best-maintained end of GitHub. The half that
+reads test plans, specs and checklists, and needs Bob, is measured against a recorded answer key in
+[`examples/`](../examples/README.md).
+
+This document is the method, including every correction I made to the checks along the way, because a
+measurement that only reports its final answer cannot be audited.
 
 ---
 
 ## The corpus
 
-The 100 most-starred repositories on GitHub that ship an installable package manifest. The selection
-rule is four steps with no judgement in any of them:
+The 100 most-starred **organisation-owned** repositories on GitHub that ship an installable package
+manifest. The selection rule is five steps with no judgement in any of them, and it is code:
+[`measure/build-corpus.mjs`](../measure/build-corpus.mjs). [`measure/CORPUS.md`](../measure/CORPUS.md)
+states it in full.
+
+1. The 400 most-starred repositories on GitHub.
+2. Drop the ones owned by a personal account.
+3. Drop the archived ones.
+4. Drop the ones with no `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `setup.py`,
+   `pom.xml`, `Gemfile` or `composer.json` at the repository root.
+5. Take the first 100 of what is left, still in star order.
 
 ```bash
-# 1. the 200 most-starred repositories on GitHub
-gh api "search/repositories?q=stars:%3E5000&sort=stars&order=desc&per_page=100&page=1"
-gh api "search/repositories?q=stars:%3E5000&sort=stars&order=desc&per_page=100&page=2"
-
-# 2. drop the archived ones
-# 3. drop the ones with no package.json, pyproject.toml, Cargo.toml, go.mod, setup.py,
-#    pom.xml, Gemfile or composer.json at the repository root
-# 4. take the first 100 of what is left, still in star order
-
-node measure/verify-corpus.mjs     # check the frozen corpus against that rule
+node measure/verify-corpus.mjs              # check the frozen corpus against that rule
+node measure/verify-corpus.mjs --self-test  # nine mutations, each must be caught
 ```
 
-**Composition:** 65 npm, 25 Python, 4 Go, 3 Rust, 2 setup.py, 1 Maven.
-**14,304,526 stars between them.**
+**Composition:** 65 `package.json`, 22 `pyproject.toml`, 5 `go.mod`, 5 `Cargo.toml`, 2 `setup.py`,
+1 `composer.json`. **12,269,541 stars between them.** Captured 25 September 2026.
 
-**The corpus cannot be rebuilt, and that is stated rather than hidden.** Stars drift by a few hundred
-a day at this end of GitHub, so step 1 returns a different 200 every time it runs. The artefact is
-`measure/corpus.json`, captured 17 September 2026; the query is how it was made. `measure/CORPUS.md`
-records the rule, what is preserved, and the one thing that is not: page 2 of the source response,
-which 45 of the 100 entries came from and which no longer exists in that state. Anyone who disagrees
-with the selection can read the rule, run it, and get a corpus of their own to compare against.
+**Why organisations only.** The result is published next to repository names, and a repository owned
+by a personal account names a person. This project uses no personal information, so the rule excludes
+them rather than anyone editing the list by hand, and `verify-corpus.mjs` fails if one appears. Of the
+400 candidates, 146 were personal accounts.
 
-`measure/verify-corpus.mjs` checks the frozen file rather than rebuilding it: star order, every entry
-installable, none archived, the summary fields agreeing with the lists they summarise, and the star
-total and composition matching the figures on this page. `--self-test` mutates a copy eight ways to
-prove each check can fail, because a check that cannot fail is not a check.
+**The corpus cannot be rebuilt exactly, and that is stated rather than hidden.** Stars drift daily at
+this end of GitHub, so step 1 returns a different 400 every time it runs. The artefact is
+`measure/corpus.json`; `measure/corpus-source.json` keeps all 400 candidates in the order GitHub
+returned them (personal accounts keep their position and lose their names), so the selection can be
+re-derived.
 
-These are the best-maintained, most-scrutinised repositories in public existence. Millions of people
-read these READMEs. If they fail a check, that is a floor for the ecosystem, not a ceiling, and the
-sample cannot be accused of being chosen to look bad.
+These are among the most-read READMEs in existence. If they fail a check, that is a floor for the
+ecosystem, not a ceiling, and the sample cannot be accused of being chosen to look bad.
 
 ---
 
@@ -88,11 +91,13 @@ tool's ids, so there is one name for each check and no mapping to get wrong.
 ## The corrections
 
 **The first pass said 89 of 100.** That was wrong, and it was wrong in the direction that flattered
-the tool, which is the failure mode that matters. Thirteen corrections follow. Five came from
-re-checking a finding by hand, one from trying to reproduce the number from the shipped code rather
-than from the harness that produced it, one from reading this document against the tool's own output,
-one from cross-checking the deck against the harness JSON, and five from an adversarial review of the
-repository and a hand-check of what it found, on 23 September:
+the tool, which is the failure mode that matters. Eighteen corrections follow.
+
+**Corrections 1 to 13 were made between 17 and 23 September on a first corpus**, the 100 most-starred
+installable repositories of any owner. That corpus was retired on 25 September (correction 14), so the
+counts quoted inside those corrections describe it, not the corpus above. Each correction changed the
+checks, and the checks carried forward unchanged. Repository names in them are organisations'; where a
+finding concerned a personal account, it is described without the name.
 
 **1. The file tree was capped at 6,000 entries.** 34 of the 100 repositories exceed that. A path past
 the cap looked identical to a path that does not exist. Fixed by fetching the tree per repository with
@@ -143,7 +148,7 @@ re-implementing them, because while those rules lived in two places they disagre
 moved.
 
 **6. A link inside a code span is not a link.** Found on 17 September, by checking one of the three
-relative-link findings by hand and discovering that the path was not in the README at all. Graphify's
+relative-link findings by hand and discovering that the path was not in the README at all. One project's
 README documents its own parser with `` `[text](./other.md)` `` inside backticks. That is an example of
 markdown syntax, written to explain what the tool parses. Plumbline read it as a link, found no
 `other.md` in the repository, and reported the project for pointing at a file it had never written.
@@ -161,8 +166,8 @@ by reading this document against the tool's own output rather than by checking a
 names. Run `--selfcheck` and the tool prints `link.external`, `manifest.version`, `license.claimed` and
 three more. **Seven published check names appeared nowhere in the published tool**, and this document
 claimed the harness "runs the same checks the tool runs". The harness now reports under the tool's ids.
-Proved label-only rather than asserted: re-running the whole corpus returns the same 18, the same
-14,304,526 stars, the same per-check counts and the same failing set repository for repository, and
+Proved label-only rather than asserted: re-running the whole corpus returned the same 18, the same
+star total, the same per-check counts and the same failing set repository for repository, and
 every difference between the two runs is a name. The two rows that genuinely are harness-side
 (`readme.present`, a precondition, and `readme.versions`, a claim type the CLI does not expose) and the
 one the harness does not evaluate (`ci.claimed`) are now stated rather than left to be noticed.
@@ -210,12 +215,12 @@ those the READMEs were only partly tested and the published link figure was an u
 A bound is where a silent truncation hides, so the cap is gone by default and a cap that is set is
 printed with the run.
 
-Removing it changed the answer, which is how it was found to matter: **Eleven repositories the capped run cleared now fail**, on links that were never tested, and two
-more gained an extra failing check on top of the one they already had. repositories
-that the capped run cleared now fail, on links that were never tested. The cost is one slow repository.
-Most READMEs in this corpus yield under 50 external links, `vinta/awesome-python` yields 543 and
-`avelino/awesome-go` yields 3,248, and a curated link list is exactly where dead links accumulate, so
-truncating one is the last place to save time.
+Removing it changed the answer, which is how it was found to matter: **eleven repositories the capped
+run cleared now failed**, on links that were never tested, and two more gained an extra failing check on
+top of the one they already had. The cost is one slow repository.
+Most READMEs in that corpus yielded under 50 external links, the two largest curated "awesome" lists
+yielded 543 and 3,248, and a curated link list is exactly where dead links accumulate, so truncating
+one is the last place to save time.
 
 **11. The client did not look like a reader, and one server answered it accordingly.** Found on 23
 September, while hand-checking the dead links the uncapped run reported. `nodejs/node`'s README links
@@ -284,7 +289,7 @@ and 9 moved no figure at all, and that is what made them worth writing down:** a
 how the result was described or reported, and a description defect cannot show up in a result.
 
 **One step in that sequence is not a correction at all.** The move from 18 to 19 happened on
-23 September with no change to the method: `affaan-m/ECC` published `2.2.2` to its manifest while npm's
+23 September with no change to the method: one repository published `2.2.2` to its manifest while npm's
 registry still served `2.2.1`, between the two runs. The corpus is frozen; the repositories are not.
 That is the defect this tool exists to find, appearing in the wild during the measurement period, and it
 is worth separating from the corrections because a figure that moves for that reason is evidence rather
@@ -297,88 +302,83 @@ worth stating plainly, because "the number went up" and "the number went down" a
 own: what matters is which direction the evidence supported, and these two are the cleanest illustration
 in this document of why a tool's error rate has to be measured in both directions at once.
 
+**14. The corpus named people.** Found on 24 September, reading the hackathon's data rules against
+the published result. The first corpus had no ownership rule, so about a third of it was personal
+accounts, and the measurement printed findings next to their names. The rule gained step 2, the corpus
+was rebuilt from the 400 most-starred repositories, and `verify-corpus.mjs` now fails if a personal
+account appears, with a ninth self-test mutation to prove that check fires.
+
+**15 to 18. Four more ways to accuse a repository of something untrue.** Found on 25 September by
+confirming every candidate of the first run on the new corpus by hand, which is the house rule:
+
+- **15.** A README kept in `docs/` or `.github/` was reported missing. GitHub shows the README from
+  `.github/`, then the root, then `docs/`, and resolves its relative links from that folder. The tool
+  and the harness now look where GitHub looks.
+- **16.** A published nightly or preview version was reported unpublished, because `manifest.version`
+  compared the manifest with `latest`. The claim is that the version is published, so that is what it
+  now checks. A manifest copied from a template is no longer compared with the template's own package:
+  when the audited repository is known, the registry must point back at it. And `0.0.0` in source, a
+  placeholder a release pipeline overwrites, is named as a placeholder and not judged.
+- **17.** Open Collective's empty sponsor slots answer 404 by design. They are badges.
+- **18.** Most of the links a full run could not reach were github.com asking the client to slow down.
+  A 429 is now retried after the wait the server asks for (up to ten seconds, twice), and links back to
+  github.com are paced. That moved the number up, because links that had been untested were now tested,
+  and every one that moved it was confirmed dead by hand.
+
 ---
 
 ## The result
 
-| check | repositories failing, of 100 |
+| check | repositories failing, of 100 (run E) |
 |---|---|
-| `link.external` | 17 |
-| `manifest.version` | 4 |
-| `readme.versions` | 1 |
+| `link.external` | 21 |
 | `link.relative` | 2 |
 | `license.claimed` | 1 |
-| `readme.present` | 1 |
 | **at least one of the above** | **23** |
 
-`install` found nothing in this corpus. `ci.claimed` is not evaluated here. The six rows above are the
-six that produced a failure, and they are listed in full rather than trimmed to the interesting ones,
-because a method that shows only its hits cannot be audited.
+24 findings across 23 repositories: one fails two checks. `manifest.version`, `install`,
+`readme.versions` and `readme.present` found nothing in this corpus. `ci.claimed` is not evaluated
+here. The rows are listed in full rather than trimmed to the interesting ones, because a method that
+shows only its hits cannot be audited.
 
-Behind those six rows: **9,351 external links fetched and tested**, of which **66 are gone**. **64** of those were found by the confirmation run; the other two are the two dead links in `microsoft/generative-ai-for-beginners`, which that run could not reach and a hand check confirmed are 404. A
-further **364 are badges**, which are skipped rather than asserted, because a shields.io badge is an
-image whose 404 is not a claim the README makes. **1,650 relative links** were checked against the
-repositories' own file trees, making **11,001 links** in total. Two repositories report their tree
-truncated, so their relative links are reported as not observable rather than guessed at.
+Behind those rows: **4,537 links found**, **4,041 external links tested**, **63 gone**, **496
+badges** skipped rather than asserted (a badge is an image whose 404 is not a claim the README makes),
+and **786 relative links** checked against the repositories' own file trees.
 
-**Some of these numbers move between runs and some do not, and the difference matters.** The
-quantities that come from the corpus are **identical to the digit** in every run: **9,715 links found,
-9,351 external links checked, 364 badges, 1,650 relative links**. The quantities that describe the
-network are not. Across the runs that recorded them:
+**Some of these numbers move between runs and some do not.** The quantities that come from the corpus
+are identical to the digit in both final runs: links found, links tested, badges, relative links, the
+gone count. The quantities that describe the network are not:
 
-| quantity | run A | run B | run C | run D |
-|---|---|---|---|---|
-| gone | 58 | 62 | 64 | 64 |
-| unreachable | 3,450 | 2,773 | 3,036 | 3,116 |
-| repositories not fully tested | | | 37 | 41 |
+| quantity | run E | run F |
+|---|---|---|
+| repositories failing | 23 | 22 |
+| links unreachable | 98 | 126 |
+| repositories not fully tested | 26 | 33 |
 
-**They are not even a conserved split of the same set.** 58 + 3,450 is 3,508, 62 + 2,773 is 2,835,
-64 + 3,036 is 3,100, and 64 + 3,116 is 3,180. A link that times out in one run can answer 404 in the
-next, and only the 404 is a finding, so **the headline moves with the network**. The wall clock moves
-for the same reason and is reported as a range.
+**The two runs agree on 22 repositories, repository for repository.** The 23rd,
+`doocs/advanced-java`, links to its own `/stargazers` page, which answers 404 signed out and signed in;
+run F could not reach it. So 22 is a floor no final run went below, and the published count is the
+candidate set confirmed by hand. A run on another day will land near it, not on it: links rot, and
+servers time out.
 
-**The stable part is worth stating precisely, because it is stronger than it looks.** The set of
-repositories that fail is not arbitrary: two of the four runs returned **the same 22 repositories,
-repository for repository**, and every other run returned those same 22 plus one or more. So 22 is a
-floor that no run has ever gone below, and the count published here is what a hand check adds to it.
-An earlier version of this document quoted the unreachable count as a single figure and described the
-gone count as stable, and **both were samples of a variable wearing the costume of a fact**.
+**Every candidate was re-checked by hand** with a real `GET`, following redirects, with a browser user
+agent and an explicit `Accept-Language`. Every one came back 404 or 410, and the two missing paths and
+the missing licence file were confirmed against the repositories themselves. The GitHub `/stargazers` and
+`/watchers` links were also checked signed in, because a page that only works signed in would be a
+false accusation. They 404 either way.
 
-**A sample of the gone links was re-confirmed by hand with a real `GET`**, following redirects,
-with a browser user agent and an explicit `Accept-Language`. Every one checked came back the same
-status the harness reported: `pythonware.com/products/pil/`, `kubernetes.io/case-studies/`, the
-Storybook toolbar path, `docs.n8n.io/sustainable-use-license/` and `u.ant.design/reproduce` are hard
-404s, and `localsend/localsend`'s store listing is a 410 from a delisted app. The `ecc-universal`
-version page is the one worth reading: it is a 404 because **2.2.2 is not on npm**, which is the same
-fact `manifest.version` reports from the other direction. **Both relative-link findings were confirmed
-against the GitHub contents API.**
+| repository | what the README claims | what is true |
+|---|---|---|
+| `react/create-react-app` | its documentation is at `facebook.github.io/create-react-app/` | 404; the site moved and the README did not |
+| `kubernetes/kubernetes` | case studies at `kubernetes.io/case-studies/` | 404 |
+| `fastapi/fastapi` | a relative link to `tutorial/` | no such path in the repository |
+| `laravel/laravel` | the README refers to a licence | no licence file at the repository root |
+| `n8n-io/n8n` | its licence is explained at `docs.n8n.io/sustainable-use-license/` | 404 |
+| `PaddlePaddle/PaddleOCR` | a benchmark document and a parallel-inference page | the file is not in the repository, and the page is a 404 |
+| `localsend/localsend` | a Microsoft Store listing | 410, delisted |
 
-**Two independent runs do not produce the same number, and this document used to say they did.** The
-first pair that was compared, on the code before corrections 12 and 13, returned **22 and 26**, with
-`link.external` at 16 against 19 and four repositories differing in the failing set. Three of those four
-differences were network artefacts and are now guarded: a registry throttle that read as a missing
-package (correction 12), and two links that answered in one run and 404ed in the next.
-
-**The pair that was compared on the shipped code returned 23 and 22, and the difference between them is
-one repository.** Both runs returned the **same 22 repositories**, repository for repository. The 23rd
-is `microsoft/generative-ai-for-beginners`, which fails whenever its links can be reached and passes
-when they cannot, because it has 32 links that time out together. So the figure is published as a count
-with its spread, and the spread is **22 to 26** over four full runs. **A run prints a candidate set. The
-count here is the candidate set confirmed by hand**, which is the same rule the rest of this document
-follows.
-
-**Reported separately, not in the headline.** Across the **1,768 workflow files** in these 100
-repositories, **6 have a step or job marked `if: false`**, which can never run, and **55 have a step
-marked `continue-on-error`**, whose failure does not fail the job. Three repositories have no GitHub
-Actions workflows at all, because they use another CI system. This is a warning tier rather than a
-failure: `continue-on-error` on a docs job is a deliberate engineering choice, not a lie.
-
-Reproduce it with `measure/ci-warnings.mjs`. **An earlier version of this figure said 47, and it was
-wrong.** It counted any `|| true`, which appears legitimately inside command substitution
-(`candidate="$(find ... || true)"`), at the end of best-effort cleanup (`gh pr merge ... || true`), and
-inside a comment explaining why a workflow does **not** use it. The pattern was measuring "CI that
-mentions `|| true`" and reporting it as "CI that cannot fail". It was narrowed to the two cases that
-are unambiguous from the file alone.
+The full list, with every dead URL, is what `measure/audit.mjs` prints; the hosted checker shows the
+same result for any one of them.
 
 ---
 
@@ -389,47 +389,25 @@ are unambiguous from the file alone.
   the package. That is exactly the point: these are the defects that survive every existing quality
   gate, because no test reads what the documentation claims.
 - **The corpus is deliberately the strongest end of GitHub**, not a random sample.
-
----
-
-## The example used in the demo
-
-`ruvnet/RuView`. Its README links the same architecture decision record twice:
-
-```
-[ADR-079](docs/adr/ADR-079-camera-ground-truth-training.md)      exists
-[ADR-079](docs/adr/ADR-079-camera-supervised-pose-finetune.md)   never existed
-```
-
-One document, one README, two filenames, one invented. Confirmed against the GitHub contents API.
+- **It is the free tier only.** These checks read a README and a manifest. The claims that matter most
+  to a release, in the test plan, the spec and the checklist, need Bob, and are measured in
+  [`examples/`](../examples/README.md) against an answer key instead.
 
 ---
 
 ## Reproducing
 
-The harness ships with the tool and reports under the same check ids, so a row here and a row from
-`--selfcheck` name the same thing:
-
 ```bash
-GH_TOKEN=$(gh auth token) node measure/audit.mjs            # the whole corpus, about fifteen minutes
-GH_TOKEN=$(gh auth token) node measure/audit.mjs --only 8   # a pilot, first eight repositories
-GH_TOKEN=$(gh auth token) node measure/audit.mjs --out r.json
+GH_TOKEN=$(gh auth token) node measure/audit.mjs --out r.json          # the whole corpus
+GH_TOKEN=$(gh auth token) node measure/audit.mjs --slice 0:25 --out a.json  # a quarter, for splitting a run
 ```
 
-`measure/corpus.json` is the 100 repositories and their metadata. `measure/audit.mjs` imports the
-checks from `src/` rather than re-implementing them, so the link parsing and the registry rules are
-the shipped ones and cannot drift away from them. What it does not do is evaluate all six: `ci.claimed`
-is measured by `measure/ci-warnings.mjs` instead, and `readme.versions` is a claim type the CLI does
-not expose. Both are stated above rather than left for a reader to notice. The one exception is the relative-path check, which
-the shipped version answers against the local filesystem and the harness answers against GitHub's file
-tree, because the repository is remote.
-
-It needs network access: GitHub for the file trees and the READMEs, npm for the version lookups. It
-reads only, and writes nothing unless you pass `--out`.
+`measure/audit.mjs` imports the checks from `src/` rather than re-implementing them, so the link
+parsing and the registry rules are the shipped ones and cannot drift away from them. The one
+exception is the relative-path check, which the shipped version answers against the local filesystem
+and the harness answers against GitHub's file tree, because the repository is remote. It needs network
+access (GitHub and the npm registry), reads only, and writes nothing unless you pass `--out`.
 
 What it prints is a **candidate** set. Every candidate was then confirmed by hand, and the corrections
 above name exactly what that pass changed. A harness that reports its own answer without being checked
 is the thing this whole project is about.
-
-The numbers move as links rot and versions are published, which is why the figure carries its date. A
-re-run today will not return exactly this set.

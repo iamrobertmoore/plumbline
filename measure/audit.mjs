@@ -43,8 +43,8 @@ const OUT = arg('--out', null);
 // reached the cap.
 //
 // The cost of removing it is one slow repository. Measured 23 September: most READMEs in
-// this corpus yield under 50 external links, vinta/awesome-python yields 543, and
-// avelino/awesome-go yields 3,248. A curated link list is also exactly where dead links
+// this corpus yield under 50 external links, while a curated "awesome" list can yield
+// several thousand. A curated link list is also exactly where dead links
 // accumulate, so truncating one is the last place to save time.
 const MAX_LINKS = Number(arg('--max-links', 0)) || 0;
 const CONC = Number(arg('--concurrency', 6));

@@ -15,7 +15,7 @@
     "report": "node .bob/skills/plumbline/render-report.mjs"
   },
   "repository": { "type": "git", "url": "git+https://github.com/iamrobertmoore/plumbline.git" },
-  "homepage": "https://iamrobertmoore.github.io/plumbline/",
+  "homepage": "https://plumbline-smoky.vercel.app/",
   "bugs": { "url": "https://github.com/iamrobertmoore/plumbline/issues" },
   "keywords": ["audit", "release", "ci", "documentation", "verification"],
   "license": "MIT",

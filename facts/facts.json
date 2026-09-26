@@ -1,175 +1,53 @@
 {
-  "_about": "Every figure the entry states about itself lives here once. node facts/render.mjs --check fails if any surface disagrees; --write puts these values into every surface. Edit this file, never the number on a surface.",
+  "_about": "Every figure the entry states about itself lives here once. node facts/render.mjs --check fails if any surface disagrees; --write puts these values into every surface. Edit this file, never the number on a surface. Figures about the worked example are computed from Bob's own claims.json.",
   "facts": {
-    "headline.failing": {
-      "value": "23",
-      "source": "docs/MEASUREMENT.md, the hand-confirmed candidate set of the 23 September runs"
-    },
-    "headline.findings": {
-      "value": "26",
-      "source": "docs/MEASUREMENT.md"
-    },
-    "headline.spread": {
-      "value": "22, 26, 23 and 22",
-      "source": "four full runs, 23 September 2026"
-    },
-    "headline.notFullyTested": {
-      "value": "41",
-      "source": "the last of those runs"
-    },
-    "corpus.stars": {
-      "value": "14,304,526",
-      "source": "measure/corpus.json, checked by measure/verify-corpus.mjs"
-    },
-    "method.corrections": {
-      "value": "thirteen",
-      "words": true,
-      "source": "docs/MEASUREMENT.md"
-    },
-    "tests.count": {
-      "computed": "tests",
-      "source": "counted from test/*.test.mjs"
-    }
+    "headline.failing": { "value": "23", "source": "docs/MEASUREMENT.md, run E confirmed by hand, 25 September 2026" },
+    "headline.spread": { "value": "23 and 22", "source": "runs E and F, 25 September 2026" },
+    "corpus.stars": { "value": "12,269,541", "source": "measure/corpus.json, checked by measure/verify-corpus.mjs" },
+    "method.corrections": { "value": "eighteen", "words": true, "source": "docs/MEASUREMENT.md" },
+    "bob.coins": { "value": "30.23", "source": "working log of each task header, docs/bob/SESSIONS.md" },
+    "tests.count": { "computed": "tests", "source": "counted from test/*.test.mjs" },
+    "sample.automated": { "computed": "sample.automated", "source": "examples/turnstile/.plumbline/claims.json" },
+    "sample.withTest": { "computed": "sample.withTest", "source": "examples/turnstile/.plumbline/claims.json" },
+    "sample.withoutTest": { "computed": "sample.withoutTest", "source": "examples/turnstile/.plumbline/claims.json" },
+    "sample.nameOnly": { "computed": "sample.nameOnly", "source": "examples/turnstile/.plumbline/claims.json" },
+    "sample.specFalse": { "computed": "sample.specFalse", "source": "examples/turnstile/.plumbline/claims.json" },
+    "sample.checklistFalse": { "computed": "sample.checklistFalse", "source": "examples/turnstile/.plumbline/claims.json" }
   },
   "bindings": [
-    {
-      "fact": "headline.failing",
-      "pattern": "(?<v>\\d+) of the 100 most-starred",
-      "files": [
-        "README.md",
-        "index.html",
-        "deck/index.html",
-        "docs/brand/cover.svg"
-      ]
-    },
-    {
-      "fact": "headline.failing",
-      "pattern": "(?<v>\\d+) of them fail at least one check",
-      "files": [
-        "README.md"
-      ]
-    },
-    {
-      "fact": "headline.failing",
-      "pattern": "(?<v>\\d+) in every 100",
-      "files": [
-        "README.md"
-      ]
-    },
-    {
-      "fact": "headline.failing",
-      "pattern": "bignum\">(?<v>\\d+)<small>",
-      "files": [
-        "index.html"
-      ]
-    },
-    {
-      "fact": "headline.failing",
-      "pattern": ">(?<v>\\d+) of 100</text>",
-      "files": [
-        "docs/brand/cover.svg"
-      ]
-    },
-    {
-      "fact": "headline.failing",
-      "pattern": "<h2>(?<v>\\d+) of 100\\.",
-      "files": [
-        "deck/index.html"
-      ]
-    },
-    {
-      "fact": "headline.failing",
-      "pattern": "so (?<v>\\d+)(?:%| in 100) is a",
-      "files": [
-        "README.md",
-        "index.html",
-        "deck/index.html"
-      ]
-    },
-    {
-      "fact": "headline.failing",
-      "pattern": "findings across\\s+(?<v>\\d+)\\s+repositories",
-      "files": [
-        "README.md",
-        "index.html",
-        "deck/index.html"
-      ]
-    },
-    {
-      "fact": "headline.findings",
-      "pattern": "(?<v>\\d+) findings across",
-      "files": [
-        "README.md",
-        "index.html",
-        "deck/index.html"
-      ]
-    },
-    {
-      "fact": "headline.spread",
-      "pattern": "returned (?<v>\\d+, \\d+, \\d+ and \\d+)",
-      "files": [
-        "README.md",
-        "index.html",
-        "deck/index.html"
-      ]
-    },
-    {
-      "fact": "headline.notFullyTested",
-      "pattern": "(?<v>\\d+) of the 100 had",
-      "files": [
-        "README.md",
-        "index.html",
-        "deck/index.html"
-      ]
-    },
-    {
-      "fact": "corpus.stars",
-      "pattern": "(?<v>\\d{1,3}(?:,\\d{3})+) stars (?:of software|between them)",
-      "files": [
-        "README.md",
-        "index.html",
-        "deck/index.html",
-        "docs/brand/cover.svg"
-      ]
-    },
-    {
-      "fact": "method.corrections",
-      "pattern": "(?<v>[A-Za-z]+) corrections (?:are|is) (?:written|in)",
-      "files": [
-        "index.html",
-        "deck/index.html"
-      ]
-    },
-    {
-      "fact": "method.corrections",
-      "pattern": "All (?<v>[a-z]+) corrections",
-      "files": [
-        "README.md"
-      ]
-    },
-    {
-      "fact": "tests.count",
-      "pattern": "\\((?<v>\\d+) tests\\)",
-      "files": [
-        "README.md"
-      ]
-    }
+    { "fact": "headline.failing", "pattern": "(?<v>\\d+) of the 100 most-starred", "files": ["README.md"] },
+    { "fact": "headline.failing", "pattern": "\\*\\*(?<v>\\d+) of the 100 most-starred", "files": ["docs/MEASUREMENT.md"] },
+    { "fact": "headline.failing", "pattern": ">(?<v>\\d+) of 100</text>", "files": ["docs/brand/cover.svg"] },
+    { "fact": "headline.spread", "pattern": "two final runs, (?<v>\\d+ and \\d+)", "files": ["README.md"] },
+    { "fact": "headline.spread", "pattern": "code returned (?<v>\\d+ and \\d+)", "files": ["docs/MEASUREMENT.md"] },
+    { "fact": "corpus.stars", "pattern": "(?<v>\\d{1,3}(?:,\\d{3})+) stars between them", "files": ["README.md", "docs/MEASUREMENT.md"] },
+    { "fact": "method.corrections", "pattern": "all (?<v>[a-z]+) corrections", "files": ["README.md"] },
+    { "fact": "method.corrections", "pattern": "(?<v>[A-Za-z]+) corrections follow", "files": ["docs/MEASUREMENT.md"] },
+    { "fact": "bob.coins", "pattern": "for (?<v>\\d+\\.\\d+) of the 40 Bobcoins", "files": ["README.md"] },
+    { "fact": "bob.coins", "pattern": "\\*\\*(?<v>\\d+\\.\\d+) of 40\\*\\*", "files": ["docs/bob/SESSIONS.md"] },
+    { "fact": "tests.count", "pattern": "\\((?<v>\\d+) tests\\)", "files": ["README.md"] },
+    { "fact": "sample.automated", "pattern": "says all (?<v>\\d+) automated cases", "files": ["README.md"] },
+    { "fact": "sample.withTest", "pattern": "Bob found a test for (?<v>\\d+)", "files": ["README.md"] },
+    { "fact": "sample.withoutTest", "pattern": "(?<v>\\d+) of the \\d+ cases have no test", "files": ["README.md"] },
+    { "fact": "sample.nameOnly", "pattern": "(?<v>\\d+) tests pass on broken code", "files": ["README.md"] },
+    { "fact": "sample.nameOnly", "pattern": "(?<v>\\d+) of those tests stay green", "files": ["README.md"] },
+    { "fact": "sample.specFalse", "pattern": "(?<v>\\d+) of the \\d+ spec clauses", "files": ["README.md"] },
+    { "fact": "sample.specFalse", "pattern": "wrong in (?<v>\\d+) places", "files": ["README.md"] },
+    { "fact": "sample.checklistFalse", "pattern": "(?<v>\\d+) of the \\d+ tick", "files": ["README.md"] }
   ],
   "stale": [
-    "Eleven corrections",
-    "18 in 100",
-    "19% is a floor",
-    "18 of 100",
-    "19 of 100",
-    "22 of 100"
+    "14,304,526",
+    "ruvnet",
+    "RuView",
+    "22, 26, 23 and 22",
+    "github.io/plumbline",
+    "co-author",
+    "one subagent per claim"
   ],
   "staleFiles": [
     "README.md",
-    "index.html",
-    "deck/index.html",
-    "docs/brand/cover.svg",
-    "docs/brand/readme-banner.svg",
     "docs/MEASUREMENT.md",
+    "docs/brand/readme-banner.svg",
     "check/index.html"
   ]
 }
