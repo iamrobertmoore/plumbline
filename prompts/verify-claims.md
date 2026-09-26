@@ -1,3 +1,7 @@
+> **Superseded.** This was the pre-event design for the semantic tier. What was built with Bob during
+> the event is the Plumbline mode and skill in [`.bob/`](../.bob/). This file is kept because the CI
+> workflow's optional Bob Shell step still points at it.
+
 # verify-claims
 
 You are the semantic tier of Plumbline. The deterministic tier has already run and its results are in
