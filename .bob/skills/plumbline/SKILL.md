@@ -111,7 +111,15 @@ For each `.pdf` file:
    `•`), or a numbered list item (`1.`, `2.`, etc.). Emit one claim per item.
    The `source` field is `<filename>!line:<approximate-line-number>`.
 4. **If both calls fail** (throw, return empty, or return only whitespace):
-   - Emit a single claim entry:
+   - **Try the PDF script as a third fallback:** run
+     `node .bob/skills/plumbline/pdf-text.mjs <file.pdf>` via `execute_command`.
+     The script decodes FlateDecode and ASCII85Decode content streams and maps
+     ZapfDingbats glyphs (including ✔ U+2714, ✘ U+2718, ■ U+25A0, ❏ U+274F)
+     to Unicode. If the script produces non-empty output, split its lines on
+     item-ID patterns (e.g. `R-\d+`, `^\d+\.`) or treat each non-blank line
+     as one checklist item. Each line that contains a ✔ is ticked; lines with
+     ✘ or ■ (unchecked square) are unticked.
+   - **If all three attempts fail**, emit a single claim entry:
      ```json
      {
        "id": "<auto-id>",
@@ -129,8 +137,8 @@ For each `.pdf` file:
    - This failure is surfaced in the report as an amber row. Do **not** skip
      the file silently.
 
-**Cost rule:** up to two calls per `.pdf` file (`office_read` attempt + `read_file`
-fallback). Both attempts count toward the cost even if both fail.
+**Cost rule:** up to two `office_read`/`read_file` calls per `.pdf` file, plus
+one `execute_command` call if those two fail. All attempts count toward the cost.
 
 ### 1.5 Claims JSON schema
 
