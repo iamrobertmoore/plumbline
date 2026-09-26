@@ -6,3 +6,4 @@ docs/brand/*.png
 .vercel/
 .env*
 node_modules/
+examples/

@@ -1,0 +1,11 @@
+{
+  "name": "turnstile",
+  "version": "2.3.0",
+  "description": "Accounts, passwords, sessions and tokens for a small web service.",
+  "type": "module",
+  "exports": "./src/index.mjs",
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node --test test/*.test.mjs" },
+  "license": "MIT",
+  "dependencies": {}
+}

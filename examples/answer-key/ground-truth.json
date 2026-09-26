@@ -1,0 +1,1500 @@
+{
+ "cases": [
+  {
+   "id": "TC-01",
+   "area": "Registration",
+   "title": "Reject an email address with no @",
+   "expected": "Registration refused, bad_email",
+   "status": "tested",
+   "test": "TC-01 rejects an email address with no @",
+   "file": "test/validation.test.mjs",
+   "mutation": [
+    [
+     "src/validation.mjs",
+     "if (at < 1 || at !== e.lastIndexOf('@')) return false;",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-02",
+   "area": "Registration",
+   "title": "Reject an email address whose domain has no dot",
+   "expected": "Registration refused, bad_email",
+   "status": "tested",
+   "test": "TC-02 rejects an email address whose domain has no dot",
+   "file": "test/validation.test.mjs",
+   "mutation": [
+    [
+     "src/validation.mjs",
+     "if (!domain.includes('.')) return false;",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-03",
+   "area": "Registration",
+   "title": "Reject an email address longer than 254 characters",
+   "expected": "Registration refused, bad_email",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/validation.mjs",
+     "if (e.length > EMAIL_MAX) return false;",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-04",
+   "area": "Registration",
+   "title": "Trim and lowercase the email before storing it",
+   "expected": "Ada@Example.COM is stored as ada@example.com",
+   "status": "tested",
+   "test": "email addresses are trimmed and lowercased before use",
+   "file": "test/validation.test.mjs",
+   "mutation": [
+    [
+     "src/validation.mjs",
+     "return String(email).trim().toLowerCase();",
+     "return String(email);"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-05",
+   "area": "Passwords",
+   "title": "Reject a password shorter than the minimum length",
+   "expected": "Refused, too_short",
+   "status": "tested",
+   "test": "TC-05 rejects a password below the minimum length",
+   "file": "test/validation.test.mjs",
+   "mutation": [
+    [
+     "src/validation.mjs",
+     "if (pw.length < PASSWORD_MIN)",
+     "if (false)"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-06",
+   "area": "Passwords",
+   "title": "Reject a password longer than 128 characters",
+   "expected": "Refused, too_long",
+   "status": "tested",
+   "test": "TC-06 rejects a password over 128 characters",
+   "file": "test/validation.test.mjs",
+   "mutation": [
+    [
+     "src/validation.mjs",
+     "if (pw.length > PASSWORD_MAX)",
+     "if (false)"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-07",
+   "area": "Passwords",
+   "title": "Reject a password with no digit",
+   "expected": "Refused, no_digit",
+   "status": "tested",
+   "test": "a password with no digit is refused",
+   "file": "test/validation.test.mjs",
+   "mutation": [
+    [
+     "src/validation.mjs",
+     "if (!/\\d/.test(pw))",
+     "if (false)"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-08",
+   "area": "Passwords",
+   "title": "Reject a password containing the email local part",
+   "expected": "Refused, contains_email",
+   "status": "tested",
+   "test": "TC-08 rejects a password containing the local part of the email",
+   "file": "test/validation.test.mjs",
+   "mutation": [
+    [
+     "src/validation.mjs",
+     "errors.push('contains_email')",
+     "void 0"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-09",
+   "area": "Passwords",
+   "title": "Reject a password on the common-password list",
+   "expected": "Refused, common",
+   "status": "tested",
+   "test": "TC-09 rejects a password on the common-password list",
+   "file": "test/validation.test.mjs",
+   "mutation": [
+    [
+     "src/validation.mjs",
+     "if (COMMON.has(pw.toLowerCase())) errors.push('common');",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-10",
+   "area": "Passwords",
+   "title": "Accept a password that meets every rule",
+   "expected": "No errors",
+   "status": "tested",
+   "test": "TC-10 accepts a password that meets every rule",
+   "file": "test/validation.test.mjs",
+   "mutation": [
+    [
+     "src/validation.mjs",
+     "const errors = [];",
+     "const errors = ['x'];"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-11",
+   "area": "Registration",
+   "title": "Username is 3 to 32 characters",
+   "expected": "ab and a 33-character name refused",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/validation.mjs",
+     "{3,32}",
+     "{1,64}"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-12",
+   "area": "Registration",
+   "title": "Username uses only lowercase letters, digits and underscore",
+   "expected": "Ada.Lovelace refused",
+   "status": "tested",
+   "test": "usernames may only use lowercase letters, digits and underscores",
+   "file": "test/validation.test.mjs",
+   "mutation": [
+    [
+     "src/validation.mjs",
+     "[a-z0-9_]",
+     "[A-Za-z0-9_.-]"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-13",
+   "area": "Passwords",
+   "title": "A stored hash never contains the plaintext",
+   "expected": "Plaintext absent from stored value",
+   "status": "tested",
+   "test": "TC-13 a stored hash never contains the plaintext password",
+   "file": "test/passwords.test.mjs",
+   "mutation": [
+    [
+     "src/passwords.mjs",
+     "hash.toString('base64url')].join('$')",
+     "hash.toString('base64url'), pw].join('$')"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-14",
+   "area": "Passwords",
+   "title": "Hashes are salted",
+   "expected": "Same password hashed twice gives different values",
+   "status": "tested",
+   "test": "TC-14 hashing the same password twice gives different hashes",
+   "file": "test/passwords.test.mjs",
+   "mutation": [
+    [
+     "src/passwords.mjs",
+     "const salt = randomBytes(16);",
+     "const salt = Buffer.alloc(16);"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-15",
+   "area": "Passwords",
+   "title": "Verify accepts the correct password",
+   "expected": "true",
+   "status": "tested",
+   "test": "TC-15 verify accepts the correct password",
+   "file": "test/passwords.test.mjs",
+   "mutation": [
+    [
+     "src/passwords.mjs",
+     "return actual.length === expected.length && timingSafeEqual(actual, expected);",
+     "return false;"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-16",
+   "area": "Passwords",
+   "title": "Verify rejects a wrong password",
+   "expected": "false",
+   "status": "tested",
+   "test": "verify says no to the wrong password",
+   "file": "test/passwords.test.mjs",
+   "mutation": [
+    [
+     "src/passwords.mjs",
+     "return actual.length === expected.length && timingSafeEqual(actual, expected);",
+     "return true;"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-17",
+   "area": "Passwords",
+   "title": "Password comparison is constant time",
+   "expected": "Reviewed in code, timingSafeEqual used",
+   "status": "manual",
+   "test": null,
+   "file": null,
+   "mutation": [],
+   "note": null
+  },
+  {
+   "id": "TC-18",
+   "area": "Passwords",
+   "title": "Hashes made with weaker parameters are flagged for rehash",
+   "expected": "needsRehash is true",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/passwords.mjs",
+     "return !(N >= SCRYPT.N);",
+     "return false;"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-19",
+   "area": "Passwords",
+   "title": "A malformed stored hash is rejected without an exception",
+   "expected": "false, no throw",
+   "status": "tested",
+   "test": "TC-19 verify returns false for a malformed stored hash instead of throwing",
+   "file": "test/passwords.test.mjs",
+   "mutation": [
+    [
+     "src/passwords.mjs",
+     "if (parts.length !== 6 || parts[0] !== 'scrypt') return false;",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-20",
+   "area": "Login",
+   "title": "Correct email and password logs in",
+   "expected": "ok",
+   "status": "tested",
+   "test": "TC-20 a correct email and password logs in",
+   "file": "test/login.test.mjs",
+   "mutation": [
+    [
+     "src/login.mjs",
+     "return { ok: true, user };",
+     "return { ok: false, user };"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-21",
+   "area": "Login",
+   "title": "Wrong password is refused",
+   "expected": "invalid_credentials",
+   "status": "tested",
+   "test": "TC-21 a wrong password is refused as invalid credentials",
+   "file": "test/login.test.mjs",
+   "mutation": [
+    [
+     "src/login.mjs",
+     "return { ok: false, reason: 'invalid_credentials' };",
+     "return { ok: false, reason: 'wrong_password' };"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-22",
+   "area": "Login",
+   "title": "Account locks after five failed attempts",
+   "expected": "Locked on the fifth failure",
+   "status": "tested",
+   "test": "TC-22 the account locks after five failed attempts",
+   "file": "test/login.test.mjs",
+   "mutation": [
+    [
+     "src/login.mjs",
+     "export const MAX_ATTEMPTS = 5;",
+     "export const MAX_ATTEMPTS = 6;"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-23",
+   "area": "Login",
+   "title": "A locked account refuses the correct password",
+   "expected": "locked",
+   "status": "tested",
+   "test": "a locked account refuses even the right password",
+   "file": "test/login.test.mjs",
+   "mutation": [
+    [
+     "src/login.mjs",
+     "if (state.lockedUntil > clock()) {",
+     "if (false) {"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-24",
+   "area": "Login",
+   "title": "The lock lifts after 15 minutes",
+   "expected": "Login succeeds after 15 minutes",
+   "status": "tested",
+   "test": "TC-24 the lock lifts after fifteen minutes",
+   "file": "test/login.test.mjs",
+   "mutation": [
+    [
+     "src/login.mjs",
+     "export const LOCK_MS = 15 * 60 * 1000;",
+     "export const LOCK_MS = 24 * 60 * 60 * 1000;"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-25",
+   "area": "Login",
+   "title": "A successful login resets the failure count",
+   "expected": "Count back to zero",
+   "status": "tested",
+   "test": "TC-25 a successful login resets the failure count",
+   "file": "test/login.test.mjs",
+   "mutation": [
+    [
+     "src/login.mjs",
+     "failures.delete(key);",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-26",
+   "area": "Login",
+   "title": "Unknown email and wrong password give the same response",
+   "expected": "No user enumeration",
+   "status": "tested",
+   "test": "unknown email and wrong password look identical to the caller",
+   "file": "test/login.test.mjs",
+   "mutation": [
+    [
+     "src/login.mjs",
+     "const user = users.get(key);",
+     "const user = users.get(key); if (!user) return { ok: false, reason: 'unknown_user' };"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-27",
+   "area": "Login",
+   "title": "An unverified email cannot log in",
+   "expected": "unverified",
+   "status": "tested",
+   "test": "TC-27 an account with an unverified email cannot log in",
+   "file": "test/login.test.mjs",
+   "mutation": [
+    [
+     "src/login.mjs",
+     "if (!user.emailVerified) return { ok: false, reason: 'unverified' };",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-28",
+   "area": "Access tokens",
+   "title": "A freshly issued access token verifies",
+   "expected": "valid",
+   "status": "tested",
+   "test": "TC-28 a freshly issued access token verifies",
+   "file": "test/tokens.test.mjs",
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "return { valid: true, claims };",
+     "return { valid: false, claims };"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-29",
+   "area": "Access tokens",
+   "title": "Access token carries the subject",
+   "expected": "sub is the user email",
+   "status": "tested",
+   "test": "TC-29 the access token carries the subject",
+   "file": "test/tokens.test.mjs",
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "b64({ sub, roles",
+     "b64({ sub: 'anonymous', roles"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-30",
+   "area": "Access tokens",
+   "title": "Access token carries the roles",
+   "expected": "roles claim present",
+   "status": "tested",
+   "test": "TC-30 the access token carries the roles",
+   "file": "test/tokens.test.mjs",
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "roles, iat, exp",
+     "roles: [], iat, exp"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-31",
+   "area": "Access tokens",
+   "title": "A token with an edited payload is rejected",
+   "expected": "invalid",
+   "status": "tested",
+   "test": "TC-31 a token with an edited payload is rejected",
+   "file": "test/tokens.test.mjs",
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "if (expected.length !== given.length || !timingSafeEqual(expected, given)) return { valid: false, reason: 'bad_signature' };",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-32",
+   "area": "Access tokens",
+   "title": "A token with an edited signature is rejected",
+   "expected": "bad_signature",
+   "status": "tested",
+   "test": "tampering with the signature is caught",
+   "file": "test/tokens.test.mjs",
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "!timingSafeEqual(expected, given)",
+     "false"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-33",
+   "area": "Access tokens",
+   "title": "A token signed with another key is rejected",
+   "expected": "invalid",
+   "status": "tested",
+   "test": "TC-33 a token signed with a different key is rejected",
+   "file": "test/tokens.test.mjs",
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "if (expected.length !== given.length || !timingSafeEqual(expected, given)) return { valid: false, reason: 'bad_signature' };",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-34",
+   "area": "Access tokens",
+   "title": "A malformed token is rejected without an exception",
+   "expected": "malformed",
+   "status": "tested",
+   "test": "TC-34 a malformed token is rejected without throwing",
+   "file": "test/tokens.test.mjs",
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "} catch { return { valid: false, reason: 'malformed' }; }",
+     "} catch (e) { throw e; }"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-35",
+   "area": "Access tokens",
+   "title": "A token declaring alg none is rejected",
+   "expected": "bad_alg",
+   "status": "tested",
+   "test": "TC-35 a token declaring alg none is rejected",
+   "file": "test/tokens.test.mjs",
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "if (header.alg !== 'HS256') return { valid: false, reason: 'bad_alg' };",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-36",
+   "area": "Access tokens",
+   "title": "A token issued more than 30 seconds in the future is rejected",
+   "expected": "not_yet_valid",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "if (claims.iat > t + CLOCK_SKEW_SECONDS)",
+     "if (false)"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-37",
+   "area": "Access tokens",
+   "title": "Up to 30 seconds of clock skew is tolerated",
+   "expected": "valid",
+   "status": "tested",
+   "test": "TC-37 a token issued up to thirty seconds in the future is accepted",
+   "file": "test/tokens.test.mjs",
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "export const CLOCK_SKEW_SECONDS = 30;",
+     "export const CLOCK_SKEW_SECONDS = 0;"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-38",
+   "area": "Access tokens",
+   "title": "Every access token has a unique id",
+   "expected": "Two tokens, two jti values",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "jti: randomBytes(12).toString('base64url')",
+     "jti: 'fixed'"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-39",
+   "area": "Access tokens",
+   "title": "A revoked token is rejected",
+   "expected": "revoked",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "if (revoked.has(claims.jti)) return { valid: false, reason: 'revoked' };",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-40",
+   "area": "Access tokens",
+   "title": "Access token names its issuer",
+   "expected": "iss is turnstile",
+   "status": "tested",
+   "test": "TC-40 the access token names its issuer",
+   "file": "test/tokens.test.mjs",
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "iss: config.issuer",
+     "iss: 'unknown'"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-41",
+   "area": "Access tokens",
+   "title": "An expired access token is rejected",
+   "expected": "expired",
+   "status": "name_only",
+   "test": "TC-41 rejects an expired access token",
+   "file": "test/tokens.test.mjs",
+   "mutation": [
+    [
+     "src/tokens.mjs",
+     "if (claims.exp <= t - CLOCK_SKEW_SECONDS) return { valid: false, reason: 'expired' };",
+     ""
+    ]
+   ],
+   "note": "assert.ok on the result object, which is always truthy"
+  },
+  {
+   "id": "TC-42",
+   "area": "Refresh tokens",
+   "title": "Refreshing returns a new access token and a new refresh token",
+   "expected": "Both new",
+   "status": "tested",
+   "test": "TC-42 refreshing returns a new access token and a new refresh token",
+   "file": "test/refresh.test.mjs",
+   "mutation": [
+    [
+     "src/refresh.mjs",
+     "refresh: issue(rec.sub, rec.family),",
+     "refresh: token,"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-43",
+   "area": "Refresh tokens",
+   "title": "A refresh token can be used only once",
+   "expected": "Second use refused, reused",
+   "status": "name_only",
+   "test": "refresh tokens rotate on use",
+   "file": "test/refresh.test.mjs",
+   "mutation": [
+    [
+     "src/refresh.mjs",
+     "rec.used = true;\n",
+     ""
+    ]
+   ],
+   "note": "checks that a new token came back, never tries the old one again"
+  },
+  {
+   "id": "TC-44",
+   "area": "Refresh tokens",
+   "title": "Reusing a rotated refresh token revokes the whole family",
+   "expected": "Every token in the family refused",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/refresh.mjs",
+     "for (const r of store.values()) if (r.family === rec.family) r.used = true;",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-45",
+   "area": "Refresh tokens",
+   "title": "A refresh token expires after 30 days",
+   "expected": "expired",
+   "status": "tested",
+   "test": "TC-45 a refresh token expires after thirty days",
+   "file": "test/refresh.test.mjs",
+   "mutation": [
+    [
+     "src/refresh.mjs",
+     "if (rec.exp <= clock()) return { ok: false, reason: 'expired' };",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-46",
+   "area": "Refresh tokens",
+   "title": "A refresh token for a deleted user is rejected",
+   "expected": "no_user",
+   "status": "tested",
+   "test": "TC-46 a refresh token for a deleted user is rejected",
+   "file": "test/refresh.test.mjs",
+   "mutation": [
+    [
+     "src/refresh.mjs",
+     "if (users && !users.has(rec.sub)) return { ok: false, reason: 'no_user' };",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-47",
+   "area": "Refresh tokens",
+   "title": "Refresh tokens are stored hashed",
+   "expected": "Raw token never in the store",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/refresh.mjs",
+     "const h = (t) => createHash('sha256').update(t).digest('hex');",
+     "const h = (t) => t;"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-48",
+   "area": "Sessions",
+   "title": "Logging in creates a session",
+   "expected": "Session readable by id",
+   "status": "tested",
+   "test": "TC-48 logging in creates a session",
+   "file": "test/sessions.test.mjs",
+   "mutation": [
+    [
+     "src/sessions.mjs",
+     "sessions.set(id, { userId, created: t, lastSeen: t });",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-49",
+   "area": "Sessions",
+   "title": "A session ends after 30 minutes idle",
+   "expected": "null after 31 minutes",
+   "status": "tested",
+   "test": "TC-49 a session ends after thirty minutes idle",
+   "file": "test/sessions.test.mjs",
+   "mutation": [
+    [
+     "src/sessions.mjs",
+     "if (t - s.lastSeen > IDLE_MS)",
+     "if (false)"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-50",
+   "area": "Sessions",
+   "title": "Activity extends the idle timer",
+   "expected": "Alive after 40 minutes with activity at 20",
+   "status": "tested",
+   "test": "activity keeps a session alive",
+   "file": "test/sessions.test.mjs",
+   "mutation": [
+    [
+     "src/sessions.mjs",
+     "s.lastSeen = t;\n",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-51",
+   "area": "Sessions",
+   "title": "A session ends after 12 hours regardless of activity",
+   "expected": "null after 12 hours",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/sessions.mjs",
+     "if (t - s.created > ABSOLUTE_MS)",
+     "if (false)"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-52",
+   "area": "Sessions",
+   "title": "Logging out ends the session",
+   "expected": "null after logout",
+   "status": "tested",
+   "test": "TC-52 logging out ends the session",
+   "file": "test/sessions.test.mjs",
+   "mutation": [
+    [
+     "src/sessions.mjs",
+     "function destroy(id) {\n    sessions.delete(id);",
+     "function destroy(id) {"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-53",
+   "area": "Sessions",
+   "title": "Log out everywhere ends every session for the user",
+   "expected": "All sessions gone",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/sessions.mjs",
+     "for (const [id, s] of sessions) if (s.userId === userId) sessions.delete(id);",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-54",
+   "area": "Sessions",
+   "title": "Session ids are 32 random bytes",
+   "expected": "64 hex characters",
+   "status": "tested",
+   "test": "TC-54 session ids are 32 random bytes",
+   "file": "test/sessions.test.mjs",
+   "mutation": [
+    [
+     "src/sessions.mjs",
+     "randomBytes(32).toString('hex')",
+     "randomBytes(8).toString('hex')"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-55",
+   "area": "Sessions",
+   "title": "A user may hold at most five sessions, oldest evicted",
+   "expected": "Sixth login evicts the first session",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [],
+   "note": "not implemented at all; no mutation exists because there is no code"
+  },
+  {
+   "id": "TC-56",
+   "area": "Rate limiting",
+   "title": "Allow 100 requests a minute from one IP",
+   "expected": "All 100 allowed",
+   "status": "tested",
+   "test": "TC-56 allows 100 requests a minute from one IP",
+   "file": "test/ratelimit.test.mjs",
+   "mutation": [
+    [
+     "src/ratelimit.mjs",
+     "export const LIMIT = 100;",
+     "export const LIMIT = 99;"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-57",
+   "area": "Rate limiting",
+   "title": "Reject the 101st request in a minute from one IP",
+   "expected": "allowed false",
+   "status": "name_only",
+   "test": "TC-57 rejects requests over 100 a minute from one IP",
+   "file": "test/ratelimit.test.mjs",
+   "mutation": [
+    [
+     "src/ratelimit.mjs",
+     "if (b.count > limit)",
+     "if (false)"
+    ]
+   ],
+   "note": "sends exactly 100 requests and asserts they were allowed; never sends the 101st"
+  },
+  {
+   "id": "TC-58",
+   "area": "Rate limiting",
+   "title": "The window resets after a minute",
+   "expected": "Allowed again after 60 seconds",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/ratelimit.mjs",
+     "if (!b || t - b.start >= WINDOW_MS) {",
+     "if (!b) {"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-59",
+   "area": "Rate limiting",
+   "title": "Limits are per IP",
+   "expected": "A second IP is unaffected",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/ratelimit.mjs",
+     "let b = buckets.get(ip);",
+     "let b = buckets.get('all');"
+    ],
+    [
+     "src/ratelimit.mjs",
+     "buckets.set(ip, b);",
+     "buckets.set('all', b);"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-60",
+   "area": "Rate limiting",
+   "title": "A refused request says how long to wait",
+   "expected": "retryAfter in seconds",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/ratelimit.mjs",
+     "retryAfter: Math.ceil((b.start + WINDOW_MS - t) / 1000)",
+     "retryAfter: 0"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-61",
+   "area": "Password reset",
+   "title": "A reset link is issued for a known email",
+   "expected": "Token sent",
+   "status": "tested",
+   "test": "TC-61 a reset link is issued for a known email",
+   "file": "test/reset.test.mjs",
+   "mutation": [
+    [
+     "src/reset.mjs",
+     "return { sent: true, token };",
+     "return { sent: true };"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-62",
+   "area": "Password reset",
+   "title": "An unknown email gets the same response as a known one",
+   "expected": "No user enumeration",
+   "status": "tested",
+   "test": "TC-62 an unknown email gets the same answer as a known one",
+   "file": "test/reset.test.mjs",
+   "mutation": [
+    [
+     "src/reset.mjs",
+     "if (!users.has(key)) return { sent: true };",
+     "if (!users.has(key)) return { sent: false };"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-63",
+   "area": "Password reset",
+   "title": "A reset link expires after one hour",
+   "expected": "expired",
+   "status": "tested",
+   "test": "TC-63 a reset link expires after one hour",
+   "file": "test/reset.test.mjs",
+   "mutation": [
+    [
+     "src/reset.mjs",
+     "if (rec.exp <= clock()) { tokens.delete(h(token)); return { ok: false, reason: 'expired' }; }",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-64",
+   "area": "Password reset",
+   "title": "A reset link works once",
+   "expected": "Second use refused",
+   "status": "tested",
+   "test": "TC-64 a reset link works once",
+   "file": "test/reset.test.mjs",
+   "mutation": [
+    [
+     "src/reset.mjs",
+     "tokens.delete(h(token));\n    users.get",
+     "users.get"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-65",
+   "area": "Password reset",
+   "title": "Completing a reset ends every session",
+   "expected": "All sessions gone",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/reset.mjs",
+     "sessions?.destroyAllFor(rec.email);",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-66",
+   "area": "Password reset",
+   "title": "The new password must meet the password rules",
+   "expected": "weak_password",
+   "status": "tested",
+   "test": "the new password must meet the password rules",
+   "file": "test/reset.test.mjs",
+   "mutation": [
+    [
+     "src/reset.mjs",
+     "if (errors.length) return { ok: false, reason: 'weak_password', errors };",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-67",
+   "area": "Password reset",
+   "title": "Reset tokens are stored hashed",
+   "expected": "Raw token never in the store",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/reset.mjs",
+     "const h = (t) => createHash('sha256').update(t).digest('hex');",
+     "const h = (t) => t;"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-68",
+   "area": "Audit",
+   "title": "A failed login is logged with the client IP",
+   "expected": "Entry with type and ip",
+   "status": "tested",
+   "test": "TC-68 a failed login is written to the audit log with the client IP",
+   "file": "test/login.test.mjs",
+   "mutation": [
+    [
+     "src/login.mjs",
+     "audit({ type: 'login.failed', email: key, ip });",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-69",
+   "area": "Audit",
+   "title": "A successful login is logged",
+   "expected": "Entry present",
+   "status": "tested",
+   "test": "TC-69 a successful login is written to the audit log",
+   "file": "test/login.test.mjs",
+   "mutation": [
+    [
+     "src/login.mjs",
+     "audit({ type: 'login.succeeded', email: key, ip });",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-70",
+   "area": "Audit",
+   "title": "A lockout is logged",
+   "expected": "Entry present",
+   "status": "tested",
+   "test": "TC-70 a lockout is written to the audit log",
+   "file": "test/login.test.mjs",
+   "mutation": [
+    [
+     "src/login.mjs",
+     "audit({ type: 'account.locked', email: key, ip });",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-71",
+   "area": "Audit",
+   "title": "The audit log never stores a password",
+   "expected": "No password in any entry",
+   "status": "name_only",
+   "test": "TC-71 the audit log never stores a password",
+   "file": "test/audit.test.mjs",
+   "mutation": [
+    [
+     "src/audit.mjs",
+     "const { password, newPassword, ...safe } = event;",
+     "const safe = event;"
+    ]
+   ],
+   "note": "the assertion is inside a try/catch that swallows its failure"
+  },
+  {
+   "id": "TC-72",
+   "area": "Audit",
+   "title": "Audit entries carry an ISO 8601 timestamp",
+   "expected": "at is ISO 8601",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/audit.mjs",
+     "at: new Date(clock()).toISOString()",
+     "at: clock()"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-73",
+   "area": "Audit",
+   "title": "A completed password reset is logged",
+   "expected": "Entry present",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/reset.mjs",
+     "audit({ type: 'reset.completed', email: rec.email });",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-74",
+   "area": "Roles",
+   "title": "An admin can manage users",
+   "expected": "can users:write",
+   "status": "tested",
+   "test": "TC-74 an admin can manage users",
+   "file": "test/roles.test.mjs",
+   "mutation": [
+    [
+     "src/roles.mjs",
+     "admin: ['users:read', 'users:write', 'tokens:revoke'],",
+     "admin: ['users:read'],"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-75",
+   "area": "Roles",
+   "title": "An ordinary user cannot manage users",
+   "expected": "cannot users:write",
+   "status": "tested",
+   "test": "TC-75 an ordinary user cannot manage users",
+   "file": "test/roles.test.mjs",
+   "mutation": [
+    [
+     "src/roles.mjs",
+     "user: ['profile:read', 'profile:write'],",
+     "user: ['profile:read', 'profile:write', 'users:write'],"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-76",
+   "area": "Roles",
+   "title": "An unknown role grants nothing",
+   "expected": "cannot anything",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/roles.mjs",
+     "(PERMISSIONS[r] ?? [])",
+     "(PERMISSIONS[r] ?? PERMISSIONS.user)"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-77",
+   "area": "Roles",
+   "title": "A token with no roles claim grants nothing",
+   "expected": "cannot anything",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/roles.mjs",
+     "Array.isArray(claims?.roles) ? claims.roles : []",
+     "Array.isArray(claims?.roles) ? claims.roles : ['user']"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-78",
+   "area": "Roles",
+   "title": "A role change applies from the next refreshed token",
+   "expected": "New roles in refreshed token",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/refresh.mjs",
+     "issueAccess(rec.sub, user?.roles ?? [], { now: clock() })",
+     "issueAccess(rec.sub, [], { now: clock() })"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-79",
+   "area": "Email verification",
+   "title": "Registering issues a verification token",
+   "expected": "Token returned",
+   "status": "tested",
+   "test": "TC-79 registering issues an email verification token",
+   "file": "test/accounts.test.mjs",
+   "mutation": [
+    [
+     "src/accounts.mjs",
+     "const verifyToken = verifier.issue(key);",
+     "const verifyToken = null;"
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-80",
+   "area": "Email verification",
+   "title": "A verification link expires after 24 hours",
+   "expected": "expired",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/verify.mjs",
+     "if (rec.exp <= clock()) return { ok: false, reason: 'expired' };",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-81",
+   "area": "Email verification",
+   "title": "Confirming the link marks the email verified",
+   "expected": "emailVerified true",
+   "status": "tested",
+   "test": "TC-81 confirming the token marks the email as verified",
+   "file": "test/accounts.test.mjs",
+   "mutation": [
+    [
+     "src/verify.mjs",
+     "users.get(rec.email).emailVerified = true;",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-82",
+   "area": "Email verification",
+   "title": "A verification link works once",
+   "expected": "Second use refused",
+   "status": "tested",
+   "test": "a verification link cannot be used twice",
+   "file": "test/accounts.test.mjs",
+   "mutation": [
+    [
+     "src/verify.mjs",
+     "pending.delete(token);",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-83",
+   "area": "Accounts",
+   "title": "Deleting an account ends every session",
+   "expected": "All sessions gone",
+   "status": "untested",
+   "test": null,
+   "file": null,
+   "mutation": [
+    [
+     "src/accounts.mjs",
+     "sessions?.destroyAllFor(key);",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-84",
+   "area": "Accounts",
+   "title": "A deleted account cannot log in",
+   "expected": "Login refused",
+   "status": "tested",
+   "test": "TC-84 a deleted account cannot log in",
+   "file": "test/accounts.test.mjs",
+   "mutation": [
+    [
+     "src/accounts.mjs",
+     "users.delete(key);",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-85",
+   "area": "Registration",
+   "title": "Registering an existing email is refused",
+   "expected": "exists",
+   "status": "tested",
+   "test": "TC-85 registering an email that already exists is refused",
+   "file": "test/accounts.test.mjs",
+   "mutation": [
+    [
+     "src/accounts.mjs",
+     "if (users.has(key)) return { ok: false, reason: 'exists' };",
+     ""
+    ]
+   ],
+   "note": null
+  },
+  {
+   "id": "TC-86",
+   "area": "Non-functional",
+   "title": "Penetration test sign-off for the release",
+   "expected": "Signed report on file",
+   "status": "manual",
+   "test": null,
+   "file": null,
+   "mutation": [],
+   "note": null
+  },
+  {
+   "id": "TC-87",
+   "area": "Non-functional",
+   "title": "Login and reset pages usable with a screen reader",
+   "expected": "Checked with VoiceOver and NVDA",
+   "status": "manual",
+   "test": null,
+   "file": null,
+   "mutation": [],
+   "note": null
+  },
+  {
+   "id": "TC-88",
+   "area": "Non-functional",
+   "title": "Reset and verification emails render in Outlook and Gmail",
+   "expected": "Checked by eye",
+   "status": "manual",
+   "test": null,
+   "file": null,
+   "mutation": [],
+   "note": null
+  },
+  {
+   "id": "TC-89",
+   "area": "Non-functional",
+   "title": "Sustains 500 logins a second on the reference box",
+   "expected": "Load test report",
+   "status": "manual",
+   "test": null,
+   "file": null,
+   "mutation": [],
+   "note": null
+  },
+  {
+   "id": "TC-90",
+   "area": "Non-functional",
+   "title": "Security headers reviewed on every endpoint",
+   "expected": "Reviewed in the release meeting",
+   "status": "manual",
+   "test": null,
+   "file": null,
+   "mutation": [],
+   "note": null
+  }
+ ],
+ "extra_tests": [
+  "hash format is self-describing"
+ ]
+}

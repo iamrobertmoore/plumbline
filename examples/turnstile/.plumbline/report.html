@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plumbline Report</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #21262d;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #e4ad45;
+      --red: #ff6a55;
+      --green: #52d6a4;
+      --amber: #d9a51f;
+      --font: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 2rem 1rem 4rem;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; font-weight: 600; color: var(--accent); margin-bottom: 0.25rem; }
+    h2 { font-size: 1.1rem; font-weight: 600; color: var(--text); margin: 2rem 0 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 0.95rem; font-weight: 600; color: var(--muted); margin: 1.5rem 0 0.5rem; }
+    .subtitle { color: var(--muted); font-size: 0.875rem; margin-bottom: 2rem; }
+    /* Headline tiles */
+    .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; margin-bottom: 2rem; }
+    .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; }
+    .tile .val { font-size: 2rem; font-weight: 600; line-height: 1; margin-bottom: 0.25rem; }
+    .tile .lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .tile.bad  .val { color: var(--red); }
+    .tile.warn .val { color: var(--amber); }
+    .tile.ok   .val { color: var(--green); }
+    .tile.accent .val { color: var(--accent); }
+    /* Tables */
+    .tbl-wrap { overflow-x: auto; margin-bottom: 1.5rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { background: var(--surface2); color: var(--muted); font-weight: 600; text-align: left;
+         padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border); white-space: nowrap; }
+    td { padding: 0.45rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr.bad  td { background: rgba(255,106,85,0.08); }
+    tr.warn td { background: rgba(217,165,31,0.08); }
+    tr.ok   td { background: rgba(82,214,164,0.05); }
+    .badge { display: inline-block; font-family: var(--mono); font-size: 0.75rem; font-weight: 600;
+             padding: 0.1em 0.5em; border-radius: 4px; white-space: nowrap; }
+    .badge.caught      { background: rgba(82,214,164,0.15);  color: var(--green); }
+    .badge.name-only   { background: rgba(255,106,85,0.2);   color: var(--red);   }
+    .badge.baseline    { background: rgba(217,165,31,0.15);  color: var(--amber); }
+    .badge.invalid     { background: rgba(217,165,31,0.15);  color: var(--amber); }
+    .badge.error       { background: rgba(255,106,85,0.15);  color: var(--red);   }
+    .badge.holds       { background: rgba(82,214,164,0.15);  color: var(--green); }
+    .badge.fails       { background: rgba(255,106,85,0.2);   color: var(--red);   }
+    .badge.partial     { background: rgba(217,165,31,0.15);  color: var(--amber); }
+    .badge.unverify    { background: rgba(139,148,158,0.15); color: var(--muted); }
+    .badge.unmapped    { background: rgba(217,165,31,0.1);   color: var(--amber); }
+    .name-only-label { font-weight: 700; color: var(--red); font-size: 0.8rem; }
+    code { font-family: var(--mono); font-size: 0.8rem; background: var(--surface2);
+           padding: 0.1em 0.4em; border-radius: 3px; word-break: break-all; }
+    .mutation { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+    .mutation .del { color: var(--red); }
+    .mutation .ins { color: var(--green); }
+    .name-only-list { margin: 0 0 1.5rem; padding: 0; list-style: none; }
+    .name-only-list li { background: rgba(255,106,85,0.1); border-left: 3px solid var(--red);
+                         padding: 0.5rem 0.75rem; margin-bottom: 0.4rem; border-radius: 0 4px 4px 0; }
+    .name-only-list li code { background: transparent; }
+    .witness { margin-top: 0.4rem; }
+    .witness summary { cursor: pointer; color: var(--muted); font-size: 0.8rem; }
+    .witness pre { font-family: var(--mono); font-size: 0.75rem; white-space: pre-wrap; margin: 0.4rem 0 0;
+                   padding: 0.5rem; background: rgba(0,0,0,0.25); border-radius: 4px; }
+    td:first-child { white-space: nowrap; }
+    td .mutation { display: inline-block; max-width: 34ch; overflow-wrap: anywhere; }
+    footer { text-align: center; color: var(--muted); font-size: 0.75rem; margin-top: 3rem;
+             padding-top: 1rem; border-top: 1px solid var(--border); }</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Plumbline Report</h1>
+<p class="subtitle">Generated 2026-09-26T09:19:18.614Z</p>
+
+<h2>Test-plan headline</h2>
+<div class="tiles"><div class="tile accent"><div class="val">90</div><div class="lbl">Cases in plan</div></div>
+<div class="tile accent"><div class="val">84</div><div class="lbl">Automated</div></div>
+<div class="tile warn"><div class="val">60</div><div class="lbl">With a test</div></div>
+<div class="tile warn"><div class="val">24</div><div class="lbl">Without a test</div></div>
+<div class="tile bad"><div class="val">8</div><div class="lbl">Tests in name only</div></div></div>
+
+
+    <h2>⚠ Tests in name only (8)</h2>
+    <p style="color:var(--muted);margin-bottom:0.75rem">
+      Each mutation broke the claimed behaviour (its witness returned true on the real code and false on the
+      mutant), and the named test still passed.
+    </p>
+    <ul class="name-only-list"><li><strong><code>TP-005</code></strong> — TC-05 | Passwords | Reject a password shorter than the minimum length | Expected: Refused, too_short<br><span class="mutation">Mutation: <span class="del">  if (pw.length &lt; PASSWORD_MIN) errors.push('too_short');</span> → <span class="ins">  if (pw.length &lt; PASSWORD_MIN - 1) errors.push('too_short');</span></span><details class="witness"><summary>Witness: true on the real code, false on the mutant</summary><pre>export default async (load) =&gt; {
+  const { validatePassword } = await load('src/validation.mjs');
+  // A password of length 9 (one below the minimum of 10) must be rejected with too_short
+  return validatePassword('short1234').includes('too_short');
+};
+</pre></details></li>
+<li><strong><code>TP-006</code></strong> — TC-06 | Passwords | Reject a password longer than 128 characters | Expected: Refused, too_long<br><span class="mutation">Mutation: <span class="del">  if (pw.length &gt; PASSWORD_MAX) errors.push('too_long');</span> → <span class="ins">  if (pw.length &gt; PASSWORD_MAX + 1) errors.push('too_long');</span></span><details class="witness"><summary>Witness: true on the real code, false on the mutant</summary><pre>export default async (load) =&gt; {
+  const { validatePassword, PASSWORD_MAX } = await load('src/validation.mjs');
+  // A password exactly one over the max must be rejected with too_long
+  const pw = 'a1' + 'x'.repeat(PASSWORD_MAX - 1); // length = PASSWORD_MAX + 1 = 129
+  return validatePassword(pw).includes('too_long');
+};
+</pre></details></li>
+<li><strong><code>TP-010</code></strong> — TC-10 | Passwords | Accept a password that meets every rule | Expected: No errors<br><span class="mutation">Mutation: <span class="del">export const PASSWORD_MIN = 10;</span> → <span class="ins">export const PASSWORD_MIN = 11;</span></span><details class="witness"><summary>Witness: true on the real code, false on the mutant</summary><pre>export default async (load) =&gt; {
+  const { validatePassword } = await load('src/validation.mjs');
+  // harbour-lights-42 is 17 chars but let's use a exactly-10 valid password
+  // 'securepass1' is exactly 10 chars (s-e-c-u-r-e-p-a-s-s = 10, +1 = 11... let's count)
+  // 'harbour142' = h-a-r-b-o-u-r-1-4-2 = 10 chars, has digit, not common
+  const errors = validatePassword('harbour142');
+  return errors.length === 0;
+};
+</pre></details></li>
+<li><strong><code>TP-012</code></strong> — TC-12 | Registration | Username uses only lowercase letters, digits and underscore | Expected: Ada.Lovelace refused<br><span class="mutation">Mutation: <span class="del">  return /^[a-z0-9_]{3,32}$/.test(u);</span> → <span class="ins">  return /^[a-z0-9_.]{3,32}$/.test(u);</span></span><details class="witness"><summary>Witness: true on the real code, false on the mutant</summary><pre>export default async (load) =&gt; {
+  const { validateUsername } = await load('src/validation.mjs');
+  // A username with a dot must be rejected
+  return validateUsername('ada.lo') === false;
+};
+</pre></details></li>
+<li><strong><code>TP-041</code></strong> — TC-41 | Access tokens | An expired access token is rejected | Expected: expired<br><span class="mutation">Mutation: <span class="del">  if (claims.exp &lt;= t - CLOCK_SKEW_SECONDS) return { valid: false, reason: 'expired' };</span> → <span class="ins">  if (false) return { valid: false, reason: 'expired' };</span></span><details class="witness"><summary>Witness: true on the real code, false on the mutant</summary><pre>export default async (load) =&gt; {
+  const { issueAccess, verifyAccess } = await load('src/tokens.mjs');
+  const NOW = Date.UTC(2026, 8, 1, 9, 0, 0);
+  const t = issueAccess('ada@example.com', [], { now: NOW });
+  // Advance 2 hours past expiry (TTL is 3600s = 1h, skew is 30s)
+  const result = verifyAccess(t, { now: NOW + 2 * 3600 * 1000 });
+  return result.valid === false &amp;&amp; result.reason === 'expired';
+};
+</pre></details></li>
+<li><strong><code>TP-042</code></strong> — TC-42 | Refresh tokens | Refreshing returns a new access token and a new refresh token | Expected: Both new<br><span class="mutation">Mutation: <span class="del">      refresh: issue(rec.sub, rec.family),</span> → <span class="ins">      refresh: undefined,</span></span><details class="witness"><summary>Witness: true on the real code, false on the mutant</summary><pre>export default async (load) =&gt; {
+  const { createRefreshStore } = await load('src/refresh.mjs');
+  let t = Date.UTC(2026, 8, 1, 9, 0, 0);
+  const clock = () =&gt; t;
+  const users = new Map([['ada@example.com', { roles: ['user'] }]]);
+  const store = createRefreshStore({ users, clock });
+  const r1 = store.issue('ada@example.com');
+  const out = store.refresh(r1);
+  // Both access and refresh must be non-empty strings
+  return out.ok === true &amp;&amp; typeof out.refresh === 'string' &amp;&amp; out.refresh.length &gt; 0;
+};
+</pre></details></li>
+<li><strong><code>TP-057</code></strong> — TC-57 | Rate limiting | Reject the 101st request in a minute from one IP | Expected: allowed false<br><span class="mutation">Mutation: <span class="del">export const LIMIT = 100;</span> → <span class="ins">export const LIMIT = 101;</span></span><details class="witness"><summary>Witness: true on the real code, false on the mutant</summary><pre>export default async (load) =&gt; {
+  const { createRateLimiter } = await load('src/ratelimit.mjs');
+  const check = createRateLimiter({ clock: () =&gt; 0 });
+  // Make exactly 100 requests (the documented limit)
+  for (let i = 0; i &lt; 100; i++) check('1.2.3.4');
+  // The 101st request must be blocked (count &gt; LIMIT = 100)
+  return check('1.2.3.4').allowed === false;
+};
+</pre></details></li>
+<li><strong><code>TP-071</code></strong> — TC-71 | Audit | The audit log never stores a password | Expected: No password in any entry<br><span class="mutation">Mutation: <span class="del">    const { password, newPassword, ...safe } = event;</span> → <span class="ins">    const { newPassword, ...safe } = event;</span></span><details class="witness"><summary>Witness: true on the real code, false on the mutant</summary><pre>export default async (load) =&gt; {
+  const { createAuditLog } = await load('src/audit.mjs');
+  const log = createAuditLog({ clock: () =&gt; 0 });
+  log.record({ type: 'login.failed', email: 'ada@example.com', password: 'supersecret123' });
+  return !JSON.stringify(log.entries).includes('supersecret123');
+};
+</pre></details></li></ul>
+  
+
+
+<h2>Test-plan coverage (90 cases)</h2>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>ID</th><th>Claim</th><th>Test</th><th>Mutation</th><th>Result</th></tr></thead>
+<tbody><tr class="ok">
+      <td><code>TP-001</code></td>
+      <td>TC-01 | Registration | Reject an email address with no @ | Expected: Registration refused, bad_email</td>
+      <td><code>test/validation.test.mjs</code><br><span style="color:var(--muted)">TC-01 rejects an email address with no @</span></td>
+      <td><span class="mutation"><span class="del">-   if (at &lt; 1 || at !== e.lastIndexOf('@')) return false;</span><br><span class="ins">+   if (false) return false; // mutation: @ check disabled</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-002</code></td>
+      <td>TC-02 | Registration | Reject an email address whose domain has no dot | Expected: Registration refused, bad_email</td>
+      <td><code>test/validation.test.mjs</code><br><span style="color:var(--muted)">TC-02 rejects an email address whose domain has no dot</span></td>
+      <td><span class="mutation"><span class="del">-   if (!domain.includes('.')) return false;</span><br><span class="ins">+   if (!domain.includes('.') &amp;&amp; false) return false;</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-003</code></td>
+      <td>TC-03 | Registration | Reject an email address longer than 254 characters | Expected: Registration refused, bad_email</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-004</code></td>
+      <td>TC-04 | Registration | Trim and lowercase the email before storing it | Expected: Ada@Example.COM is stored as ada@example.com</td>
+      <td><code>test/validation.test.mjs</code><br><span style="color:var(--muted)">email addresses are trimmed and lowercased before use</span></td>
+      <td><span class="mutation"><span class="del">-   return String(email).trim().toLowerCase();</span><br><span class="ins">+   return String(email).trim();</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="bad">
+      <td><code>TP-005</code></td>
+      <td>TC-05 | Passwords | Reject a password shorter than the minimum length | Expected: Refused, too_short</td>
+      <td><code>test/validation.test.mjs</code><br><span style="color:var(--muted)">TC-05 rejects a password below the minimum length</span></td>
+      <td><span class="mutation"><span class="del">-   if (pw.length &lt; PASSWORD_MIN) errors.push('too_short');</span><br><span class="ins">+   if (pw.length &lt; PASSWORD_MIN - 1) errors.push('too_short');</span></span></td>
+      <td><span class="badge name-only">NAME ONLY</span> <span class="name-only-label">TEST IN NAME ONLY</span></td>
+    </tr>
+<tr class="bad">
+      <td><code>TP-006</code></td>
+      <td>TC-06 | Passwords | Reject a password longer than 128 characters | Expected: Refused, too_long</td>
+      <td><code>test/validation.test.mjs</code><br><span style="color:var(--muted)">TC-06 rejects a password over 128 characters</span></td>
+      <td><span class="mutation"><span class="del">-   if (pw.length &gt; PASSWORD_MAX) errors.push('too_long');</span><br><span class="ins">+   if (pw.length &gt; PASSWORD_MAX + 1) errors.push('too_long');</span></span></td>
+      <td><span class="badge name-only">NAME ONLY</span> <span class="name-only-label">TEST IN NAME ONLY</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-007</code></td>
+      <td>TC-07 | Passwords | Reject a password with no digit | Expected: Refused, no_digit</td>
+      <td><code>test/validation.test.mjs</code><br><span style="color:var(--muted)">a password with no digit is refused</span></td>
+      <td><span class="mutation"><span class="del">-   if (!/\d/.test(pw)) errors.push('no_digit');</span><br><span class="ins">+   if (!/\d/.test(pw) &amp;&amp; false) errors.push('no_digit');</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-008</code></td>
+      <td>TC-08 | Passwords | Reject a password containing the email local part | Expected: Refused, contains_email</td>
+      <td><code>test/validation.test.mjs</code><br><span style="color:var(--muted)">TC-08 rejects a password containing the local part of the email</span></td>
+      <td><span class="mutation"><span class="del">-     if (local.length &gt;= 3 &amp;&amp; pw.toLowerCase().includes(local)) errors.push('contains_email');</span><br><span class="ins">+     if (local.length &gt;= 3 &amp;&amp; pw.toLowerCase().includes(local) &amp;&amp; false) errors.push('contains_email');</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-009</code></td>
+      <td>TC-09 | Passwords | Reject a password on the common-password list | Expected: Refused, common</td>
+      <td><code>test/validation.test.mjs</code><br><span style="color:var(--muted)">TC-09 rejects a password on the common-password list</span></td>
+      <td><span class="mutation"><span class="del">-   if (COMMON.has(pw.toLowerCase())) errors.push('common');</span><br><span class="ins">+   if (COMMON.has(pw.toLowerCase()) &amp;&amp; false) errors.push('common');</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="bad">
+      <td><code>TP-010</code></td>
+      <td>TC-10 | Passwords | Accept a password that meets every rule | Expected: No errors</td>
+      <td><code>test/validation.test.mjs</code><br><span style="color:var(--muted)">TC-10 accepts a password that meets every rule</span></td>
+      <td><span class="mutation"><span class="del">- export const PASSWORD_MIN = 10;</span><br><span class="ins">+ export const PASSWORD_MIN = 11;</span></span></td>
+      <td><span class="badge name-only">NAME ONLY</span> <span class="name-only-label">TEST IN NAME ONLY</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-011</code></td>
+      <td>TC-11 | Registration | Username is 3 to 32 characters | Expected: ab and a 33-character name refused</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="bad">
+      <td><code>TP-012</code></td>
+      <td>TC-12 | Registration | Username uses only lowercase letters, digits and underscore | Expected: Ada.Lovelace refused</td>
+      <td><code>test/validation.test.mjs</code><br><span style="color:var(--muted)">usernames may only use lowercase letters, digits and underscores</span></td>
+      <td><span class="mutation"><span class="del">-   return /^[a-z0-9_]{3,32}$/.test(u);</span><br><span class="ins">+   return /^[a-z0-9_.]{3,32}$/.test(u);</span></span></td>
+      <td><span class="badge name-only">NAME ONLY</span> <span class="name-only-label">TEST IN NAME ONLY</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-013</code></td>
+      <td>TC-13 | Passwords | A stored hash never contains the plaintext | Expected: Plaintext absent from stored value</td>
+      <td><code>test/passwords.test.mjs</code><br><span style="color:var(--muted)">TC-13 a stored hash never contains the plaintext password</span></td>
+      <td><span class="mutation"><span class="del">-   return ['scrypt', SCRYPT.N, SCRYPT.r, SCRYPT.p, salt.toString('base64url'), hash.toString('base64url')].join('$');</span><br><span class="ins">+   return ['scrypt', SCRYPT.N, SCRYPT.r, SCRYPT.p, salt.toString('base64url'), hash.toString('base64url'), pw].join('$');</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-014</code></td>
+      <td>TC-14 | Passwords | Hashes are salted | Expected: Same password hashed twice gives different values</td>
+      <td><code>test/passwords.test.mjs</code><br><span style="color:var(--muted)">TC-14 hashing the same password twice gives different hashes</span></td>
+      <td><span class="mutation"><span class="del">-   const salt = randomBytes(16);</span><br><span class="ins">+   const salt = Buffer.alloc(16);</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-015</code></td>
+      <td>TC-15 | Passwords | Verify accepts the correct password | Expected: true</td>
+      <td><code>test/passwords.test.mjs</code><br><span style="color:var(--muted)">TC-15 verify accepts the correct password</span></td>
+      <td><span class="mutation"><span class="del">-   return actual.length === expected.length &amp;&amp; timingSafeEqual(actual, expected);</span><br><span class="ins">+   return false;</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-016</code></td>
+      <td>TC-16 | Passwords | Verify rejects a wrong password | Expected: false</td>
+      <td><code>test/passwords.test.mjs</code><br><span style="color:var(--muted)">verify says no to the wrong password</span></td>
+      <td><span class="mutation"><span class="del">-   return actual.length === expected.length &amp;&amp; timingSafeEqual(actual, expected);</span><br><span class="ins">+   return true;</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-017</code></td>
+      <td>TC-17 | Passwords | Password comparison is constant time | Expected: Reviewed in code, timingSafeEqual used | Type: Manual</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-018</code></td>
+      <td>TC-18 | Passwords | Hashes made with weaker parameters are flagged for rehash | Expected: needsRehash is true</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-019</code></td>
+      <td>TC-19 | Passwords | A malformed stored hash is rejected without an exception | Expected: false, no throw</td>
+      <td><code>test/passwords.test.mjs</code><br><span style="color:var(--muted)">TC-19 verify returns false for a malformed stored hash instead of throwing</span></td>
+      <td><span class="mutation"><span class="del">-   if (parts.length !== 6 || parts[0] !== 'scrypt') return false;</span><br><span class="ins">+   if (parts.length !== 6 || parts[0] !== 'scrypt') throw new Error('malformed hash');</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-020</code></td>
+      <td>TC-20 | Login | Correct email and password logs in | Expected: ok</td>
+      <td><code>test/login.test.mjs</code><br><span style="color:var(--muted)">TC-20 a correct email and password logs in</span></td>
+      <td><span class="mutation"><span class="del">-     return { ok: true, user };</span><br><span class="ins">+     return { ok: false, reason: 'invalid_credentials' };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-021</code></td>
+      <td>TC-21 | Login | Wrong password is refused | Expected: invalid_credentials</td>
+      <td><code>test/login.test.mjs</code><br><span style="color:var(--muted)">TC-21 a wrong password is refused as invalid credentials</span></td>
+      <td><span class="mutation"><span class="del">-       return { ok: false, reason: 'invalid_credentials' };</span><br><span class="ins">+       return { ok: true, user };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-022</code></td>
+      <td>TC-22 | Login | Account locks after five failed attempts | Expected: Locked on the fifth failure</td>
+      <td><code>test/login.test.mjs</code><br><span style="color:var(--muted)">TC-22 the account locks after five failed attempts</span></td>
+      <td><span class="mutation"><span class="del">-       if (state.count &gt;= MAX_ATTEMPTS) {</span><br><span class="ins">+       if (state.count &gt; MAX_ATTEMPTS) {</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-023</code></td>
+      <td>TC-23 | Login | A locked account refuses the correct password | Expected: locked</td>
+      <td><code>test/login.test.mjs</code><br><span style="color:var(--muted)">a locked account refuses even the right password</span></td>
+      <td><span class="mutation"><span class="del">-     if (state.lockedUntil &gt; clock()) {</span><br><span class="ins">+     if (false) {</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-024</code></td>
+      <td>TC-24 | Login | The lock lifts after 15 minutes | Expected: Login succeeds after 15 minutes</td>
+      <td><code>test/login.test.mjs</code><br><span style="color:var(--muted)">TC-24 the lock lifts after fifteen minutes</span></td>
+      <td><span class="mutation"><span class="del">- export const LOCK_MS = 15 * 60 * 1000;</span><br><span class="ins">+ export const LOCK_MS = 999 * 60 * 1000;</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-025</code></td>
+      <td>TC-25 | Login | A successful login resets the failure count | Expected: Count back to zero</td>
+      <td><code>test/login.test.mjs</code><br><span style="color:var(--muted)">TC-25 a successful login resets the failure count</span></td>
+      <td><span class="mutation"><span class="del">-     failures.delete(key);</span><br><span class="ins">+     // failures.delete(key);</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-026</code></td>
+      <td>TC-26 | Login | Unknown email and wrong password give the same response | Expected: No user enumeration</td>
+      <td><code>test/login.test.mjs</code><br><span style="color:var(--muted)">unknown email and wrong password look identical to the caller</span></td>
+      <td><span class="mutation"><span class="del">-     const user = users.get(key);</span><br><span class="ins">+     const user = users.get(key); if (!user) return { ok: false, reason: 'no_such_user' };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-027</code></td>
+      <td>TC-27 | Login | An unverified email cannot log in | Expected: unverified</td>
+      <td><code>test/login.test.mjs</code><br><span style="color:var(--muted)">TC-27 an account with an unverified email cannot log in</span></td>
+      <td><span class="mutation"><span class="del">-     if (!user.emailVerified) return { ok: false, reason: 'unverified' };</span><br><span class="ins">+     if (!user.emailVerified) return { ok: true, user };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-028</code></td>
+      <td>TC-28 | Access tokens | A freshly issued access token verifies | Expected: valid</td>
+      <td><code>test/tokens.test.mjs</code><br><span style="color:var(--muted)">TC-28 a freshly issued access token verifies</span></td>
+      <td><span class="mutation"><span class="del">-   return { valid: true, claims };</span><br><span class="ins">+   return { valid: false, claims };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-029</code></td>
+      <td>TC-29 | Access tokens | Access token carries the subject | Expected: sub is the user email</td>
+      <td><code>test/tokens.test.mjs</code><br><span style="color:var(--muted)">TC-29 the access token carries the subject</span></td>
+      <td><span class="mutation"><span class="del">-   const payload = b64({ sub, roles, iat, exp: iat + ACCESS_TTL_SECONDS, jti: randomBytes(12).toString('base64url'), iss: config.issuer });</span><br><span class="ins">+   const payload = b64({ roles, iat, exp: iat + ACCESS_TTL_SECONDS, jti: randomBytes(12).toString('base64url'), iss: config.issuer });</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-030</code></td>
+      <td>TC-30 | Access tokens | Access token carries the roles | Expected: roles claim present</td>
+      <td><code>test/tokens.test.mjs</code><br><span style="color:var(--muted)">TC-30 the access token carries the roles</span></td>
+      <td><span class="mutation"><span class="del">-   const payload = b64({ sub, roles, iat, exp: iat + ACCESS_TTL_SECONDS, jti: randomBytes(12).toString('base64url'), iss: config.issuer });</span><br><span class="ins">+   const payload = b64({ sub, iat, exp: iat + ACCESS_TTL_SECONDS, jti: randomBytes(12).toString('base64url'), iss: config.issuer });</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-031</code></td>
+      <td>TC-31 | Access tokens | A token with an edited payload is rejected | Expected: invalid</td>
+      <td><code>test/tokens.test.mjs</code><br><span style="color:var(--muted)">TC-31 a token with an edited payload is rejected</span></td>
+      <td><span class="mutation"><span class="del">-   if (expected.length !== given.length || !timingSafeEqual(expected, given)) return { valid: false, reason: 'bad_signature' };</span><br><span class="ins">+   if (false) return { valid: false, reason: 'bad_signature' };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-032</code></td>
+      <td>TC-32 | Access tokens | A token with an edited signature is rejected | Expected: bad_signature</td>
+      <td><code>test/tokens.test.mjs</code><br><span style="color:var(--muted)">tampering with the signature is caught</span></td>
+      <td><span class="mutation"><span class="del">-   if (expected.length !== given.length || !timingSafeEqual(expected, given)) return { valid: false, reason: 'bad_signature' };</span><br><span class="ins">+   if (expected.length !== given.length || !timingSafeEqual(expected, given)) return { valid: false, reason: 'invalid' };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-033</code></td>
+      <td>TC-33 | Access tokens | A token signed with another key is rejected | Expected: invalid</td>
+      <td><code>test/tokens.test.mjs</code><br><span style="color:var(--muted)">TC-33 a token signed with a different key is rejected</span></td>
+      <td><span class="mutation"><span class="del">-   if (expected.length !== given.length || !timingSafeEqual(expected, given)) return { valid: false, reason: 'bad_signature' };</span><br><span class="ins">+   // mutation: signature check disabled</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-034</code></td>
+      <td>TC-34 | Access tokens | A malformed token is rejected without an exception | Expected: malformed</td>
+      <td><code>test/tokens.test.mjs</code><br><span style="color:var(--muted)">TC-34 a malformed token is rejected without throwing</span></td>
+      <td><span class="mutation"><span class="del">-   if (parts.length !== 3) return { valid: false, reason: 'malformed' };</span><br><span class="ins">+   if (parts.length !== 3) throw new Error('malformed token');</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-035</code></td>
+      <td>TC-35 | Access tokens | A token declaring alg none is rejected | Expected: bad_alg</td>
+      <td><code>test/tokens.test.mjs</code><br><span style="color:var(--muted)">TC-35 a token declaring alg none is rejected</span></td>
+      <td><span class="mutation"><span class="del">-   if (header.alg !== 'HS256') return { valid: false, reason: 'bad_alg' };</span><br><span class="ins">+   if (false) return { valid: false, reason: 'bad_alg' };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-036</code></td>
+      <td>TC-36 | Access tokens | A token issued more than 30 seconds in the future is rejected | Expected: not_yet_valid</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-037</code></td>
+      <td>TC-37 | Access tokens | Up to 30 seconds of clock skew is tolerated | Expected: valid</td>
+      <td><code>test/tokens.test.mjs</code><br><span style="color:var(--muted)">TC-37 a token issued up to thirty seconds in the future is accepted</span></td>
+      <td><span class="mutation"><span class="del">- export const CLOCK_SKEW_SECONDS = 30;</span><br><span class="ins">+ export const CLOCK_SKEW_SECONDS = 0;</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-038</code></td>
+      <td>TC-38 | Access tokens | Every access token has a unique id | Expected: Two tokens, two jti values</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-039</code></td>
+      <td>TC-39 | Access tokens | A revoked token is rejected | Expected: revoked</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-040</code></td>
+      <td>TC-40 | Access tokens | Access token names its issuer | Expected: iss is turnstile</td>
+      <td><code>test/tokens.test.mjs</code><br><span style="color:var(--muted)">TC-40 the access token names its issuer</span></td>
+      <td><span class="mutation"><span class="del">-   issuer: process.env.TURNSTILE_ISSUER ?? 'turnstile',</span><br><span class="ins">+   issuer: process.env.TURNSTILE_ISSUER ?? 'not-turnstile',</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="bad">
+      <td><code>TP-041</code></td>
+      <td>TC-41 | Access tokens | An expired access token is rejected | Expected: expired</td>
+      <td><code>test/tokens.test.mjs</code><br><span style="color:var(--muted)">TC-41 rejects an expired access token</span></td>
+      <td><span class="mutation"><span class="del">-   if (claims.exp &lt;= t - CLOCK_SKEW_SECONDS) return { valid: false, reason: 'expired' };</span><br><span class="ins">+   if (false) return { valid: false, reason: 'expired' };</span></span></td>
+      <td><span class="badge name-only">NAME ONLY</span> <span class="name-only-label">TEST IN NAME ONLY</span></td>
+    </tr>
+<tr class="bad">
+      <td><code>TP-042</code></td>
+      <td>TC-42 | Refresh tokens | Refreshing returns a new access token and a new refresh token | Expected: Both new</td>
+      <td><code>test/refresh.test.mjs</code><br><span style="color:var(--muted)">TC-42 refreshing returns a new access token and a new refresh token</span></td>
+      <td><span class="mutation"><span class="del">-       refresh: issue(rec.sub, rec.family),</span><br><span class="ins">+       refresh: undefined,</span></span></td>
+      <td><span class="badge name-only">NAME ONLY</span> <span class="name-only-label">TEST IN NAME ONLY</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-043</code></td>
+      <td>TC-43 | Refresh tokens | A refresh token can be used only once | Expected: Second use refused, reused</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-044</code></td>
+      <td>TC-44 | Refresh tokens | Reusing a rotated refresh token revokes the whole family | Expected: Every token in the family refused</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-045</code></td>
+      <td>TC-45 | Refresh tokens | A refresh token expires after 30 days | Expected: expired</td>
+      <td><code>test/refresh.test.mjs</code><br><span style="color:var(--muted)">TC-45 a refresh token expires after thirty days</span></td>
+      <td><span class="mutation"><span class="del">- export const REFRESH_TTL_MS = 30 * 24 * 60 * 60 * 1000;</span><br><span class="ins">+ export const REFRESH_TTL_MS = 31 * 24 * 60 * 60 * 1000;</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-046</code></td>
+      <td>TC-46 | Refresh tokens | A refresh token for a deleted user is rejected | Expected: no_user</td>
+      <td><code>test/refresh.test.mjs</code><br><span style="color:var(--muted)">TC-46 a refresh token for a deleted user is rejected</span></td>
+      <td><span class="mutation"><span class="del">-     if (users &amp;&amp; !users.has(rec.sub)) return { ok: false, reason: 'no_user' };</span><br><span class="ins">+     if (false &amp;&amp; !users.has(rec.sub)) return { ok: false, reason: 'no_user' };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-047</code></td>
+      <td>TC-47 | Refresh tokens | Refresh tokens are stored hashed | Expected: Raw token never in the store</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-048</code></td>
+      <td>TC-48 | Sessions | Logging in creates a session | Expected: Session readable by id</td>
+      <td><code>test/sessions.test.mjs</code><br><span style="color:var(--muted)">TC-48 logging in creates a session</span></td>
+      <td><span class="mutation"><span class="del">-     sessions.set(id, { userId, created: t, lastSeen: t });</span><br><span class="ins">+     sessions.set(id, { userId, created: t, lastSeen: t }); sessions.delete(id);</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-049</code></td>
+      <td>TC-49 | Sessions | A session ends after 30 minutes idle | Expected: null after 31 minutes</td>
+      <td><code>test/sessions.test.mjs</code><br><span style="color:var(--muted)">TC-49 a session ends after thirty minutes idle</span></td>
+      <td><span class="mutation"><span class="del">-     if (t - s.lastSeen &gt; IDLE_MS) { sessions.delete(id); return null; }</span><br><span class="ins">+     if (t - s.lastSeen &gt; IDLE_MS * 2) { sessions.delete(id); return null; }</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-050</code></td>
+      <td>TC-50 | Sessions | Activity extends the idle timer | Expected: Alive after 40 minutes with activity at 20</td>
+      <td><code>test/sessions.test.mjs</code><br><span style="color:var(--muted)">activity keeps a session alive</span></td>
+      <td><span class="mutation"><span class="del">-     s.lastSeen = t;</span><br><span class="ins">+     // s.lastSeen = t;</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-051</code></td>
+      <td>TC-51 | Sessions | A session ends after 12 hours regardless of activity | Expected: null after 12 hours</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-052</code></td>
+      <td>TC-52 | Sessions | Logging out ends the session | Expected: null after logout</td>
+      <td><code>test/sessions.test.mjs</code><br><span style="color:var(--muted)">TC-52 logging out ends the session</span></td>
+      <td><span class="mutation"><span class="del">-   function destroy(id) {
+    sessions.delete(id);
+  }</span><br><span class="ins">+   function destroy(id) {
+    // sessions.delete(id);
+  }</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-053</code></td>
+      <td>TC-53 | Sessions | Log out everywhere ends every session for the user | Expected: All sessions gone</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-054</code></td>
+      <td>TC-54 | Sessions | Session ids are 32 random bytes | Expected: 64 hex characters</td>
+      <td><code>test/sessions.test.mjs</code><br><span style="color:var(--muted)">TC-54 session ids are 32 random bytes</span></td>
+      <td><span class="mutation"><span class="del">-     const id = randomBytes(32).toString('hex');</span><br><span class="ins">+     const id = randomBytes(16).toString('hex');</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-055</code></td>
+      <td>TC-55 | Sessions | A user may hold at most five sessions, oldest evicted | Expected: Sixth login evicts the first session</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-056</code></td>
+      <td>TC-56 | Rate limiting | Allow 100 requests a minute from one IP | Expected: All 100 allowed</td>
+      <td><code>test/ratelimit.test.mjs</code><br><span style="color:var(--muted)">TC-56 allows 100 requests a minute from one IP</span></td>
+      <td><span class="mutation"><span class="del">-     if (b.count &gt; limit) return { allowed: false, retryAfter: Math.ceil((b.start + WINDOW_MS - t) / 1000) };</span><br><span class="ins">+     if (b.count &gt;= limit) return { allowed: false, retryAfter: Math.ceil((b.start + WINDOW_MS - t) / 1000) };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="bad">
+      <td><code>TP-057</code></td>
+      <td>TC-57 | Rate limiting | Reject the 101st request in a minute from one IP | Expected: allowed false</td>
+      <td><code>test/ratelimit.test.mjs</code><br><span style="color:var(--muted)">TC-57 rejects requests over 100 a minute from one IP</span></td>
+      <td><span class="mutation"><span class="del">- export const LIMIT = 100;</span><br><span class="ins">+ export const LIMIT = 101;</span></span></td>
+      <td><span class="badge name-only">NAME ONLY</span> <span class="name-only-label">TEST IN NAME ONLY</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-058</code></td>
+      <td>TC-58 | Rate limiting | The window resets after a minute | Expected: Allowed again after 60 seconds</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-059</code></td>
+      <td>TC-59 | Rate limiting | Limits are per IP | Expected: A second IP is unaffected</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-060</code></td>
+      <td>TC-60 | Rate limiting | A refused request says how long to wait | Expected: retryAfter in seconds</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-061</code></td>
+      <td>TC-61 | Password reset | A reset link is issued for a known email | Expected: Token sent</td>
+      <td><code>test/reset.test.mjs</code><br><span style="color:var(--muted)">TC-61 a reset link is issued for a known email</span></td>
+      <td><span class="mutation"><span class="del">-     return { sent: true, token };</span><br><span class="ins">+     return { sent: false };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-062</code></td>
+      <td>TC-62 | Password reset | An unknown email gets the same response as a known one | Expected: No user enumeration</td>
+      <td><code>test/reset.test.mjs</code><br><span style="color:var(--muted)">TC-62 an unknown email gets the same answer as a known one</span></td>
+      <td><span class="mutation"><span class="del">-     if (!users.has(key)) return { sent: true };</span><br><span class="ins">+     if (!users.has(key)) return { sent: false, reason: 'user_not_found' };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-063</code></td>
+      <td>TC-63 | Password reset | A reset link expires after one hour | Expected: expired</td>
+      <td><code>test/reset.test.mjs</code><br><span style="color:var(--muted)">TC-63 a reset link expires after one hour</span></td>
+      <td><span class="mutation"><span class="del">-     if (rec.exp &lt;= clock()) { tokens.delete(h(token)); return { ok: false, reason: 'expired' }; }</span><br><span class="ins">+     if (rec.exp &lt;= clock()) { tokens.delete(h(token)); return { ok: false, reason: 'invalid' }; }</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-064</code></td>
+      <td>TC-64 | Password reset | A reset link works once | Expected: Second use refused</td>
+      <td><code>test/reset.test.mjs</code><br><span style="color:var(--muted)">TC-64 a reset link works once</span></td>
+      <td><span class="mutation"><span class="del">-     tokens.delete(h(token));</span><br><span class="ins">+     // tokens.delete(h(token));</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-065</code></td>
+      <td>TC-65 | Password reset | Completing a reset ends every session | Expected: All sessions gone</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-066</code></td>
+      <td>TC-66 | Password reset | The new password must meet the password rules | Expected: weak_password</td>
+      <td><code>test/reset.test.mjs</code><br><span style="color:var(--muted)">the new password must meet the password rules</span></td>
+      <td><span class="mutation"><span class="del">-     if (errors.length) return { ok: false, reason: 'weak_password', errors };</span><br><span class="ins">+     if (errors.length) return { ok: false, reason: 'validation_error', errors };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-067</code></td>
+      <td>TC-67 | Password reset | Reset tokens are stored hashed | Expected: Raw token never in the store</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-068</code></td>
+      <td>TC-68 | Audit | A failed login is logged with the client IP | Expected: Entry with type and ip</td>
+      <td><code>test/login.test.mjs</code><br><span style="color:var(--muted)">TC-68 a failed login is written to the audit log with the client IP</span></td>
+      <td><span class="mutation"><span class="del">-       audit({ type: 'login.failed', email: key, ip });</span><br><span class="ins">+       audit({ type: 'login.failed', email: key });</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-069</code></td>
+      <td>TC-69 | Audit | A successful login is logged | Expected: Entry present</td>
+      <td><code>test/login.test.mjs</code><br><span style="color:var(--muted)">TC-69 a successful login is written to the audit log</span></td>
+      <td><span class="mutation"><span class="del">-     audit({ type: 'login.succeeded', email: key, ip });</span><br><span class="ins">+     // audit({ type: 'login.succeeded', email: key, ip });</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-070</code></td>
+      <td>TC-70 | Audit | A lockout is logged | Expected: Entry present</td>
+      <td><code>test/login.test.mjs</code><br><span style="color:var(--muted)">TC-70 a lockout is written to the audit log</span></td>
+      <td><span class="mutation"><span class="del">-         audit({ type: 'account.locked', email: key, ip });</span><br><span class="ins">+         // audit({ type: 'account.locked', email: key, ip });</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="bad">
+      <td><code>TP-071</code></td>
+      <td>TC-71 | Audit | The audit log never stores a password | Expected: No password in any entry</td>
+      <td><code>test/audit.test.mjs</code><br><span style="color:var(--muted)">TC-71 the audit log never stores a password</span></td>
+      <td><span class="mutation"><span class="del">-     const { password, newPassword, ...safe } = event;</span><br><span class="ins">+     const { newPassword, ...safe } = event;</span></span></td>
+      <td><span class="badge name-only">NAME ONLY</span> <span class="name-only-label">TEST IN NAME ONLY</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-072</code></td>
+      <td>TC-72 | Audit | Audit entries carry an ISO 8601 timestamp | Expected: at is ISO 8601</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-073</code></td>
+      <td>TC-73 | Audit | A completed password reset is logged | Expected: Entry present</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-074</code></td>
+      <td>TC-74 | Roles | An admin can manage users | Expected: can users:write</td>
+      <td><code>test/roles.test.mjs</code><br><span style="color:var(--muted)">TC-74 an admin can manage users</span></td>
+      <td><span class="mutation"><span class="del">-   admin: ['users:read', 'users:write', 'tokens:revoke'],</span><br><span class="ins">+   admin: ['users:read', 'tokens:revoke'],</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-075</code></td>
+      <td>TC-75 | Roles | An ordinary user cannot manage users | Expected: cannot users:write</td>
+      <td><code>test/roles.test.mjs</code><br><span style="color:var(--muted)">TC-75 an ordinary user cannot manage users</span></td>
+      <td><span class="mutation"><span class="del">-   user: ['profile:read', 'profile:write'],</span><br><span class="ins">+   user: ['profile:read', 'profile:write', 'users:write'],</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-076</code></td>
+      <td>TC-76 | Roles | An unknown role grants nothing | Expected: cannot anything</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-077</code></td>
+      <td>TC-77 | Roles | A token with no roles claim grants nothing | Expected: cannot anything</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-078</code></td>
+      <td>TC-78 | Roles | A role change applies from the next refreshed token | Expected: New roles in refreshed token</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-079</code></td>
+      <td>TC-79 | Email verification | Registering issues a verification token | Expected: Token returned</td>
+      <td><code>test/accounts.test.mjs</code><br><span style="color:var(--muted)">TC-79 registering issues an email verification token</span></td>
+      <td><span class="mutation"><span class="del">-     const verifyToken = verifier.issue(key);
+    return { ok: true, verifyToken };</span><br><span class="ins">+     verifier.issue(key);
+    return { ok: true };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-080</code></td>
+      <td>TC-80 | Email verification | A verification link expires after 24 hours | Expected: expired</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-081</code></td>
+      <td>TC-81 | Email verification | Confirming the link marks the email verified | Expected: emailVerified true</td>
+      <td><code>test/accounts.test.mjs</code><br><span style="color:var(--muted)">TC-81 confirming the token marks the email as verified</span></td>
+      <td><span class="mutation"><span class="del">-     users.get(rec.email).emailVerified = true;</span><br><span class="ins">+     users.get(rec.email).emailVerified = false;</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-082</code></td>
+      <td>TC-82 | Email verification | A verification link works once | Expected: Second use refused</td>
+      <td><code>test/accounts.test.mjs</code><br><span style="color:var(--muted)">a verification link cannot be used twice</span></td>
+      <td><span class="mutation"><span class="del">-     pending.delete(token);</span><br><span class="ins">+     // pending.delete(token);</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-083</code></td>
+      <td>TC-83 | Accounts | Deleting an account ends every session | Expected: All sessions gone</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-084</code></td>
+      <td>TC-84 | Accounts | A deleted account cannot log in | Expected: Login refused</td>
+      <td><code>test/accounts.test.mjs</code><br><span style="color:var(--muted)">TC-84 a deleted account cannot log in</span></td>
+      <td><span class="mutation"><span class="del">-     const user = users.get(key);
+    if (!user || !verifyPassword(password, user.passwordHash)) {</span><br><span class="ins">+     const user = users.get(key);
+    if (user &amp;&amp; !verifyPassword(password, user.passwordHash)) {</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="ok">
+      <td><code>TP-085</code></td>
+      <td>TC-85 | Registration | Registering an existing email is refused | Expected: exists</td>
+      <td><code>test/accounts.test.mjs</code><br><span style="color:var(--muted)">TC-85 registering an email that already exists is refused</span></td>
+      <td><span class="mutation"><span class="del">-     if (users.has(key)) return { ok: false, reason: 'exists' };</span><br><span class="ins">+     // if (users.has(key)) return { ok: false, reason: 'exists' };</span></span></td>
+      <td><span class="badge caught">CAUGHT</span></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-086</code></td>
+      <td>TC-86 | Non-functional | Penetration test sign-off for the release | Expected: Signed report on file | Type: Manual</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-087</code></td>
+      <td>TC-87 | Non-functional | Login and reset pages usable with a screen reader | Expected: Checked with VoiceOver and NVDA | Type: Manual</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-088</code></td>
+      <td>TC-88 | Non-functional | Reset and verification emails render in Outlook and Gmail | Expected: Checked by eye | Type: Manual</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-089</code></td>
+      <td>TC-89 | Non-functional | Sustains 500 logins a second on the reference box | Expected: Load test report | Type: Manual</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr>
+<tr class="warn">
+      <td><code>TP-090</code></td>
+      <td>TC-90 | Non-functional | Security headers reviewed on every endpoint | Expected: Reviewed in the release meeting | Type: Manual</td>
+      <td><span class="badge unmapped">UNMAPPED</span></td>
+      <td>—</td>
+      <td></td>
+    </tr></tbody>
+</table>
+</div>
+
+
+
+<h2>Spec verdicts (24)</h2>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>ID</th><th>Clause</th><th>Verdict</th><th>Detail</th></tr></thead>
+<tbody><tr class="bad">
+      <td><code>SP-001</code></td>
+      <td>2.1 Passwords are hashed with bcrypt at a cost factor of 12.</td>
+      <td><span class="badge fails">FAILS</span></td>
+      <td>src/passwords.mjs:1,3 uses scryptSync with N=16384, not bcrypt. Algorithm is scrypt, not bcrypt.</td>
+    </tr>
+<tr class="bad">
+      <td><code>SP-002</code></td>
+      <td>2.2 The minimum password length is 12 characters.</td>
+      <td><span class="badge fails">FAILS</span></td>
+      <td>src/validation.mjs:1 sets PASSWORD_MIN = 10, not 12.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-003</code></td>
+      <td>2.3 The maximum password length is 128 characters.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/validation.mjs:2 PASSWORD_MAX = 128; enforced at src/validation.mjs:24.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-004</code></td>
+      <td>2.4 Passwords on the common-password list are refused.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/validation.mjs:5 defines COMMON set; src/validation.mjs:30 rejects matches.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-005</code></td>
+      <td>2.5 A password may not contain the local part of the user's email address.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/validation.mjs:27-28 extracts local part and pushes 'contains_email' if present.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-006</code></td>
+      <td>3.1 An account locks after five consecutive failed login attempts.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/login.mjs:4 MAX_ATTEMPTS=5; src/login.mjs:20 `if (state.count &gt;= MAX_ATTEMPTS)` triggers lock.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-007</code></td>
+      <td>3.2 A lock lasts 15 minutes.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/login.mjs:5 LOCK_MS = 15*60*1000; src/login.mjs:21 lockedUntil = clock() + LOCK_MS.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-008</code></td>
+      <td>3.3 The response to an unknown email is identical to the response to a wrong password.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/login.mjs:18 single branch `if (!user || !verifyPassword(...))` returns `{ok:false,reason:'invalid_credentials'}` for both cases.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-009</code></td>
+      <td>3.4 A user whose email address is not verified cannot log in.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/login.mjs:29 `if (!user.emailVerified) return {ok:false,reason:'unverified'}`.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-010</code></td>
+      <td>4.1 Access tokens are signed with HMAC-SHA256.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/tokens.mjs:1,11 createHmac('sha256', key) — algorithm is HS256 as confirmed by header b64({alg:'HS256'}).</td>
+    </tr>
+<tr class="bad">
+      <td><code>SP-011</code></td>
+      <td>4.2 Access tokens expire 15 minutes after they are issued.</td>
+      <td><span class="badge fails">FAILS</span></td>
+      <td>src/tokens.mjs:4 ACCESS_TTL_SECONDS = 3600 (1 hour). Was 900 (15 min) in v2.2.0; changed in commit 1838534 'Longer access tokens for the mobile client'.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-012</code></td>
+      <td>4.3 Tokens declaring any algorithm other than HS256 are refused.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/tokens.mjs:34 `if (header.alg !== 'HS256') return {valid:false,reason:'bad_alg'}`.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-013</code></td>
+      <td>4.4 Up to 30 seconds of clock skew is tolerated.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/tokens.mjs:5 CLOCK_SKEW_SECONDS = 30; applied at lines 39-40.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-014</code></td>
+      <td>4.5 Refresh tokens are single use, and reusing one revokes its whole token family.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/refresh.mjs:20-22: if rec.used, marks all family tokens used:true and returns 'reused'.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-015</code></td>
+      <td>4.6 Refresh tokens expire after 30 days.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/refresh.mjs:4 REFRESH_TTL_MS = 30*24*60*60*1000; enforced at src/refresh.mjs:24.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-016</code></td>
+      <td>5.1 A session ends after 30 minutes without activity.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/sessions.mjs:3 IDLE_MS = 30*60*1000; enforced at src/sessions.mjs:20.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-017</code></td>
+      <td>5.2 A session ends 12 hours after login, whatever the activity.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/sessions.mjs:4 ABSOLUTE_MS = 12*60*60*1000; enforced at src/sessions.mjs:21.</td>
+    </tr>
+<tr class="bad">
+      <td><code>SP-018</code></td>
+      <td>5.3 A user may hold at most five concurrent sessions. Starting a sixth ends the oldest.</td>
+      <td><span class="badge fails">FAILS</span></td>
+      <td>src/sessions.mjs has no session count cap. createSessionStore() allows unlimited sessions per user; no eviction of oldest.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-019</code></td>
+      <td>6.1 Each client IP may make 100 requests a minute. Further requests are refused with a retry time.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/ratelimit.mjs:1-2 LIMIT=100, WINDOW_MS=60000; src/ratelimit.mjs:16 returns {allowed:false,retryAfter:...}.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-020</code></td>
+      <td>7.1 Reset links expire after one hour and work once.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/reset.mjs:5 RESET_TTL_MS=60*60*1000; src/reset.mjs:28 tokens.delete(h(token)) after first use.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-021</code></td>
+      <td>7.2 Completing a reset ends every active session for the account.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/reset.mjs:30 sessions?.destroyAllFor(rec.email); added in commit 2d435d7 and CHANGELOG 2.3.0.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-022</code></td>
+      <td>8.1 Every failed login is recorded with the client IP address.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/login.mjs:26 audit({type:'login.failed',email:key,ip}) — ip is included.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-023</code></td>
+      <td>8.2 Passwords are never written to the audit log.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/audit.mjs:5 destructures `{password,newPassword,...safe}` stripping both password fields before storing.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SP-024</code></td>
+      <td>9.1 Verification links expire after 24 hours.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>src/verify.mjs:3 VERIFY_TTL_MS = 24*60*60*1000; enforced at src/verify.mjs:17.</td>
+    </tr></tbody>
+</table>
+</div>
+
+
+
+<h2>Checklist verdicts (10)</h2>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>ID</th><th>Item</th><th>Verdict</th><th>Detail</th></tr></thead>
+<tbody><tr class="ok">
+      <td><code>CL-001</code></td>
+      <td>✔ R-01 All automated tests pass on main.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>npm test (Stage 4): 62/62 tests pass on main branch.</td>
+    </tr>
+<tr class="bad">
+      <td><code>CL-002</code></td>
+      <td>✔ R-02 Every automated case in the test plan has a passing automated test.</td>
+      <td><span class="badge fails">FAILS</span></td>
+      <td>Stage 2 found no mapped test for 24 of 84 automated cases (e.g. TP-003, TP-011, TP-018, TP-036, TP-038, TP-039 …). Coverage is ~71%. Rule A: 'every' claim fails on counterexample.</td>
+    </tr>
+<tr class="bad">
+      <td><code>CL-003</code></td>
+      <td>✔ R-03 CHANGELOG lists every behaviour change since 2.2.0.</td>
+      <td><span class="badge fails">FAILS</span></td>
+      <td>Rule A: 'every' claim fails on a counterexample. CHANGELOG.md 2.3.0 omits the token TTL change (15 min → 1 hour, commit 1838534). At least one behaviour change is unlisted — 'every' cannot hold.</td>
+    </tr>
+<tr class="ok">
+      <td><code>CL-004</code></td>
+      <td>✔ R-04 package.json version matches the release tag.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>package.json version:&quot;2.3.0&quot; matches git tag v2.3.0.</td>
+    </tr>
+<tr class="ok">
+      <td><code>CL-005</code></td>
+      <td>✔ R-05 No new runtime dependencies.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>package.json dependencies:{} in both v2.2.0 and v2.3.0. git diff v2.2.0 v2.3.0 -- package.json shows no dependency additions.</td>
+    </tr>
+<tr class="bad">
+      <td><code>CL-006</code></td>
+      <td>✔ R-06 No TODO or FIXME comments left in src/.</td>
+      <td><span class="badge fails">FAILS</span></td>
+      <td>src/ratelimit.mjs:6 contains `// FIXME: buckets are never pruned, so memory grows with every distinct IP seen.` — added in commit cdb5818.</td>
+    </tr>
+<tr class="ok">
+      <td><code>CL-007</code></td>
+      <td>✔ R-07 README documents every environment variable the service reads.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>README.md Configuration table lists TURNSTILE_SECRET and TURNSTILE_ISSUER — the only two env vars in src/config.mjs:3-4.</td>
+    </tr>
+<tr class="ok">
+      <td><code>CL-008</code></td>
+      <td>✔ R-08 Licence file present and matches package.json.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>LICENSE file present (MIT License header). package.json license:&quot;MIT&quot;. Both match.</td>
+    </tr>
+<tr class="ok">
+      <td><code>CL-009</code></td>
+      <td>✔ R-09 SECURITY.md names a contact for vulnerability reports.</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>SECURITY.md:3 names security@turnstile.example as the vulnerability contact.</td>
+    </tr>
+<tr class="bad">
+      <td><code>CL-010</code></td>
+      <td>✔ R-10 The authentication spec has been reviewed against the implementation.</td>
+      <td><span class="badge fails">FAILS</span></td>
+      <td>Rule B: claim attests the spec was reviewed against the implementation. This audit's own verdicts show SP-001 FAILS (bcrypt claimed, scrypt used), SP-002 FAILS (min length 12 claimed, 10 in code), SP-011 FAILS (15-min TTL claimed, 1-hour in code), SP-018 FAILS (5-session cap claimed, no cap in code). A proper review would have found these. The attestation is contradicted by audit evidence.</td>
+    </tr></tbody>
+</table>
+</div>
+
+
+
+<h2>Workbook summary claims (6)</h2>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>ID</th><th>Source</th><th>Claim</th><th>Verdict</th><th>Detail</th></tr></thead>
+<tbody><tr class="ok">
+      <td><code>SUM-001</code></td>
+      <td>docs/test-plan.xlsx!Summary!B3</td>
+      <td>Cases in plan: 90</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>claims.json contains TP-001 through TP-090 — 90 test-plan rows total.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SUM-002</code></td>
+      <td>docs/test-plan.xlsx!Summary!B4</td>
+      <td>Automated: 84</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>90 total minus 6 explicit Manual rows (TP-017, TP-086–TP-090) = 84 automated cases per plan.</td>
+    </tr>
+<tr class="ok">
+      <td><code>SUM-003</code></td>
+      <td>docs/test-plan.xlsx!Summary!B5</td>
+      <td>Manual: 6</td>
+      <td><span class="badge holds">HOLDS</span></td>
+      <td>Exactly 6 rows carry Type=Manual: TC-17, TC-86, TC-87, TC-88, TC-89, TC-90.</td>
+    </tr>
+<tr class="bad">
+      <td><code>SUM-004</code></td>
+      <td>docs/test-plan.xlsx!Summary!B6</td>
+      <td>Automated cases passing: 84</td>
+      <td><span class="badge fails">FAILS</span></td>
+      <td>npm test (run Stage 4) shows 62 tests pass — not 84. Only 62 automated test names are mapped and run.</td>
+    </tr>
+<tr class="bad">
+      <td><code>SUM-005</code></td>
+      <td>docs/test-plan.xlsx!Summary!B7</td>
+      <td>Automated coverage of plan: 100%</td>
+      <td><span class="badge fails">FAILS</span></td>
+      <td>24 of 84 automated test-plan cases have testFile=null (script count: 60 with testFile, 24 without). Coverage is ~71%, not 100%.</td>
+    </tr>
+<tr class="bad">
+      <td><code>SUM-006</code></td>
+      <td>docs/test-plan.xlsx!Summary!A8:B8</td>
+      <td>Release gate: Met</td>
+      <td><span class="badge fails">FAILS</span></td>
+      <td>Rule B: 'Release gate: Met' attests all checklist items passed. This audit's own verdicts contradict that: CL-002 FAILS (24 automated cases unmapped, Rule A), CL-003 FAILS (token TTL change missing from CHANGELOG, Rule A), CL-006 FAILS (FIXME in src/ratelimit.mjs:6), CL-010 FAILS (spec review attestation contradicted by SP-001/SP-002/SP-011/SP-018 FAILS, Rule B). Release gate cannot be Met.</td>
+    </tr></tbody>
+</table>
+</div>
+
+
+</div>
+<footer>Made with IBM Bob</footer>
+</body>
+</html>

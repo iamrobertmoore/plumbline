@@ -1,0 +1,211 @@
+{
+ "specVersion": "1.4",
+ "spec": [
+  {
+   "clause": "2.1",
+   "text": "Passwords are hashed with bcrypt at a cost factor of 12.",
+   "true": false,
+   "why": "src/passwords.mjs uses scrypt (N=16384, r=8, p=1). There is no bcrypt anywhere."
+  },
+  {
+   "clause": "2.2",
+   "text": "The minimum password length is 12 characters.",
+   "true": false,
+   "why": "src/validation.mjs: PASSWORD_MIN = 10."
+  },
+  {
+   "clause": "2.3",
+   "text": "The maximum password length is 128 characters.",
+   "true": true,
+   "why": "PASSWORD_MAX = 128."
+  },
+  {
+   "clause": "2.4",
+   "text": "Passwords on the common-password list are refused.",
+   "true": true,
+   "why": "COMMON set in validation.mjs."
+  },
+  {
+   "clause": "2.5",
+   "text": "A password may not contain the local part of the user's email address.",
+   "true": true,
+   "why": "contains_email rule."
+  },
+  {
+   "clause": "3.1",
+   "text": "An account locks after five consecutive failed login attempts.",
+   "true": true,
+   "why": "MAX_ATTEMPTS = 5."
+  },
+  {
+   "clause": "3.2",
+   "text": "A lock lasts 15 minutes.",
+   "true": true,
+   "why": "LOCK_MS = 15 minutes."
+  },
+  {
+   "clause": "3.3",
+   "text": "The response to an unknown email is identical to the response to a wrong password.",
+   "true": true,
+   "why": "Both return invalid_credentials."
+  },
+  {
+   "clause": "3.4",
+   "text": "A user whose email address is not verified cannot log in.",
+   "true": true,
+   "why": "unverified branch in login.mjs."
+  },
+  {
+   "clause": "4.1",
+   "text": "Access tokens are signed with HMAC-SHA256.",
+   "true": true,
+   "why": "createHmac sha256."
+  },
+  {
+   "clause": "4.2",
+   "text": "Access tokens expire 15 minutes after they are issued.",
+   "true": false,
+   "why": "ACCESS_TTL_SECONDS = 3600 since commit \"Longer access tokens for the mobile client\". It was 900 at v2.2.0."
+  },
+  {
+   "clause": "4.3",
+   "text": "Tokens declaring any algorithm other than HS256 are refused.",
+   "true": true,
+   "why": "bad_alg branch."
+  },
+  {
+   "clause": "4.4",
+   "text": "Up to 30 seconds of clock skew is tolerated.",
+   "true": true,
+   "why": "CLOCK_SKEW_SECONDS = 30."
+  },
+  {
+   "clause": "4.5",
+   "text": "Refresh tokens are single use, and reusing one revokes its whole token family.",
+   "true": true,
+   "why": "used flag and family revocation in refresh.mjs."
+  },
+  {
+   "clause": "4.6",
+   "text": "Refresh tokens expire after 30 days.",
+   "true": true,
+   "why": "REFRESH_TTL_MS = 30 days."
+  },
+  {
+   "clause": "5.1",
+   "text": "A session ends after 30 minutes without activity.",
+   "true": true,
+   "why": "IDLE_MS."
+  },
+  {
+   "clause": "5.2",
+   "text": "A session ends 12 hours after login, whatever the activity.",
+   "true": true,
+   "why": "ABSOLUTE_MS."
+  },
+  {
+   "clause": "5.3",
+   "text": "A user may hold at most five concurrent sessions. Starting a sixth ends the oldest.",
+   "true": false,
+   "why": "Not implemented. sessions.mjs has no limit."
+  },
+  {
+   "clause": "6.1",
+   "text": "Each client IP may make 100 requests a minute. Further requests are refused with a retry time.",
+   "true": true,
+   "why": "LIMIT = 100, retryAfter."
+  },
+  {
+   "clause": "7.1",
+   "text": "Reset links expire after one hour and work once.",
+   "true": true,
+   "why": "RESET_TTL_MS, token deleted on use."
+  },
+  {
+   "clause": "7.2",
+   "text": "Completing a reset ends every active session for the account.",
+   "true": true,
+   "why": "destroyAllFor, added in 2.3.0."
+  },
+  {
+   "clause": "8.1",
+   "text": "Every failed login is recorded with the client IP address.",
+   "true": true,
+   "why": "login.failed with ip."
+  },
+  {
+   "clause": "8.2",
+   "text": "Passwords are never written to the audit log.",
+   "true": true,
+   "why": "audit.mjs strips password and newPassword."
+  },
+  {
+   "clause": "9.1",
+   "text": "Verification links expire after 24 hours.",
+   "true": true,
+   "why": "VERIFY_TTL_MS."
+  }
+ ],
+ "checklist": [
+  {
+   "item": "R-01",
+   "text": "All automated tests pass on main.",
+   "true": true,
+   "why": "npm test: 62 of 62 pass."
+  },
+  {
+   "item": "R-02",
+   "text": "Every automated case in the test plan has a passing automated test.",
+   "true": false,
+   "why": "61 of 84 automated cases have a test. Four of those 61 do not test what they are named for."
+  },
+  {
+   "item": "R-03",
+   "text": "CHANGELOG lists every behaviour change since 2.2.0.",
+   "true": false,
+   "why": "The access token lifetime went from 15 to 60 minutes (git diff v2.2.0 v2.3.0 -- src/tokens.mjs). The changelog does not mention it."
+  },
+  {
+   "item": "R-04",
+   "text": "package.json version matches the release tag.",
+   "true": true,
+   "why": "2.3.0 and v2.3.0."
+  },
+  {
+   "item": "R-05",
+   "text": "No new runtime dependencies.",
+   "true": true,
+   "why": "dependencies is empty."
+  },
+  {
+   "item": "R-06",
+   "text": "No TODO or FIXME comments left in src/.",
+   "true": false,
+   "why": "src/ratelimit.mjs carries a FIXME added after 2.2.0."
+  },
+  {
+   "item": "R-07",
+   "text": "README documents every environment variable the service reads.",
+   "true": true,
+   "why": "TURNSTILE_SECRET and TURNSTILE_ISSUER, both in the README."
+  },
+  {
+   "item": "R-08",
+   "text": "Licence file present and matches package.json.",
+   "true": true,
+   "why": "MIT in both."
+  },
+  {
+   "item": "R-09",
+   "text": "SECURITY.md names a contact for vulnerability reports.",
+   "true": true,
+   "why": "security@turnstile.example."
+  },
+  {
+   "item": "R-10",
+   "text": "The authentication spec has been reviewed against the implementation.",
+   "true": false,
+   "why": "Four of the spec claims are false at 2.3.0: 2.1, 2.2, 4.2 and 5.3."
+  }
+ ]
+}

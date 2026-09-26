@@ -1,0 +1,1814 @@
+[
+  {
+    "id": "TP-001",
+    "source": "docs/test-plan.xlsx!Test plan!B5",
+    "kind": "test-plan",
+    "text": "TC-01 | Registration | Reject an email address with no @ | Expected: Registration refused, bad_email",
+    "testFile": "test/validation.test.mjs",
+    "testName": "TC-01 rejects an email address with no @",
+    "mutation": {
+      "file": "src/validation.mjs",
+      "search": "  if (at < 1 || at !== e.lastIndexOf('@')) return false;",
+      "replace": "  if (false) return false; // mutation: @ check disabled"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT",
+    "witness": "export default async (load) => {\n  const { validateEmail } = await load('src/validation.mjs');\n  // An email address with no @ must be rejected\n  return validateEmail('noa.tsign') === false;\n};\n"
+  },
+  {
+    "id": "TP-002",
+    "source": "docs/test-plan.xlsx!Test plan!B6",
+    "kind": "test-plan",
+    "text": "TC-02 | Registration | Reject an email address whose domain has no dot | Expected: Registration refused, bad_email",
+    "testFile": "test/validation.test.mjs",
+    "testName": "TC-02 rejects an email address whose domain has no dot",
+    "mutation": {
+      "file": "src/validation.mjs",
+      "search": "  if (!domain.includes('.')) return false;",
+      "replace": "  if (!domain.includes('.') && false) return false;"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-003",
+    "source": "docs/test-plan.xlsx!Test plan!B7",
+    "kind": "test-plan",
+    "text": "TC-03 | Registration | Reject an email address longer than 254 characters | Expected: Registration refused, bad_email",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-004",
+    "source": "docs/test-plan.xlsx!Test plan!B8",
+    "kind": "test-plan",
+    "text": "TC-04 | Registration | Trim and lowercase the email before storing it | Expected: Ada@Example.COM is stored as ada@example.com",
+    "testFile": "test/validation.test.mjs",
+    "testName": "email addresses are trimmed and lowercased before use",
+    "mutation": {
+      "file": "src/validation.mjs",
+      "search": "  return String(email).trim().toLowerCase();",
+      "replace": "  return String(email).trim();"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-005",
+    "source": "docs/test-plan.xlsx!Test plan!B9",
+    "kind": "test-plan",
+    "text": "TC-05 | Passwords | Reject a password shorter than the minimum length | Expected: Refused, too_short",
+    "testFile": "test/validation.test.mjs",
+    "testName": "TC-05 rejects a password below the minimum length",
+    "mutation": {
+      "file": "src/validation.mjs",
+      "search": "  if (pw.length < PASSWORD_MIN) errors.push('too_short');",
+      "replace": "  if (pw.length < PASSWORD_MIN - 1) errors.push('too_short');"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "NAME_ONLY",
+    "witness": "export default async (load) => {\n  const { validatePassword } = await load('src/validation.mjs');\n  // A password of length 9 (one below the minimum of 10) must be rejected with too_short\n  return validatePassword('short1234').includes('too_short');\n};\n"
+  },
+  {
+    "id": "TP-006",
+    "source": "docs/test-plan.xlsx!Test plan!B10",
+    "kind": "test-plan",
+    "text": "TC-06 | Passwords | Reject a password longer than 128 characters | Expected: Refused, too_long",
+    "testFile": "test/validation.test.mjs",
+    "testName": "TC-06 rejects a password over 128 characters",
+    "mutation": {
+      "file": "src/validation.mjs",
+      "search": "  if (pw.length > PASSWORD_MAX) errors.push('too_long');",
+      "replace": "  if (pw.length > PASSWORD_MAX + 1) errors.push('too_long');"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "NAME_ONLY",
+    "witness": "export default async (load) => {\n  const { validatePassword, PASSWORD_MAX } = await load('src/validation.mjs');\n  // A password exactly one over the max must be rejected with too_long\n  const pw = 'a1' + 'x'.repeat(PASSWORD_MAX - 1); // length = PASSWORD_MAX + 1 = 129\n  return validatePassword(pw).includes('too_long');\n};\n"
+  },
+  {
+    "id": "TP-007",
+    "source": "docs/test-plan.xlsx!Test plan!B11",
+    "kind": "test-plan",
+    "text": "TC-07 | Passwords | Reject a password with no digit | Expected: Refused, no_digit",
+    "testFile": "test/validation.test.mjs",
+    "testName": "a password with no digit is refused",
+    "mutation": {
+      "file": "src/validation.mjs",
+      "search": "  if (!/\\d/.test(pw)) errors.push('no_digit');",
+      "replace": "  if (!/\\d/.test(pw) && false) errors.push('no_digit');"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-008",
+    "source": "docs/test-plan.xlsx!Test plan!B12",
+    "kind": "test-plan",
+    "text": "TC-08 | Passwords | Reject a password containing the email local part | Expected: Refused, contains_email",
+    "testFile": "test/validation.test.mjs",
+    "testName": "TC-08 rejects a password containing the local part of the email",
+    "mutation": {
+      "file": "src/validation.mjs",
+      "search": "    if (local.length >= 3 && pw.toLowerCase().includes(local)) errors.push('contains_email');",
+      "replace": "    if (local.length >= 3 && pw.toLowerCase().includes(local) && false) errors.push('contains_email');"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-009",
+    "source": "docs/test-plan.xlsx!Test plan!B13",
+    "kind": "test-plan",
+    "text": "TC-09 | Passwords | Reject a password on the common-password list | Expected: Refused, common",
+    "testFile": "test/validation.test.mjs",
+    "testName": "TC-09 rejects a password on the common-password list",
+    "mutation": {
+      "file": "src/validation.mjs",
+      "search": "  if (COMMON.has(pw.toLowerCase())) errors.push('common');",
+      "replace": "  if (COMMON.has(pw.toLowerCase()) && false) errors.push('common');"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-010",
+    "source": "docs/test-plan.xlsx!Test plan!B14",
+    "kind": "test-plan",
+    "text": "TC-10 | Passwords | Accept a password that meets every rule | Expected: No errors",
+    "testFile": "test/validation.test.mjs",
+    "testName": "TC-10 accepts a password that meets every rule",
+    "mutation": {
+      "file": "src/validation.mjs",
+      "search": "export const PASSWORD_MIN = 10;",
+      "replace": "export const PASSWORD_MIN = 11;"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "NAME_ONLY",
+    "witness": "export default async (load) => {\n  const { validatePassword } = await load('src/validation.mjs');\n  // harbour-lights-42 is 17 chars but let's use a exactly-10 valid password\n  // 'securepass1' is exactly 10 chars (s-e-c-u-r-e-p-a-s-s = 10, +1 = 11... let's count)\n  // 'harbour142' = h-a-r-b-o-u-r-1-4-2 = 10 chars, has digit, not common\n  const errors = validatePassword('harbour142');\n  return errors.length === 0;\n};\n"
+  },
+  {
+    "id": "TP-011",
+    "source": "docs/test-plan.xlsx!Test plan!B15",
+    "kind": "test-plan",
+    "text": "TC-11 | Registration | Username is 3 to 32 characters | Expected: ab and a 33-character name refused",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-012",
+    "source": "docs/test-plan.xlsx!Test plan!B16",
+    "kind": "test-plan",
+    "text": "TC-12 | Registration | Username uses only lowercase letters, digits and underscore | Expected: Ada.Lovelace refused",
+    "testFile": "test/validation.test.mjs",
+    "testName": "usernames may only use lowercase letters, digits and underscores",
+    "mutation": {
+      "file": "src/validation.mjs",
+      "search": "  return /^[a-z0-9_]{3,32}$/.test(u);",
+      "replace": "  return /^[a-z0-9_.]{3,32}$/.test(u);"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "NAME_ONLY",
+    "witness": "export default async (load) => {\n  const { validateUsername } = await load('src/validation.mjs');\n  // A username with a dot must be rejected\n  return validateUsername('ada.lo') === false;\n};\n"
+  },
+  {
+    "id": "TP-013",
+    "source": "docs/test-plan.xlsx!Test plan!B17",
+    "kind": "test-plan",
+    "text": "TC-13 | Passwords | A stored hash never contains the plaintext | Expected: Plaintext absent from stored value",
+    "testFile": "test/passwords.test.mjs",
+    "testName": "TC-13 a stored hash never contains the plaintext password",
+    "mutation": {
+      "file": "src/passwords.mjs",
+      "search": "  return ['scrypt', SCRYPT.N, SCRYPT.r, SCRYPT.p, salt.toString('base64url'), hash.toString('base64url')].join('$');",
+      "replace": "  return ['scrypt', SCRYPT.N, SCRYPT.r, SCRYPT.p, salt.toString('base64url'), hash.toString('base64url'), pw].join('$');"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-014",
+    "source": "docs/test-plan.xlsx!Test plan!B18",
+    "kind": "test-plan",
+    "text": "TC-14 | Passwords | Hashes are salted | Expected: Same password hashed twice gives different values",
+    "testFile": "test/passwords.test.mjs",
+    "testName": "TC-14 hashing the same password twice gives different hashes",
+    "mutation": {
+      "file": "src/passwords.mjs",
+      "search": "  const salt = randomBytes(16);",
+      "replace": "  const salt = Buffer.alloc(16);"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-015",
+    "source": "docs/test-plan.xlsx!Test plan!B19",
+    "kind": "test-plan",
+    "text": "TC-15 | Passwords | Verify accepts the correct password | Expected: true",
+    "testFile": "test/passwords.test.mjs",
+    "testName": "TC-15 verify accepts the correct password",
+    "mutation": {
+      "file": "src/passwords.mjs",
+      "search": "  return actual.length === expected.length && timingSafeEqual(actual, expected);",
+      "replace": "  return false;"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-016",
+    "source": "docs/test-plan.xlsx!Test plan!B20",
+    "kind": "test-plan",
+    "text": "TC-16 | Passwords | Verify rejects a wrong password | Expected: false",
+    "testFile": "test/passwords.test.mjs",
+    "testName": "verify says no to the wrong password",
+    "mutation": {
+      "file": "src/passwords.mjs",
+      "search": "  return actual.length === expected.length && timingSafeEqual(actual, expected);",
+      "replace": "  return true;"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-017",
+    "source": "docs/test-plan.xlsx!Test plan!B21",
+    "kind": "test-plan",
+    "text": "TC-17 | Passwords | Password comparison is constant time | Expected: Reviewed in code, timingSafeEqual used | Type: Manual",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-018",
+    "source": "docs/test-plan.xlsx!Test plan!B22",
+    "kind": "test-plan",
+    "text": "TC-18 | Passwords | Hashes made with weaker parameters are flagged for rehash | Expected: needsRehash is true",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-019",
+    "source": "docs/test-plan.xlsx!Test plan!B23",
+    "kind": "test-plan",
+    "text": "TC-19 | Passwords | A malformed stored hash is rejected without an exception | Expected: false, no throw",
+    "testFile": "test/passwords.test.mjs",
+    "testName": "TC-19 verify returns false for a malformed stored hash instead of throwing",
+    "mutation": {
+      "file": "src/passwords.mjs",
+      "search": "  if (parts.length !== 6 || parts[0] !== 'scrypt') return false;",
+      "replace": "  if (parts.length !== 6 || parts[0] !== 'scrypt') throw new Error('malformed hash');"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-020",
+    "source": "docs/test-plan.xlsx!Test plan!B24",
+    "kind": "test-plan",
+    "text": "TC-20 | Login | Correct email and password logs in | Expected: ok",
+    "testFile": "test/login.test.mjs",
+    "testName": "TC-20 a correct email and password logs in",
+    "mutation": {
+      "file": "src/login.mjs",
+      "search": "    return { ok: true, user };",
+      "replace": "    return { ok: false, reason: 'invalid_credentials' };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-021",
+    "source": "docs/test-plan.xlsx!Test plan!B25",
+    "kind": "test-plan",
+    "text": "TC-21 | Login | Wrong password is refused | Expected: invalid_credentials",
+    "testFile": "test/login.test.mjs",
+    "testName": "TC-21 a wrong password is refused as invalid credentials",
+    "mutation": {
+      "file": "src/login.mjs",
+      "search": "      return { ok: false, reason: 'invalid_credentials' };",
+      "replace": "      return { ok: true, user };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-022",
+    "source": "docs/test-plan.xlsx!Test plan!B26",
+    "kind": "test-plan",
+    "text": "TC-22 | Login | Account locks after five failed attempts | Expected: Locked on the fifth failure",
+    "testFile": "test/login.test.mjs",
+    "testName": "TC-22 the account locks after five failed attempts",
+    "mutation": {
+      "file": "src/login.mjs",
+      "search": "      if (state.count >= MAX_ATTEMPTS) {",
+      "replace": "      if (state.count > MAX_ATTEMPTS) {"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-023",
+    "source": "docs/test-plan.xlsx!Test plan!B27",
+    "kind": "test-plan",
+    "text": "TC-23 | Login | A locked account refuses the correct password | Expected: locked",
+    "testFile": "test/login.test.mjs",
+    "testName": "a locked account refuses even the right password",
+    "mutation": {
+      "file": "src/login.mjs",
+      "search": "    if (state.lockedUntil > clock()) {",
+      "replace": "    if (false) {"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-024",
+    "source": "docs/test-plan.xlsx!Test plan!B28",
+    "kind": "test-plan",
+    "text": "TC-24 | Login | The lock lifts after 15 minutes | Expected: Login succeeds after 15 minutes",
+    "testFile": "test/login.test.mjs",
+    "testName": "TC-24 the lock lifts after fifteen minutes",
+    "mutation": {
+      "file": "src/login.mjs",
+      "search": "export const LOCK_MS = 15 * 60 * 1000;",
+      "replace": "export const LOCK_MS = 999 * 60 * 1000;"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-025",
+    "source": "docs/test-plan.xlsx!Test plan!B29",
+    "kind": "test-plan",
+    "text": "TC-25 | Login | A successful login resets the failure count | Expected: Count back to zero",
+    "testFile": "test/login.test.mjs",
+    "testName": "TC-25 a successful login resets the failure count",
+    "mutation": {
+      "file": "src/login.mjs",
+      "search": "    failures.delete(key);",
+      "replace": "    // failures.delete(key);"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-026",
+    "source": "docs/test-plan.xlsx!Test plan!B30",
+    "kind": "test-plan",
+    "text": "TC-26 | Login | Unknown email and wrong password give the same response | Expected: No user enumeration",
+    "testFile": "test/login.test.mjs",
+    "testName": "unknown email and wrong password look identical to the caller",
+    "mutation": {
+      "file": "src/login.mjs",
+      "search": "    const user = users.get(key);",
+      "replace": "    const user = users.get(key); if (!user) return { ok: false, reason: 'no_such_user' };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-027",
+    "source": "docs/test-plan.xlsx!Test plan!B31",
+    "kind": "test-plan",
+    "text": "TC-27 | Login | An unverified email cannot log in | Expected: unverified",
+    "testFile": "test/login.test.mjs",
+    "testName": "TC-27 an account with an unverified email cannot log in",
+    "mutation": {
+      "file": "src/login.mjs",
+      "search": "    if (!user.emailVerified) return { ok: false, reason: 'unverified' };",
+      "replace": "    if (!user.emailVerified) return { ok: true, user };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-028",
+    "source": "docs/test-plan.xlsx!Test plan!B32",
+    "kind": "test-plan",
+    "text": "TC-28 | Access tokens | A freshly issued access token verifies | Expected: valid",
+    "testFile": "test/tokens.test.mjs",
+    "testName": "TC-28 a freshly issued access token verifies",
+    "mutation": {
+      "file": "src/tokens.mjs",
+      "search": "  return { valid: true, claims };",
+      "replace": "  return { valid: false, claims };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-029",
+    "source": "docs/test-plan.xlsx!Test plan!B33",
+    "kind": "test-plan",
+    "text": "TC-29 | Access tokens | Access token carries the subject | Expected: sub is the user email",
+    "testFile": "test/tokens.test.mjs",
+    "testName": "TC-29 the access token carries the subject",
+    "mutation": {
+      "file": "src/tokens.mjs",
+      "search": "  const payload = b64({ sub, roles, iat, exp: iat + ACCESS_TTL_SECONDS, jti: randomBytes(12).toString('base64url'), iss: config.issuer });",
+      "replace": "  const payload = b64({ roles, iat, exp: iat + ACCESS_TTL_SECONDS, jti: randomBytes(12).toString('base64url'), iss: config.issuer });"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-030",
+    "source": "docs/test-plan.xlsx!Test plan!B34",
+    "kind": "test-plan",
+    "text": "TC-30 | Access tokens | Access token carries the roles | Expected: roles claim present",
+    "testFile": "test/tokens.test.mjs",
+    "testName": "TC-30 the access token carries the roles",
+    "mutation": {
+      "file": "src/tokens.mjs",
+      "search": "  const payload = b64({ sub, roles, iat, exp: iat + ACCESS_TTL_SECONDS, jti: randomBytes(12).toString('base64url'), iss: config.issuer });",
+      "replace": "  const payload = b64({ sub, iat, exp: iat + ACCESS_TTL_SECONDS, jti: randomBytes(12).toString('base64url'), iss: config.issuer });"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-031",
+    "source": "docs/test-plan.xlsx!Test plan!B35",
+    "kind": "test-plan",
+    "text": "TC-31 | Access tokens | A token with an edited payload is rejected | Expected: invalid",
+    "testFile": "test/tokens.test.mjs",
+    "testName": "TC-31 a token with an edited payload is rejected",
+    "mutation": {
+      "file": "src/tokens.mjs",
+      "search": "  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return { valid: false, reason: 'bad_signature' };",
+      "replace": "  if (false) return { valid: false, reason: 'bad_signature' };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-032",
+    "source": "docs/test-plan.xlsx!Test plan!B36",
+    "kind": "test-plan",
+    "text": "TC-32 | Access tokens | A token with an edited signature is rejected | Expected: bad_signature",
+    "testFile": "test/tokens.test.mjs",
+    "testName": "tampering with the signature is caught",
+    "mutation": {
+      "file": "src/tokens.mjs",
+      "search": "  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return { valid: false, reason: 'bad_signature' };",
+      "replace": "  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return { valid: false, reason: 'invalid' };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-033",
+    "source": "docs/test-plan.xlsx!Test plan!B37",
+    "kind": "test-plan",
+    "text": "TC-33 | Access tokens | A token signed with another key is rejected | Expected: invalid",
+    "testFile": "test/tokens.test.mjs",
+    "testName": "TC-33 a token signed with a different key is rejected",
+    "mutation": {
+      "file": "src/tokens.mjs",
+      "search": "  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return { valid: false, reason: 'bad_signature' };",
+      "replace": "  // mutation: signature check disabled"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT",
+    "witness": "export default async (load) => {\n  const { issueAccess, verifyAccess } = await load('src/tokens.mjs');\n  const NOW = Date.UTC(2026, 8, 1, 9, 0, 0);\n  // Sign with a different key; verifyAccess uses default (config.secret)\n  const t = issueAccess('ada@example.com', [], { now: NOW, key: 'other-key' });\n  return verifyAccess(t, { now: NOW }).valid === false;\n};\n"
+  },
+  {
+    "id": "TP-034",
+    "source": "docs/test-plan.xlsx!Test plan!B38",
+    "kind": "test-plan",
+    "text": "TC-34 | Access tokens | A malformed token is rejected without an exception | Expected: malformed",
+    "testFile": "test/tokens.test.mjs",
+    "testName": "TC-34 a malformed token is rejected without throwing",
+    "mutation": {
+      "file": "src/tokens.mjs",
+      "search": "  if (parts.length !== 3) return { valid: false, reason: 'malformed' };",
+      "replace": "  if (parts.length !== 3) throw new Error('malformed token');"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-035",
+    "source": "docs/test-plan.xlsx!Test plan!B39",
+    "kind": "test-plan",
+    "text": "TC-35 | Access tokens | A token declaring alg none is rejected | Expected: bad_alg",
+    "testFile": "test/tokens.test.mjs",
+    "testName": "TC-35 a token declaring alg none is rejected",
+    "mutation": {
+      "file": "src/tokens.mjs",
+      "search": "  if (header.alg !== 'HS256') return { valid: false, reason: 'bad_alg' };",
+      "replace": "  if (false) return { valid: false, reason: 'bad_alg' };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-036",
+    "source": "docs/test-plan.xlsx!Test plan!B40",
+    "kind": "test-plan",
+    "text": "TC-36 | Access tokens | A token issued more than 30 seconds in the future is rejected | Expected: not_yet_valid",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-037",
+    "source": "docs/test-plan.xlsx!Test plan!B41",
+    "kind": "test-plan",
+    "text": "TC-37 | Access tokens | Up to 30 seconds of clock skew is tolerated | Expected: valid",
+    "testFile": "test/tokens.test.mjs",
+    "testName": "TC-37 a token issued up to thirty seconds in the future is accepted",
+    "mutation": {
+      "file": "src/tokens.mjs",
+      "search": "export const CLOCK_SKEW_SECONDS = 30;",
+      "replace": "export const CLOCK_SKEW_SECONDS = 0;"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-038",
+    "source": "docs/test-plan.xlsx!Test plan!B42",
+    "kind": "test-plan",
+    "text": "TC-38 | Access tokens | Every access token has a unique id | Expected: Two tokens, two jti values",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-039",
+    "source": "docs/test-plan.xlsx!Test plan!B43",
+    "kind": "test-plan",
+    "text": "TC-39 | Access tokens | A revoked token is rejected | Expected: revoked",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-040",
+    "source": "docs/test-plan.xlsx!Test plan!B44",
+    "kind": "test-plan",
+    "text": "TC-40 | Access tokens | Access token names its issuer | Expected: iss is turnstile",
+    "testFile": "test/tokens.test.mjs",
+    "testName": "TC-40 the access token names its issuer",
+    "mutation": {
+      "file": "src/config.mjs",
+      "search": "  issuer: process.env.TURNSTILE_ISSUER ?? 'turnstile',",
+      "replace": "  issuer: process.env.TURNSTILE_ISSUER ?? 'not-turnstile',"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-041",
+    "source": "docs/test-plan.xlsx!Test plan!B45",
+    "kind": "test-plan",
+    "text": "TC-41 | Access tokens | An expired access token is rejected | Expected: expired",
+    "testFile": "test/tokens.test.mjs",
+    "testName": "TC-41 rejects an expired access token",
+    "mutation": {
+      "file": "src/tokens.mjs",
+      "search": "  if (claims.exp <= t - CLOCK_SKEW_SECONDS) return { valid: false, reason: 'expired' };",
+      "replace": "  if (false) return { valid: false, reason: 'expired' };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "NAME_ONLY",
+    "witness": "export default async (load) => {\n  const { issueAccess, verifyAccess } = await load('src/tokens.mjs');\n  const NOW = Date.UTC(2026, 8, 1, 9, 0, 0);\n  const t = issueAccess('ada@example.com', [], { now: NOW });\n  // Advance 2 hours past expiry (TTL is 3600s = 1h, skew is 30s)\n  const result = verifyAccess(t, { now: NOW + 2 * 3600 * 1000 });\n  return result.valid === false && result.reason === 'expired';\n};\n"
+  },
+  {
+    "id": "TP-042",
+    "source": "docs/test-plan.xlsx!Test plan!B46",
+    "kind": "test-plan",
+    "text": "TC-42 | Refresh tokens | Refreshing returns a new access token and a new refresh token | Expected: Both new",
+    "testFile": "test/refresh.test.mjs",
+    "testName": "TC-42 refreshing returns a new access token and a new refresh token",
+    "mutation": {
+      "file": "src/refresh.mjs",
+      "search": "      refresh: issue(rec.sub, rec.family),",
+      "replace": "      refresh: undefined,"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "NAME_ONLY",
+    "witness": "export default async (load) => {\n  const { createRefreshStore } = await load('src/refresh.mjs');\n  let t = Date.UTC(2026, 8, 1, 9, 0, 0);\n  const clock = () => t;\n  const users = new Map([['ada@example.com', { roles: ['user'] }]]);\n  const store = createRefreshStore({ users, clock });\n  const r1 = store.issue('ada@example.com');\n  const out = store.refresh(r1);\n  // Both access and refresh must be non-empty strings\n  return out.ok === true && typeof out.refresh === 'string' && out.refresh.length > 0;\n};\n"
+  },
+  {
+    "id": "TP-043",
+    "source": "docs/test-plan.xlsx!Test plan!B47",
+    "kind": "test-plan",
+    "text": "TC-43 | Refresh tokens | A refresh token can be used only once | Expected: Second use refused, reused",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-044",
+    "source": "docs/test-plan.xlsx!Test plan!B48",
+    "kind": "test-plan",
+    "text": "TC-44 | Refresh tokens | Reusing a rotated refresh token revokes the whole family | Expected: Every token in the family refused",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-045",
+    "source": "docs/test-plan.xlsx!Test plan!B49",
+    "kind": "test-plan",
+    "text": "TC-45 | Refresh tokens | A refresh token expires after 30 days | Expected: expired",
+    "testFile": "test/refresh.test.mjs",
+    "testName": "TC-45 a refresh token expires after thirty days",
+    "mutation": {
+      "file": "src/refresh.mjs",
+      "search": "export const REFRESH_TTL_MS = 30 * 24 * 60 * 60 * 1000;",
+      "replace": "export const REFRESH_TTL_MS = 31 * 24 * 60 * 60 * 1000;"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-046",
+    "source": "docs/test-plan.xlsx!Test plan!B50",
+    "kind": "test-plan",
+    "text": "TC-46 | Refresh tokens | A refresh token for a deleted user is rejected | Expected: no_user",
+    "testFile": "test/refresh.test.mjs",
+    "testName": "TC-46 a refresh token for a deleted user is rejected",
+    "mutation": {
+      "file": "src/refresh.mjs",
+      "search": "    if (users && !users.has(rec.sub)) return { ok: false, reason: 'no_user' };",
+      "replace": "    if (false && !users.has(rec.sub)) return { ok: false, reason: 'no_user' };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-047",
+    "source": "docs/test-plan.xlsx!Test plan!B51",
+    "kind": "test-plan",
+    "text": "TC-47 | Refresh tokens | Refresh tokens are stored hashed | Expected: Raw token never in the store",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-048",
+    "source": "docs/test-plan.xlsx!Test plan!B52",
+    "kind": "test-plan",
+    "text": "TC-48 | Sessions | Logging in creates a session | Expected: Session readable by id",
+    "testFile": "test/sessions.test.mjs",
+    "testName": "TC-48 logging in creates a session",
+    "mutation": {
+      "file": "src/sessions.mjs",
+      "search": "    sessions.set(id, { userId, created: t, lastSeen: t });",
+      "replace": "    sessions.set(id, { userId, created: t, lastSeen: t }); sessions.delete(id);"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-049",
+    "source": "docs/test-plan.xlsx!Test plan!B53",
+    "kind": "test-plan",
+    "text": "TC-49 | Sessions | A session ends after 30 minutes idle | Expected: null after 31 minutes",
+    "testFile": "test/sessions.test.mjs",
+    "testName": "TC-49 a session ends after thirty minutes idle",
+    "mutation": {
+      "file": "src/sessions.mjs",
+      "search": "    if (t - s.lastSeen > IDLE_MS) { sessions.delete(id); return null; }",
+      "replace": "    if (t - s.lastSeen > IDLE_MS * 2) { sessions.delete(id); return null; }"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-050",
+    "source": "docs/test-plan.xlsx!Test plan!B54",
+    "kind": "test-plan",
+    "text": "TC-50 | Sessions | Activity extends the idle timer | Expected: Alive after 40 minutes with activity at 20",
+    "testFile": "test/sessions.test.mjs",
+    "testName": "activity keeps a session alive",
+    "mutation": {
+      "file": "src/sessions.mjs",
+      "search": "    s.lastSeen = t;",
+      "replace": "    // s.lastSeen = t;"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-051",
+    "source": "docs/test-plan.xlsx!Test plan!B55",
+    "kind": "test-plan",
+    "text": "TC-51 | Sessions | A session ends after 12 hours regardless of activity | Expected: null after 12 hours",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-052",
+    "source": "docs/test-plan.xlsx!Test plan!B56",
+    "kind": "test-plan",
+    "text": "TC-52 | Sessions | Logging out ends the session | Expected: null after logout",
+    "testFile": "test/sessions.test.mjs",
+    "testName": "TC-52 logging out ends the session",
+    "mutation": {
+      "file": "src/sessions.mjs",
+      "search": "  function destroy(id) {\n    sessions.delete(id);\n  }",
+      "replace": "  function destroy(id) {\n    // sessions.delete(id);\n  }"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-053",
+    "source": "docs/test-plan.xlsx!Test plan!B57",
+    "kind": "test-plan",
+    "text": "TC-53 | Sessions | Log out everywhere ends every session for the user | Expected: All sessions gone",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-054",
+    "source": "docs/test-plan.xlsx!Test plan!B58",
+    "kind": "test-plan",
+    "text": "TC-54 | Sessions | Session ids are 32 random bytes | Expected: 64 hex characters",
+    "testFile": "test/sessions.test.mjs",
+    "testName": "TC-54 session ids are 32 random bytes",
+    "mutation": {
+      "file": "src/sessions.mjs",
+      "search": "    const id = randomBytes(32).toString('hex');",
+      "replace": "    const id = randomBytes(16).toString('hex');"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-055",
+    "source": "docs/test-plan.xlsx!Test plan!B59",
+    "kind": "test-plan",
+    "text": "TC-55 | Sessions | A user may hold at most five sessions, oldest evicted | Expected: Sixth login evicts the first session",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-056",
+    "source": "docs/test-plan.xlsx!Test plan!B60",
+    "kind": "test-plan",
+    "text": "TC-56 | Rate limiting | Allow 100 requests a minute from one IP | Expected: All 100 allowed",
+    "testFile": "test/ratelimit.test.mjs",
+    "testName": "TC-56 allows 100 requests a minute from one IP",
+    "mutation": {
+      "file": "src/ratelimit.mjs",
+      "search": "    if (b.count > limit) return { allowed: false, retryAfter: Math.ceil((b.start + WINDOW_MS - t) / 1000) };",
+      "replace": "    if (b.count >= limit) return { allowed: false, retryAfter: Math.ceil((b.start + WINDOW_MS - t) / 1000) };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-057",
+    "source": "docs/test-plan.xlsx!Test plan!B61",
+    "kind": "test-plan",
+    "text": "TC-57 | Rate limiting | Reject the 101st request in a minute from one IP | Expected: allowed false",
+    "testFile": "test/ratelimit.test.mjs",
+    "testName": "TC-57 rejects requests over 100 a minute from one IP",
+    "mutation": {
+      "file": "src/ratelimit.mjs",
+      "search": "export const LIMIT = 100;",
+      "replace": "export const LIMIT = 101;"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "NAME_ONLY",
+    "witness": "export default async (load) => {\n  const { createRateLimiter } = await load('src/ratelimit.mjs');\n  const check = createRateLimiter({ clock: () => 0 });\n  // Make exactly 100 requests (the documented limit)\n  for (let i = 0; i < 100; i++) check('1.2.3.4');\n  // The 101st request must be blocked (count > LIMIT = 100)\n  return check('1.2.3.4').allowed === false;\n};\n"
+  },
+  {
+    "id": "TP-058",
+    "source": "docs/test-plan.xlsx!Test plan!B62",
+    "kind": "test-plan",
+    "text": "TC-58 | Rate limiting | The window resets after a minute | Expected: Allowed again after 60 seconds",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-059",
+    "source": "docs/test-plan.xlsx!Test plan!B63",
+    "kind": "test-plan",
+    "text": "TC-59 | Rate limiting | Limits are per IP | Expected: A second IP is unaffected",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-060",
+    "source": "docs/test-plan.xlsx!Test plan!B64",
+    "kind": "test-plan",
+    "text": "TC-60 | Rate limiting | A refused request says how long to wait | Expected: retryAfter in seconds",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-061",
+    "source": "docs/test-plan.xlsx!Test plan!B65",
+    "kind": "test-plan",
+    "text": "TC-61 | Password reset | A reset link is issued for a known email | Expected: Token sent",
+    "testFile": "test/reset.test.mjs",
+    "testName": "TC-61 a reset link is issued for a known email",
+    "mutation": {
+      "file": "src/reset.mjs",
+      "search": "    return { sent: true, token };",
+      "replace": "    return { sent: false };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT",
+    "witness": "export default async (load) => {\n  const { createResetService } = await load('src/reset.mjs');\n  const { hashPassword } = await load('src/passwords.mjs');\n  const users = new Map([['ada@example.com', { passwordHash: hashPassword('harbour142') }]]);\n  const svc = createResetService({ users, clock: () => Date.UTC(2026, 8, 1, 9, 0, 0), audit: () => {} });\n  const result = svc.request('ada@example.com');\n  // A reset link for a known email must be sent (sent: true) and include a token\n  return result.sent === true && typeof result.token === 'string';\n};\n"
+  },
+  {
+    "id": "TP-062",
+    "source": "docs/test-plan.xlsx!Test plan!B66",
+    "kind": "test-plan",
+    "text": "TC-62 | Password reset | An unknown email gets the same response as a known one | Expected: No user enumeration",
+    "testFile": "test/reset.test.mjs",
+    "testName": "TC-62 an unknown email gets the same answer as a known one",
+    "mutation": {
+      "file": "src/reset.mjs",
+      "search": "    if (!users.has(key)) return { sent: true };",
+      "replace": "    if (!users.has(key)) return { sent: false, reason: 'user_not_found' };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-063",
+    "source": "docs/test-plan.xlsx!Test plan!B67",
+    "kind": "test-plan",
+    "text": "TC-63 | Password reset | A reset link expires after one hour | Expected: expired",
+    "testFile": "test/reset.test.mjs",
+    "testName": "TC-63 a reset link expires after one hour",
+    "mutation": {
+      "file": "src/reset.mjs",
+      "search": "    if (rec.exp <= clock()) { tokens.delete(h(token)); return { ok: false, reason: 'expired' }; }",
+      "replace": "    if (rec.exp <= clock()) { tokens.delete(h(token)); return { ok: false, reason: 'invalid' }; }"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-064",
+    "source": "docs/test-plan.xlsx!Test plan!B68",
+    "kind": "test-plan",
+    "text": "TC-64 | Password reset | A reset link works once | Expected: Second use refused",
+    "testFile": "test/reset.test.mjs",
+    "testName": "TC-64 a reset link works once",
+    "mutation": {
+      "file": "src/reset.mjs",
+      "search": "    tokens.delete(h(token));",
+      "replace": "    // tokens.delete(h(token));"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-065",
+    "source": "docs/test-plan.xlsx!Test plan!B69",
+    "kind": "test-plan",
+    "text": "TC-65 | Password reset | Completing a reset ends every session | Expected: All sessions gone",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-066",
+    "source": "docs/test-plan.xlsx!Test plan!B70",
+    "kind": "test-plan",
+    "text": "TC-66 | Password reset | The new password must meet the password rules | Expected: weak_password",
+    "testFile": "test/reset.test.mjs",
+    "testName": "the new password must meet the password rules",
+    "mutation": {
+      "file": "src/reset.mjs",
+      "search": "    if (errors.length) return { ok: false, reason: 'weak_password', errors };",
+      "replace": "    if (errors.length) return { ok: false, reason: 'validation_error', errors };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT",
+    "witness": "export default async (load) => {\n  const { createResetService } = await load('src/reset.mjs');\n  const { hashPassword } = await load('src/passwords.mjs');\n  const users = new Map([['ada@example.com', { passwordHash: hashPassword('harbour142') }]]);\n  const svc = createResetService({ users, clock: () => Date.UTC(2026, 8, 1, 9, 0, 0), audit: () => {} });\n  const { token } = svc.request('ada@example.com');\n  // A weak password must be rejected with reason 'weak_password'\n  const result = svc.complete(token, 'short');\n  return result.ok === false && result.reason === 'weak_password';\n};\n"
+  },
+  {
+    "id": "TP-067",
+    "source": "docs/test-plan.xlsx!Test plan!B71",
+    "kind": "test-plan",
+    "text": "TC-67 | Password reset | Reset tokens are stored hashed | Expected: Raw token never in the store",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-068",
+    "source": "docs/test-plan.xlsx!Test plan!B72",
+    "kind": "test-plan",
+    "text": "TC-68 | Audit | A failed login is logged with the client IP | Expected: Entry with type and ip",
+    "testFile": "test/login.test.mjs",
+    "testName": "TC-68 a failed login is written to the audit log with the client IP",
+    "mutation": {
+      "file": "src/login.mjs",
+      "search": "      audit({ type: 'login.failed', email: key, ip });",
+      "replace": "      audit({ type: 'login.failed', email: key });"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-069",
+    "source": "docs/test-plan.xlsx!Test plan!B73",
+    "kind": "test-plan",
+    "text": "TC-69 | Audit | A successful login is logged | Expected: Entry present",
+    "testFile": "test/login.test.mjs",
+    "testName": "TC-69 a successful login is written to the audit log",
+    "mutation": {
+      "file": "src/login.mjs",
+      "search": "    audit({ type: 'login.succeeded', email: key, ip });",
+      "replace": "    // audit({ type: 'login.succeeded', email: key, ip });"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-070",
+    "source": "docs/test-plan.xlsx!Test plan!B74",
+    "kind": "test-plan",
+    "text": "TC-70 | Audit | A lockout is logged | Expected: Entry present",
+    "testFile": "test/login.test.mjs",
+    "testName": "TC-70 a lockout is written to the audit log",
+    "mutation": {
+      "file": "src/login.mjs",
+      "search": "        audit({ type: 'account.locked', email: key, ip });",
+      "replace": "        // audit({ type: 'account.locked', email: key, ip });"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-071",
+    "source": "docs/test-plan.xlsx!Test plan!B75",
+    "kind": "test-plan",
+    "text": "TC-71 | Audit | The audit log never stores a password | Expected: No password in any entry",
+    "testFile": "test/audit.test.mjs",
+    "testName": "TC-71 the audit log never stores a password",
+    "mutation": {
+      "file": "src/audit.mjs",
+      "search": "    const { password, newPassword, ...safe } = event;",
+      "replace": "    const { newPassword, ...safe } = event;"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "NAME_ONLY",
+    "witness": "export default async (load) => {\n  const { createAuditLog } = await load('src/audit.mjs');\n  const log = createAuditLog({ clock: () => 0 });\n  log.record({ type: 'login.failed', email: 'ada@example.com', password: 'supersecret123' });\n  return !JSON.stringify(log.entries).includes('supersecret123');\n};\n"
+  },
+  {
+    "id": "TP-072",
+    "source": "docs/test-plan.xlsx!Test plan!B76",
+    "kind": "test-plan",
+    "text": "TC-72 | Audit | Audit entries carry an ISO 8601 timestamp | Expected: at is ISO 8601",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-073",
+    "source": "docs/test-plan.xlsx!Test plan!B77",
+    "kind": "test-plan",
+    "text": "TC-73 | Audit | A completed password reset is logged | Expected: Entry present",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-074",
+    "source": "docs/test-plan.xlsx!Test plan!B78",
+    "kind": "test-plan",
+    "text": "TC-74 | Roles | An admin can manage users | Expected: can users:write",
+    "testFile": "test/roles.test.mjs",
+    "testName": "TC-74 an admin can manage users",
+    "mutation": {
+      "file": "src/roles.mjs",
+      "search": "  admin: ['users:read', 'users:write', 'tokens:revoke'],",
+      "replace": "  admin: ['users:read', 'tokens:revoke'],"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-075",
+    "source": "docs/test-plan.xlsx!Test plan!B79",
+    "kind": "test-plan",
+    "text": "TC-75 | Roles | An ordinary user cannot manage users | Expected: cannot users:write",
+    "testFile": "test/roles.test.mjs",
+    "testName": "TC-75 an ordinary user cannot manage users",
+    "mutation": {
+      "file": "src/roles.mjs",
+      "search": "  user: ['profile:read', 'profile:write'],",
+      "replace": "  user: ['profile:read', 'profile:write', 'users:write'],"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-076",
+    "source": "docs/test-plan.xlsx!Test plan!B80",
+    "kind": "test-plan",
+    "text": "TC-76 | Roles | An unknown role grants nothing | Expected: cannot anything",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-077",
+    "source": "docs/test-plan.xlsx!Test plan!B81",
+    "kind": "test-plan",
+    "text": "TC-77 | Roles | A token with no roles claim grants nothing | Expected: cannot anything",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-078",
+    "source": "docs/test-plan.xlsx!Test plan!B82",
+    "kind": "test-plan",
+    "text": "TC-78 | Roles | A role change applies from the next refreshed token | Expected: New roles in refreshed token",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-079",
+    "source": "docs/test-plan.xlsx!Test plan!B83",
+    "kind": "test-plan",
+    "text": "TC-79 | Email verification | Registering issues a verification token | Expected: Token returned",
+    "testFile": "test/accounts.test.mjs",
+    "testName": "TC-79 registering issues an email verification token",
+    "mutation": {
+      "file": "src/accounts.mjs",
+      "search": "    const verifyToken = verifier.issue(key);\n    return { ok: true, verifyToken };",
+      "replace": "    verifier.issue(key);\n    return { ok: true };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-080",
+    "source": "docs/test-plan.xlsx!Test plan!B84",
+    "kind": "test-plan",
+    "text": "TC-80 | Email verification | A verification link expires after 24 hours | Expected: expired",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-081",
+    "source": "docs/test-plan.xlsx!Test plan!B85",
+    "kind": "test-plan",
+    "text": "TC-81 | Email verification | Confirming the link marks the email verified | Expected: emailVerified true",
+    "testFile": "test/accounts.test.mjs",
+    "testName": "TC-81 confirming the token marks the email as verified",
+    "mutation": {
+      "file": "src/verify.mjs",
+      "search": "    users.get(rec.email).emailVerified = true;",
+      "replace": "    users.get(rec.email).emailVerified = false;"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-082",
+    "source": "docs/test-plan.xlsx!Test plan!B86",
+    "kind": "test-plan",
+    "text": "TC-82 | Email verification | A verification link works once | Expected: Second use refused",
+    "testFile": "test/accounts.test.mjs",
+    "testName": "a verification link cannot be used twice",
+    "mutation": {
+      "file": "src/verify.mjs",
+      "search": "    pending.delete(token);",
+      "replace": "    // pending.delete(token);"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-083",
+    "source": "docs/test-plan.xlsx!Test plan!B87",
+    "kind": "test-plan",
+    "text": "TC-83 | Accounts | Deleting an account ends every session | Expected: All sessions gone",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-084",
+    "source": "docs/test-plan.xlsx!Test plan!B88",
+    "kind": "test-plan",
+    "text": "TC-84 | Accounts | A deleted account cannot log in | Expected: Login refused",
+    "testFile": "test/accounts.test.mjs",
+    "testName": "TC-84 a deleted account cannot log in",
+    "mutation": {
+      "file": "src/login.mjs",
+      "search": "    const user = users.get(key);\n    if (!user || !verifyPassword(password, user.passwordHash)) {",
+      "replace": "    const user = users.get(key);\n    if (user && !verifyPassword(password, user.passwordHash)) {"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-085",
+    "source": "docs/test-plan.xlsx!Test plan!B89",
+    "kind": "test-plan",
+    "text": "TC-85 | Registration | Registering an existing email is refused | Expected: exists",
+    "testFile": "test/accounts.test.mjs",
+    "testName": "TC-85 registering an email that already exists is refused",
+    "mutation": {
+      "file": "src/accounts.mjs",
+      "search": "    if (users.has(key)) return { ok: false, reason: 'exists' };",
+      "replace": "    // if (users.has(key)) return { ok: false, reason: 'exists' };"
+    },
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": "CAUGHT"
+  },
+  {
+    "id": "TP-086",
+    "source": "docs/test-plan.xlsx!Test plan!B90",
+    "kind": "test-plan",
+    "text": "TC-86 | Non-functional | Penetration test sign-off for the release | Expected: Signed report on file | Type: Manual",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-087",
+    "source": "docs/test-plan.xlsx!Test plan!B91",
+    "kind": "test-plan",
+    "text": "TC-87 | Non-functional | Login and reset pages usable with a screen reader | Expected: Checked with VoiceOver and NVDA | Type: Manual",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-088",
+    "source": "docs/test-plan.xlsx!Test plan!B92",
+    "kind": "test-plan",
+    "text": "TC-88 | Non-functional | Reset and verification emails render in Outlook and Gmail | Expected: Checked by eye | Type: Manual",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-089",
+    "source": "docs/test-plan.xlsx!Test plan!B93",
+    "kind": "test-plan",
+    "text": "TC-89 | Non-functional | Sustains 500 logins a second on the reference box | Expected: Load test report | Type: Manual",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "TP-090",
+    "source": "docs/test-plan.xlsx!Test plan!B94",
+    "kind": "test-plan",
+    "text": "TC-90 | Non-functional | Security headers reviewed on every endpoint | Expected: Reviewed in the release meeting | Type: Manual",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": null,
+    "verdictDetail": null,
+    "mutationResult": null
+  },
+  {
+    "id": "SUM-001",
+    "source": "docs/test-plan.xlsx!Summary!B3",
+    "kind": "summary",
+    "text": "Cases in plan: 90",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "claims.json contains TP-001 through TP-090 — 90 test-plan rows total.",
+    "mutationResult": null
+  },
+  {
+    "id": "SUM-002",
+    "source": "docs/test-plan.xlsx!Summary!B4",
+    "kind": "summary",
+    "text": "Automated: 84",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "90 total minus 6 explicit Manual rows (TP-017, TP-086–TP-090) = 84 automated cases per plan.",
+    "mutationResult": null
+  },
+  {
+    "id": "SUM-003",
+    "source": "docs/test-plan.xlsx!Summary!B5",
+    "kind": "summary",
+    "text": "Manual: 6",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "Exactly 6 rows carry Type=Manual: TC-17, TC-86, TC-87, TC-88, TC-89, TC-90.",
+    "mutationResult": null
+  },
+  {
+    "id": "SUM-004",
+    "source": "docs/test-plan.xlsx!Summary!B6",
+    "kind": "summary",
+    "text": "Automated cases passing: 84",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "FAILS",
+    "verdictDetail": "npm test (run Stage 4) shows 62 tests pass — not 84. Only 62 automated test names are mapped and run.",
+    "mutationResult": null
+  },
+  {
+    "id": "SUM-005",
+    "source": "docs/test-plan.xlsx!Summary!B7",
+    "kind": "summary",
+    "text": "Automated coverage of plan: 100%",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "FAILS",
+    "verdictDetail": "24 of 84 automated test-plan cases have testFile=null (script count: 60 with testFile, 24 without). Coverage is ~71%, not 100%.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-001",
+    "source": "docs/auth-spec.docx!clause:2.1",
+    "kind": "spec",
+    "text": "2.1 Passwords are hashed with bcrypt at a cost factor of 12.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "FAILS",
+    "verdictDetail": "src/passwords.mjs:1,3 uses scryptSync with N=16384, not bcrypt. Algorithm is scrypt, not bcrypt.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-002",
+    "source": "docs/auth-spec.docx!clause:2.2",
+    "kind": "spec",
+    "text": "2.2 The minimum password length is 12 characters.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "FAILS",
+    "verdictDetail": "src/validation.mjs:1 sets PASSWORD_MIN = 10, not 12.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-003",
+    "source": "docs/auth-spec.docx!clause:2.3",
+    "kind": "spec",
+    "text": "2.3 The maximum password length is 128 characters.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/validation.mjs:2 PASSWORD_MAX = 128; enforced at src/validation.mjs:24.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-004",
+    "source": "docs/auth-spec.docx!clause:2.4",
+    "kind": "spec",
+    "text": "2.4 Passwords on the common-password list are refused.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/validation.mjs:5 defines COMMON set; src/validation.mjs:30 rejects matches.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-005",
+    "source": "docs/auth-spec.docx!clause:2.5",
+    "kind": "spec",
+    "text": "2.5 A password may not contain the local part of the user's email address.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/validation.mjs:27-28 extracts local part and pushes 'contains_email' if present.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-006",
+    "source": "docs/auth-spec.docx!clause:3.1",
+    "kind": "spec",
+    "text": "3.1 An account locks after five consecutive failed login attempts.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/login.mjs:4 MAX_ATTEMPTS=5; src/login.mjs:20 `if (state.count >= MAX_ATTEMPTS)` triggers lock.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-007",
+    "source": "docs/auth-spec.docx!clause:3.2",
+    "kind": "spec",
+    "text": "3.2 A lock lasts 15 minutes.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/login.mjs:5 LOCK_MS = 15*60*1000; src/login.mjs:21 lockedUntil = clock() + LOCK_MS.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-008",
+    "source": "docs/auth-spec.docx!clause:3.3",
+    "kind": "spec",
+    "text": "3.3 The response to an unknown email is identical to the response to a wrong password.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/login.mjs:18 single branch `if (!user || !verifyPassword(...))` returns `{ok:false,reason:'invalid_credentials'}` for both cases.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-009",
+    "source": "docs/auth-spec.docx!clause:3.4",
+    "kind": "spec",
+    "text": "3.4 A user whose email address is not verified cannot log in.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/login.mjs:29 `if (!user.emailVerified) return {ok:false,reason:'unverified'}`.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-010",
+    "source": "docs/auth-spec.docx!clause:4.1",
+    "kind": "spec",
+    "text": "4.1 Access tokens are signed with HMAC-SHA256.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/tokens.mjs:1,11 createHmac('sha256', key) — algorithm is HS256 as confirmed by header b64({alg:'HS256'}).",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-011",
+    "source": "docs/auth-spec.docx!clause:4.2",
+    "kind": "spec",
+    "text": "4.2 Access tokens expire 15 minutes after they are issued.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "FAILS",
+    "verdictDetail": "src/tokens.mjs:4 ACCESS_TTL_SECONDS = 3600 (1 hour). Was 900 (15 min) in v2.2.0; changed in commit 1838534 'Longer access tokens for the mobile client'.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-012",
+    "source": "docs/auth-spec.docx!clause:4.3",
+    "kind": "spec",
+    "text": "4.3 Tokens declaring any algorithm other than HS256 are refused.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/tokens.mjs:34 `if (header.alg !== 'HS256') return {valid:false,reason:'bad_alg'}`.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-013",
+    "source": "docs/auth-spec.docx!clause:4.4",
+    "kind": "spec",
+    "text": "4.4 Up to 30 seconds of clock skew is tolerated.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/tokens.mjs:5 CLOCK_SKEW_SECONDS = 30; applied at lines 39-40.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-014",
+    "source": "docs/auth-spec.docx!clause:4.5",
+    "kind": "spec",
+    "text": "4.5 Refresh tokens are single use, and reusing one revokes its whole token family.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/refresh.mjs:20-22: if rec.used, marks all family tokens used:true and returns 'reused'.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-015",
+    "source": "docs/auth-spec.docx!clause:4.6",
+    "kind": "spec",
+    "text": "4.6 Refresh tokens expire after 30 days.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/refresh.mjs:4 REFRESH_TTL_MS = 30*24*60*60*1000; enforced at src/refresh.mjs:24.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-016",
+    "source": "docs/auth-spec.docx!clause:5.1",
+    "kind": "spec",
+    "text": "5.1 A session ends after 30 minutes without activity.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/sessions.mjs:3 IDLE_MS = 30*60*1000; enforced at src/sessions.mjs:20.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-017",
+    "source": "docs/auth-spec.docx!clause:5.2",
+    "kind": "spec",
+    "text": "5.2 A session ends 12 hours after login, whatever the activity.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/sessions.mjs:4 ABSOLUTE_MS = 12*60*60*1000; enforced at src/sessions.mjs:21.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-018",
+    "source": "docs/auth-spec.docx!clause:5.3",
+    "kind": "spec",
+    "text": "5.3 A user may hold at most five concurrent sessions. Starting a sixth ends the oldest.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "FAILS",
+    "verdictDetail": "src/sessions.mjs has no session count cap. createSessionStore() allows unlimited sessions per user; no eviction of oldest.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-019",
+    "source": "docs/auth-spec.docx!clause:6.1",
+    "kind": "spec",
+    "text": "6.1 Each client IP may make 100 requests a minute. Further requests are refused with a retry time.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/ratelimit.mjs:1-2 LIMIT=100, WINDOW_MS=60000; src/ratelimit.mjs:16 returns {allowed:false,retryAfter:...}.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-020",
+    "source": "docs/auth-spec.docx!clause:7.1",
+    "kind": "spec",
+    "text": "7.1 Reset links expire after one hour and work once.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/reset.mjs:5 RESET_TTL_MS=60*60*1000; src/reset.mjs:28 tokens.delete(h(token)) after first use.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-021",
+    "source": "docs/auth-spec.docx!clause:7.2",
+    "kind": "spec",
+    "text": "7.2 Completing a reset ends every active session for the account.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/reset.mjs:30 sessions?.destroyAllFor(rec.email); added in commit 2d435d7 and CHANGELOG 2.3.0.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-022",
+    "source": "docs/auth-spec.docx!clause:8.1",
+    "kind": "spec",
+    "text": "8.1 Every failed login is recorded with the client IP address.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/login.mjs:26 audit({type:'login.failed',email:key,ip}) — ip is included.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-023",
+    "source": "docs/auth-spec.docx!clause:8.2",
+    "kind": "spec",
+    "text": "8.2 Passwords are never written to the audit log.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/audit.mjs:5 destructures `{password,newPassword,...safe}` stripping both password fields before storing.",
+    "mutationResult": null
+  },
+  {
+    "id": "SP-024",
+    "source": "docs/auth-spec.docx!clause:9.1",
+    "kind": "spec",
+    "text": "9.1 Verification links expire after 24 hours.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "src/verify.mjs:3 VERIFY_TTL_MS = 24*60*60*1000; enforced at src/verify.mjs:17.",
+    "mutationResult": null
+  },
+  {
+    "id": "CL-001",
+    "source": "docs/release-checklist-2.3.0.pdf!line:6",
+    "kind": "checklist",
+    "text": "✔ R-01 All automated tests pass on main.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "npm test (Stage 4): 62/62 tests pass on main branch.",
+    "mutationResult": null
+  },
+  {
+    "id": "CL-002",
+    "source": "docs/release-checklist-2.3.0.pdf!line:8",
+    "kind": "checklist",
+    "text": "✔ R-02 Every automated case in the test plan has a passing automated test.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "FAILS",
+    "verdictDetail": "Stage 2 found no mapped test for 24 of 84 automated cases (e.g. TP-003, TP-011, TP-018, TP-036, TP-038, TP-039 …). Coverage is ~71%. Rule A: 'every' claim fails on counterexample.",
+    "mutationResult": null
+  },
+  {
+    "id": "CL-003",
+    "source": "docs/release-checklist-2.3.0.pdf!line:10",
+    "kind": "checklist",
+    "text": "✔ R-03 CHANGELOG lists every behaviour change since 2.2.0.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "FAILS",
+    "verdictDetail": "Rule A: 'every' claim fails on a counterexample. CHANGELOG.md 2.3.0 omits the token TTL change (15 min → 1 hour, commit 1838534). At least one behaviour change is unlisted — 'every' cannot hold.",
+    "mutationResult": null
+  },
+  {
+    "id": "CL-004",
+    "source": "docs/release-checklist-2.3.0.pdf!line:12",
+    "kind": "checklist",
+    "text": "✔ R-04 package.json version matches the release tag.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "package.json version:\"2.3.0\" matches git tag v2.3.0.",
+    "mutationResult": null
+  },
+  {
+    "id": "CL-005",
+    "source": "docs/release-checklist-2.3.0.pdf!line:14",
+    "kind": "checklist",
+    "text": "✔ R-05 No new runtime dependencies.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "package.json dependencies:{} in both v2.2.0 and v2.3.0. git diff v2.2.0 v2.3.0 -- package.json shows no dependency additions.",
+    "mutationResult": null
+  },
+  {
+    "id": "CL-006",
+    "source": "docs/release-checklist-2.3.0.pdf!line:16",
+    "kind": "checklist",
+    "text": "✔ R-06 No TODO or FIXME comments left in src/.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "FAILS",
+    "verdictDetail": "src/ratelimit.mjs:6 contains `// FIXME: buckets are never pruned, so memory grows with every distinct IP seen.` — added in commit cdb5818.",
+    "mutationResult": null
+  },
+  {
+    "id": "CL-007",
+    "source": "docs/release-checklist-2.3.0.pdf!line:18",
+    "kind": "checklist",
+    "text": "✔ R-07 README documents every environment variable the service reads.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "README.md Configuration table lists TURNSTILE_SECRET and TURNSTILE_ISSUER — the only two env vars in src/config.mjs:3-4.",
+    "mutationResult": null
+  },
+  {
+    "id": "CL-008",
+    "source": "docs/release-checklist-2.3.0.pdf!line:20",
+    "kind": "checklist",
+    "text": "✔ R-08 Licence file present and matches package.json.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "LICENSE file present (MIT License header). package.json license:\"MIT\". Both match.",
+    "mutationResult": null
+  },
+  {
+    "id": "CL-009",
+    "source": "docs/release-checklist-2.3.0.pdf!line:22",
+    "kind": "checklist",
+    "text": "✔ R-09 SECURITY.md names a contact for vulnerability reports.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "HOLDS",
+    "verdictDetail": "SECURITY.md:3 names security@turnstile.example as the vulnerability contact.",
+    "mutationResult": null
+  },
+  {
+    "id": "CL-010",
+    "source": "docs/release-checklist-2.3.0.pdf!line:24",
+    "kind": "checklist",
+    "text": "✔ R-10 The authentication spec has been reviewed against the implementation.",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "FAILS",
+    "verdictDetail": "Rule B: claim attests the spec was reviewed against the implementation. This audit's own verdicts show SP-001 FAILS (bcrypt claimed, scrypt used), SP-002 FAILS (min length 12 claimed, 10 in code), SP-011 FAILS (15-min TTL claimed, 1-hour in code), SP-018 FAILS (5-session cap claimed, no cap in code). A proper review would have found these. The attestation is contradicted by audit evidence.",
+    "mutationResult": null
+  },
+  {
+    "id": "SUM-006",
+    "source": "docs/test-plan.xlsx!Summary!A8:B8",
+    "kind": "summary",
+    "text": "Release gate: Met",
+    "testFile": null,
+    "testName": null,
+    "mutation": null,
+    "verdict": "FAILS",
+    "verdictDetail": "Rule B: 'Release gate: Met' attests all checklist items passed. This audit's own verdicts contradict that: CL-002 FAILS (24 automated cases unmapped, Rule A), CL-003 FAILS (token TTL change missing from CHANGELOG, Rule A), CL-006 FAILS (FIXME in src/ratelimit.mjs:6), CL-010 FAILS (spec review attestation contradicted by SP-001/SP-002/SP-011/SP-018 FAILS, Rule B). Release gate cannot be Met.",
+    "mutationResult": null
+  }
+]
