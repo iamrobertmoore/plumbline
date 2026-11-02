@@ -1,7 +1,7 @@
-// One number, one place. Every figure this entry states about itself is kept in
+// One number, one place. Every figure this project states about itself is kept in
 // facts/facts.json and bound to the phrases that carry it on each surface. Three
-// surfaces once said "eleven corrections" while the method said thirteen, and the
-// deck once said 18 on one slide and 23 on another. This is the fix for that class.
+// surfaces once said "eleven corrections" while the method said thirteen, and one
+// page once said 18 in one place and 23 in another. This is the fix for that class.
 //
 //   node facts/render.mjs --check      exit 1 if any surface disagrees, or a binding matches nothing
 //   node facts/render.mjs --write      put the values from facts.json into every surface
@@ -94,11 +94,11 @@ export function run(root = ROOT_DEFAULT, { write = false } = {}) {
 function selfTest() {
   const copy = () => {
     const d = mkdtempSync(join(tmpdir(), 'facts-'));
-    for (const p of ['facts', 'test', 'README.md', 'index.html', 'deck', 'docs', 'check', 'examples']) cpSync(join(ROOT_DEFAULT, p), join(d, p), { recursive: true });
+    for (const p of ['facts', 'test', 'README.md', 'index.html', 'docs', 'check', 'examples']) cpSync(join(ROOT_DEFAULT, p), join(d, p), { recursive: true });
     return d;
   };
   const cases = [
-    ['a surface disagrees with facts.json', (d) => { const f = join(d, 'deck/index.html'); writeFileSync(f, readFileSync(f, 'utf8').replace(/class="big">\d+<small>/, 'class="big">99<small>')); }],
+    ['a surface disagrees with facts.json', (d) => { const f = join(d, 'index.html'); writeFileSync(f, readFileSync(f, 'utf8').replace(/class="big">\d+<small>/, 'class="big">99<small>')); }],
     ['a surface loses the phrase that carried a number', (d) => { const f = join(d, 'README.md'); writeFileSync(f, readFileSync(f, 'utf8').replace(/\(\d+ tests\)/, '(the tests)')); }],
     ['a retired figure comes back', (d) => { const f = join(d, 'README.md'); writeFileSync(f, readFileSync(f, 'utf8') + '\n14,304,526\n'); }],
     ['a test is added and the count is not updated', (d) => { writeFileSync(join(d, 'test/extra.test.mjs'), "test('x', () => {});\n"); }],

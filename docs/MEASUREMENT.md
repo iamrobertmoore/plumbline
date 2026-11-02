@@ -302,8 +302,8 @@ worth stating plainly, because "the number went up" and "the number went down" a
 own: what matters is which direction the evidence supported, and these two are the cleanest illustration
 in this document of why a tool's error rate has to be measured in both directions at once.
 
-**14. The corpus named people.** Found on 24 September, reading the hackathon's data rules against
-the published result. The first corpus had no ownership rule, so about a third of it was personal
+**14. The corpus named people.** Found on 24 September, checking the published result against
+data-use rules. The first corpus had no ownership rule, so about a third of it was personal
 accounts, and the measurement printed findings next to their names. The rule gained step 2, the corpus
 was rebuilt from the 400 most-starred repositories, and `verify-corpus.mjs` now fails if a personal
 account appears, with a ninth self-test mutation to prove that check fires.

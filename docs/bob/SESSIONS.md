@@ -2,8 +2,7 @@
 
 Every Bob task I ran for this, in order, with what Bob wrote and what it cost. The screenshot of each
 task's summary is in [`bob_sessions/`](../../bob_sessions/), and the cost column is the figure on that
-screenshot. Bob ran in Bob IDE 2.2.0 on the hackathon account (team ibm-coding-challenge-2, us-east),
-which gets 40 Bobcoins for the whole event.
+screenshot. Bob ran in Bob IDE 2.2.0 on an account with a 40-Bobcoin allowance.
 
 Everything under `.bob/`, plus `test/plumbline-run.test.mjs`, was written by Bob, apart from the
 corrections listed below. Tasks 04 to 08 ran in the Plumbline mode Bob built, on the sample project in

@@ -22,5 +22,5 @@
   <text x="72" y="148" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-weight="700" font-size="92" letter-spacing="-2" fill="#e9eeec">plumb<tspan fill="#e4ad45">line</tspan></text>
   <text x="76" y="206" font-family="'IBM Plex Sans','Helvetica Neue',Arial,sans-serif" font-size="30" fill="#b7c2c0">Checks that your test plan, spec and README are still true,</text>
   <text x="76" y="246" font-family="'IBM Plex Sans','Helvetica Neue',Arial,sans-serif" font-size="30" fill="#b7c2c0">and proves it.</text>
-  <text x="76" y="290" font-family="'IBM Plex Mono',ui-monospace,Menlo,monospace" font-size="16" letter-spacing="2" fill="#7d8b8a">BUILT WITH IBM BOB 2.0 · SOLO ENTRY</text>
+  <text x="76" y="290" font-family="'IBM Plex Mono',ui-monospace,Menlo,monospace" font-size="16" letter-spacing="2" fill="#7d8b8a">BUILT WITH IBM BOB · MIT LICENSED</text>
 </svg>

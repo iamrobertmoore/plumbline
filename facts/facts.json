@@ -1,5 +1,5 @@
 {
-  "_about": "Every figure the entry states about itself lives here once. node facts/render.mjs --check fails if any surface disagrees; --write puts these values into every surface. Edit this file, never the number on a surface. Figures about the worked example are computed from Bob's own claims.json.",
+  "_about": "Every figure the project states about itself lives here once. node facts/render.mjs --check fails if any surface disagrees; --write puts these values into every surface. Edit this file, never the number on a surface. Figures about the worked example are computed from Bob's own claims.json.",
   "facts": {
     "headline.failing": {
       "value": "23",
@@ -92,8 +92,7 @@
       "fact": "method.corrections",
       "pattern": "all (?<v>[a-z]+) corrections",
       "files": [
-        "README.md",
-        "deck/index.html"
+        "README.md"
       ]
     },
     {
@@ -184,8 +183,7 @@
       "fact": "headline.failing",
       "pattern": "class=\"big\">(?<v>\\d+)<small>",
       "files": [
-        "index.html",
-        "deck/index.html"
+        "index.html"
       ]
     },
     {
@@ -199,24 +197,21 @@
       "fact": "sample.withTest",
       "pattern": "<b>(?<v>\\d+)</b><span>with a test",
       "files": [
-        "index.html",
-        "deck/index.html"
+        "index.html"
       ]
     },
     {
       "fact": "sample.withoutTest",
       "pattern": "<b>(?<v>\\d+)</b><span>with no test",
       "files": [
-        "index.html",
-        "deck/index.html"
+        "index.html"
       ]
     },
     {
       "fact": "sample.nameOnly",
       "pattern": "<b>(?<v>\\d+)</b><span>tests in name only",
       "files": [
-        "index.html",
-        "deck/index.html"
+        "index.html"
       ]
     },
     {
@@ -230,30 +225,14 @@
       "fact": "sample.specFalse",
       "pattern": "<b>(?<v>\\d+)<small> of 24</small></b><span>spec",
       "files": [
-        "index.html",
-        "deck/index.html"
+        "index.html"
       ]
     },
     {
       "fact": "sample.checklistFalse",
       "pattern": "<b>(?<v>\\d+)<small> of 10</small></b><span>checklist",
       "files": [
-        "index.html",
-        "deck/index.html"
-      ]
-    },
-    {
-      "fact": "bob.coins",
-      "pattern": "<b>(?<v>\\d+\\.\\d+)</b><span>of 40 Bobcoins",
-      "files": [
-        "deck/index.html"
-      ]
-    },
-    {
-      "fact": "tests.count",
-      "pattern": "<b>(?<v>\\d+)</b><span>tests, all green",
-      "files": [
-        "deck/index.html"
+        "index.html"
       ]
     },
     {
@@ -261,13 +240,6 @@
       "pattern": "<b>(?<v>\\d+) tests</b>",
       "files": [
         "docs/brand/cover.html"
-      ]
-    },
-    {
-      "fact": "sample.automated",
-      "pattern": "<b>(?<v>\\d+)</b><span>automated cases",
-      "files": [
-        "deck/index.html"
       ]
     }
   ],
@@ -285,7 +257,6 @@
     "docs/brand/readme-banner.svg",
     "check/index.html",
     "index.html",
-    "deck/index.html",
     "docs/brand/cover.html"
   ]
 }

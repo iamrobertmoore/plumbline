@@ -9,7 +9,6 @@ checklist, find the test behind each claim, and then break the code to see if th
 [A real Plumbline report](https://plumbline-smoky.vercel.app/report/turnstile.html) ·
 [The worked example, scored](examples/README.md) ·
 [How I used Bob](docs/bob/SESSIONS.md) ·
-[Slides](deck/plumbline-deck.pdf) ·
 [How the number was measured](docs/MEASUREMENT.md)
 
 </div>
@@ -27,7 +26,7 @@ Every claim in this README, and where to check it.
 | 4 of the 24 spec clauses and 4 of the 10 ticked checklist items are false | the report's second row, with one line of evidence each |
 | Bob's audit matches an answer key I wrote before Bob ran: 83 of 84 mappings, 24 of 24 spec clauses, 10 of 10 checklist items | `node examples/score.mjs` |
 | The answer key itself holds up | `node examples/answer-key/verify-ground-truth.mjs <clone> --self-test` flips every expectation and catches all 83 |
-| Bob built everything Bob does here during the event: 8 tasks, 29.86 of the 40 Bobcoins | [`docs/bob/SESSIONS.md`](docs/bob/SESSIONS.md), the exports in [`docs/bob/tasks/`](docs/bob/tasks/), the screenshots in [`bob_sessions/`](bob_sessions/) |
+| Bob built everything Bob does here: 8 tasks, 29.86 of the 40 Bobcoins | [`docs/bob/SESSIONS.md`](docs/bob/SESSIONS.md), the exports in [`docs/bob/tasks/`](docs/bob/tasks/), the screenshots in [`bob_sessions/`](bob_sessions/) |
 | 23 of the 100 most-starred installable repositories on GitHub owned by organisations fail a check against their own README | [`docs/MEASUREMENT.md`](docs/MEASUREMENT.md); two final runs, 23 and 22 |
 | You can paste any public repository and get a result | the [hosted checker](https://plumbline-smoky.vercel.app/check/) |
 | Every number on every page here agrees with every other | `node facts/render.mjs --check` (and `--self-test`, which proves it can fail) |
